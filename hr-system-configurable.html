@@ -1,0 +1,2668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="docTitle">HR System — Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS — overridden by company theme
+══════════════════════════════════════════════ */
+:root {
+  --brand:       #2563EB;
+  --brand-dark:  #1D4ED8;
+  --brand-light: #EFF6FF;
+  --brand-mid:   #BFDBFE;
+  --accent:      #F59E0B;
+  --sidebar-bg:  #0F172A;
+  --sidebar-text: rgba(255,255,255,0.65);
+  --sidebar-active-bg: rgba(255,255,255,0.1);
+
+  --green:  #059669; --green-bg:  #ECFDF5;
+  --red:    #DC2626; --red-bg:    #FEF2F2;
+  --amber:  #D97706; --amber-bg:  #FFFBEB;
+  --purple: #7C3AED; --purple-bg: #F5F3FF;
+
+  --bg:      #F8FAFC;
+  --surface: #FFFFFF;
+  --border:  #E2E8F0;
+  --text:    #0F172A;
+  --muted:   #64748B;
+  --light:   #94A3B8;
+
+  --radius:   14px;
+  --radius-sm: 8px;
+  --shadow:   0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.12);
+
+  --app-name: "HR Portal";
+  --company-name: "Your Company";
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Figtree', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ══════════════════════════════════════════════
+   SETUP WIZARD
+══════════════════════════════════════════════ */
+#setupWizard {
+  min-height: 100vh;
+  display: flex;
+  background: var(--sidebar-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+#setupWizard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 20%, rgba(37,99,235,0.3) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 80% 80%, rgba(245,158,11,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.wizard-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  padding: 48px 36px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.wizard-logo-area { margin-bottom: 48px; }
+
+.wizard-logo-mark {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+}
+
+.wizard-app-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.wizard-subtitle { font-size: 13px; color: rgba(255,255,255,0.4); }
+
+.wizard-steps { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+.wstep {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.wstep.active { background: rgba(255,255,255,0.08); }
+.wstep.done   { opacity: 0.6; }
+
+.wstep-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.wstep.active .wstep-num {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: white;
+}
+
+.wstep.done .wstep-num {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.wstep-label { font-size: 13px; color: rgba(255,255,255,0.45); font-weight: 500; }
+.wstep.active .wstep-label { color: white; font-weight: 600; }
+
+.wstep-connector {
+  width: 2px; height: 20px;
+  background: rgba(255,255,255,0.06);
+  margin: 0 25px;
+}
+
+.wizard-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+  z-index: 2;
+  overflow-y: auto;
+}
+
+.wizard-panel {
+  background: white;
+  border-radius: 20px;
+  width: 680px;
+  max-width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  overflow: hidden;
+  animation: panelIn 0.4s ease;
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wp-header {
+  padding: 32px 36px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.wp-step-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--brand-light);
+  color: var(--brand);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.wp-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.wp-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+.wp-body { padding: 28px 36px; }
+.wp-footer {
+  padding: 20px 36px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg);
+}
+
+/* ── Form Elements ── */
+.fg { margin-bottom: 20px; }
+.fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.fg-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+label.fl {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+.fi, .fs, .fta {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: white;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.fi:focus, .fs:focus, .fta:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-light);
+}
+
+.fs {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+.fta { resize: vertical; min-height: 80px; }
+
+.hint { font-size: 12px; color: var(--light); margin-top: 5px; }
+
+/* Color Picker */
+.color-picker-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.cp-swatch {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.cp-swatch.selected {
+  border-color: var(--text);
+  transform: scale(1.1);
+}
+
+.cp-swatch.selected::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.custom-color-wrap { display: flex; align-items: center; gap: 8px; }
+.color-input { width: 44px; height: 34px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; padding: 2px; }
+
+/* Leave Type Builder */
+.lt-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+
+.lt-item {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 80px auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  animation: ltIn 0.2s ease;
+}
+
+@keyframes ltIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+.lt-item input { background: white; }
+
+.lt-del {
+  width: 28px; height: 28px;
+  border: none;
+  background: var(--red-bg);
+  color: var(--red);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.lt-del:hover { background: var(--red); color: white; }
+
+.lt-header {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 80px auto;
+  gap: 8px;
+  padding: 0 12px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--light);
+}
+
+.add-lt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--brand-light);
+  color: var(--brand);
+  border: 1.5px dashed var(--brand-mid);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.add-lt-btn:hover { background: var(--brand); color: white; border-style: solid; }
+
+/* Holiday Builder */
+.hol-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; margin-bottom: 10px; }
+
+.hol-item {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  animation: ltIn 0.2s ease;
+}
+
+/* Toggle */
+.toggle-group { display: flex; flex-direction: column; gap: 10px; }
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.toggle-label { font-size: 13px; font-weight: 500; }
+.toggle-desc  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.toggle {
+  width: 42px; height: 24px;
+  background: var(--border);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  border: none;
+  outline: none;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle.on { background: var(--brand); }
+.toggle.on::after { transform: translateX(18px); }
+
+/* Buttons */
+.btn {
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: white;
+}
+
+.btn-primary:hover { background: var(--brand-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,0.35); }
+
+.btn-ghost {
+  background: var(--bg);
+  color: var(--muted);
+  border: 1.5px solid var(--border);
+}
+
+.btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+.btn-big {
+  padding: 14px 32px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+/* Preview Card */
+.preview-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.preview-topbar {
+  height: 44px;
+  background: var(--brand);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+}
+
+.preview-logo-dot {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+.preview-app-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: white;
+}
+
+.preview-body {
+  padding: 16px;
+  background: white;
+  display: flex;
+  gap: 10px;
+}
+
+.preview-sidebar-mini {
+  width: 80px;
+  background: var(--sidebar-bg);
+  border-radius: 6px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preview-nav-item {
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+}
+
+.preview-nav-item.active { background: var(--brand); }
+
+.preview-content-mini { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+.preview-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+.preview-stat-card {
+  height: 36px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 6px;
+}
+
+.preview-stat-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--brand);
+  opacity: 0.3;
+  flex: 1;
+}
+
+.preview-stat-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  flex-shrink: 0;
+}
+
+/* Final Step */
+.success-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 24px;
+  animation: popIn 0.5s ease;
+}
+
+@keyframes popIn {
+  0%   { transform: scale(0); }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.config-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cs-item {
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.cs-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--light); margin-bottom: 4px; }
+.cs-val   { font-size: 14px; font-weight: 600; }
+
+/* Progress bar */
+.wizard-progress {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  margin-top: 32px;
+  overflow: hidden;
+}
+
+.wizard-progress-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* ══════════════════════════════════════════════
+   MAIN APP  (post-setup)
+══════════════════════════════════════════════ */
+#mainApp { display: none; min-height: 100vh; }
+
+.sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 232px;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.sb-header {
+  padding: 22px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.sb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sb-icon {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.sb-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: white;
+  line-height: 1.2;
+}
+
+.sb-co {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+}
+
+.sb-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+
+.sb-section {
+  padding: 14px 18px 4px;
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: all 0.12s;
+  border-left: 3px solid transparent;
+  color: var(--sidebar-text);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.sb-item:hover { background: rgba(255,255,255,0.05); color: white; }
+
+.sb-item.active {
+  background: var(--sidebar-active-bg);
+  border-left-color: var(--brand);
+  color: white;
+  font-weight: 600;
+}
+
+.sb-item .ico { font-size: 15px; width: 18px; text-align: center; }
+
+.sb-badge {
+  margin-left: auto;
+  padding: 2px 7px;
+  background: var(--brand);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+}
+
+.sb-foot {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ua {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  background: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.ua-name  { font-size: 13px; font-weight: 600; color: white; }
+.ua-role  { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+/* ── Main Layout ── */
+.main { margin-left: 232px; min-height: 100vh; display: flex; flex-direction: column; }
+
+.topbar {
+  background: white;
+  height: 58px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 0 var(--border);
+}
+
+.tb-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; }
+
+.tb-right { display: flex; align-items: center; gap: 10px; }
+
+.tb-btn {
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.tb-btn.p { background: var(--brand); color: white; }
+.tb-btn.p:hover { background: var(--brand-dark); }
+.tb-btn.g { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.tb-btn.g:hover { border-color: var(--muted); color: var(--text); }
+
+.notif-btn {
+  width: 34px; height: 34px;
+  border-radius: 7px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  position: relative;
+}
+
+.notif-dot {
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 7px; height: 7px;
+  background: var(--brand);
+  border-radius: 50%;
+  border: 1.5px solid white;
+}
+
+.content { padding: 24px; flex: 1; }
+
+/* ── Cards ── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.ch {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ct {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cb { padding: 18px 20px; }
+
+/* ── Stats Grid ── */
+.sg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+.sc {
+  background: white;
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sc:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+.sc::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--brand);
+}
+
+.sc.g::after { background: var(--green); }
+.sc.a::after { background: var(--amber); }
+.sc.r::after { background: var(--red); }
+.sc.p::after { background: var(--purple); }
+
+.sc-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  margin-bottom: 10px;
+}
+
+.sc-icon.d { background: var(--brand-light); }
+.sc-icon.g { background: var(--green-bg); }
+.sc-icon.a { background: var(--amber-bg); }
+.sc-icon.r { background: var(--red-bg); }
+.sc-icon.p { background: var(--purple-bg); }
+
+.sc-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.sc-lbl { font-size: 12px; color: var(--muted); }
+.sc-sub { font-size: 11px; color: var(--light); margin-top: 4px; }
+
+/* ── Grid ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.g13 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+.mb16 { margin-bottom: 16px; }
+.mb20 { margin-bottom: 20px; }
+
+/* ── Page Views ── */
+.pv { display: none; }
+.pv.active { display: block; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.badge.app  { background: var(--green-bg);  color: var(--green); }
+.badge.pen  { background: var(--amber-bg);  color: var(--amber); }
+.badge.rej  { background: var(--red-bg);    color: var(--red); }
+.badge.wfh  { background: var(--brand-light); color: var(--brand); }
+.badge.neu  { background: var(--bg);       color: var(--muted); border: 1px solid var(--border); }
+
+/* ── Table ── */
+.dt { width: 100%; border-collapse: collapse; }
+.dt th {
+  padding: 9px 14px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--light);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.dt td {
+  padding: 11px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.dt tr:last-child td { border-bottom: none; }
+.dt tr:hover td { background: var(--bg); }
+
+/* ── Punch Card ── */
+.punch-wrap {
+  background: linear-gradient(135deg, var(--sidebar-bg), #1e293b);
+  border-radius: var(--radius);
+  padding: 22px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.punch-wrap::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+
+.punch-time {
+  font-family: 'Syne', sans-serif;
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 2px;
+}
+
+.punch-date { font-size: 12px; opacity: 0.5; margin-bottom: 16px; }
+
+.pstatus {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.pdot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 0 rgba(74,222,128,0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
+  70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+}
+
+.pbtn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  margin-right: 8px;
+}
+
+.pbtn.out { background: rgba(255,255,255,0.12); color: white; }
+.pbtn.brk { background: var(--brand); color: white; }
+.pbtn:hover { opacity: 0.85; }
+
+.pstats {
+  display: flex;
+  gap: 20px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.pstat-val { font-size: 16px; font-weight: 700; }
+.pstat-lbl { font-size: 10px; opacity: 0.4; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── Leave Balance ── */
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.lb-item:last-child { border-bottom: none; }
+.lb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.lb-name { font-size: 13px; font-weight: 500; flex: 1; }
+.lb-track { height: 5px; background: var(--bg); border-radius: 3px; overflow: hidden; flex: 2; }
+.lb-fill  { height: 100%; border-radius: 3px; transition: width 0.7s ease; }
+.lb-nums  { font-size: 12px; color: var(--muted); text-align: right; white-space: nowrap; }
+.lb-left  { font-size: 15px; font-weight: 800; }
+
+/* ── Quick Actions ── */
+.qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.qa-btn {
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  background: white;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qa-btn:hover { border-color: var(--brand); background: var(--brand-light); }
+.qa-ico { width: 32px; height: 32px; border-radius: 7px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.qa-lbl { font-size: 13px; font-weight: 600; }
+.qa-sub { font-size: 11px; color: var(--muted); }
+
+/* ── Approval Cards ── */
+.acard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  background: white;
+  margin-bottom: 8px;
+  transition: all 0.15s;
+}
+
+.acard:hover { box-shadow: var(--shadow); }
+
+.acard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.acard-user { display: flex; align-items: center; gap: 10px; }
+.acard-actions { display: flex; gap: 6px; }
+
+.aact {
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.aact.apv { background: var(--green-bg); color: var(--green); }
+.aact.apv:hover { background: var(--green); color: white; }
+.aact.rej { background: var(--red-bg);   color: var(--red); }
+.aact.rej:hover { background: var(--red); color: white; }
+
+.acard-meta { display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+
+/* ── Holiday List ── */
+.hol-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.hol-row:last-child { border-bottom: none; }
+
+.hol-badge {
+  min-width: 42px;
+  padding: 6px 8px;
+  background: var(--bg);
+  border-radius: 7px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.hol-day   { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; line-height: 1; }
+.hol-month { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+.hol-name  { font-size: 13px; font-weight: 500; }
+.hol-type  { font-size: 11px; color: var(--muted); }
+
+/* ── Tabs ── */
+.tabs {
+  display: inline-flex;
+  background: var(--bg);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  padding: 6px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+
+.tab.active {
+  background: white;
+  color: var(--text);
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+/* ── Reports ── */
+.progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.pr-label { font-size: 13px; color: var(--muted); width: 100px; flex-shrink: 0; }
+.pr-track { flex: 1; height: 7px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.pr-fill  { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+.pr-val   { font-size: 12px; font-weight: 700; width: 38px; text-align: right; flex-shrink: 0; }
+
+/* ── Team Grid ── */
+.emp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+.emp-card {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.emp-card:hover { border-color: var(--brand); box-shadow: var(--shadow); }
+.emp-av { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; background: var(--brand); }
+.emp-name { font-size: 13px; font-weight: 600; }
+.emp-dept { font-size: 11px; color: var(--muted); }
+.emp-id   { font-size: 10px; color: var(--light); }
+
+/* ── Modal ── */
+.moverlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.moverlay.open { display: flex; }
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  width: 500px;
+  max-width: 95vw;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+  animation: mIn 0.25s ease;
+}
+
+@keyframes mIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.mtitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mclose {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+
+.mclose:hover { background: var(--bg); }
+
+.mfooter {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Toast ── */
+.toast-zone {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.toast {
+  padding: 12px 16px;
+  border-radius: 9px;
+  background: var(--sidebar-bg);
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  animation: toastSlide 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 300px;
+}
+
+.toast.ok  { background: var(--green); }
+.toast.err { background: var(--red); }
+.toast.wrn { background: var(--amber); color: white; }
+
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Filter bar ── */
+.fbar { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.fsel { padding: 7px 12px; border: 1px solid var(--border); border-radius: 7px; font-family: inherit; font-size: 13px; background: white; cursor: pointer; }
+.fsrch { padding: 7px 12px; border: 1px solid var(--border); border-radius: 7px; font-family: inherit; font-size: 13px; flex: 1; max-width: 240px; }
+.fsrch:focus { outline: none; border-color: var(--brand); }
+
+/* Settings page */
+.settings-section { margin-bottom: 24px; }
+.settings-section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lt-config-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+
+.lt-config-num { width: 56px; padding: 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; text-align: center; font-family: inherit; }
+
+/* attendance chart */
+.att-bar-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100px;
+  padding-bottom: 2px;
+}
+
+.att-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 100%;
+}
+
+.att-bar-fill {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  min-height: 3px;
+  background: var(--brand);
+  opacity: 0.7;
+}
+
+.att-bar-lbl { font-size: 10px; color: var(--light); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     SETUP WIZARD
+═══════════════════════════════════════════════ -->
+<div id="setupWizard">
+  <div class="wizard-sidebar">
+    <div class="wizard-logo-area">
+      <div class="wizard-logo-mark">⚙️</div>
+      <div class="wizard-app-title">HR System Setup</div>
+      <div class="wizard-subtitle">Configure once. Deploy forever.</div>
+    </div>
+
+    <div class="wizard-steps" id="wizardStepList">
+      <!-- Generated by JS -->
+    </div>
+
+    <div class="wizard-progress">
+      <div class="wizard-progress-fill" id="wizardProgressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="wizard-main">
+    <div class="wizard-panel" id="wizardPanel">
+      <!-- Steps rendered here -->
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════════ -->
+<div id="mainApp">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sb-header">
+      <div class="sb-brand">
+        <div class="sb-icon" id="sbIcon">🏢</div>
+        <div>
+          <div class="sb-name" id="sbAppName">HR Portal</div>
+          <div class="sb-co"   id="sbCoName">Your Company</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-nav">
+      <div class="sb-section">Overview</div>
+      <div class="sb-item active" onclick="goPage('dashboard',this)"><span class="ico">📊</span> Dashboard</div>
+      <div class="sb-item"       onclick="goPage('attendance',this)"><span class="ico">🕐</span> Attendance</div>
+
+      <div class="sb-section">Leave</div>
+      <div class="sb-item" onclick="goPage('myleaves',this)"><span class="ico">🌴</span> My Leaves</div>
+      <div class="sb-item" onclick="goPage('apply',this)"><span class="ico">✏️</span> Apply Leave</div>
+      <div class="sb-item" onclick="goPage('approvals',this)" id="navApprovals">
+        <span class="ico">✅</span> Approvals
+        <span class="sb-badge" id="appBadge">3</span>
+      </div>
+
+      <div class="sb-section">People</div>
+      <div class="sb-item" onclick="goPage('team',this)"><span class="ico">👥</span> Team</div>
+      <div class="sb-item" onclick="goPage('holidays',this)"><span class="ico">🎉</span> Holidays</div>
+
+      <div class="sb-section">Admin</div>
+      <div class="sb-item" onclick="goPage('reports',this)"><span class="ico">📈</span> Reports</div>
+      <div class="sb-item" onclick="goPage('settings',this)"><span class="ico">⚙️</span> Settings</div>
+    </div>
+
+    <div class="sb-foot">
+      <div class="ua" id="appUserAv">JS</div>
+      <div>
+        <div class="ua-name" id="appUserName">John Smith</div>
+        <div class="ua-role" id="appUserRole">HR Admin</div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title" id="pageTitle">Dashboard</div>
+      <div class="tb-right">
+        <div class="notif-btn">🔔<span class="notif-dot"></span></div>
+        <button class="tb-btn p" onclick="openM('mApply')">+ Apply Leave</button>
+        <button class="tb-btn g" onclick="reconfigure()">↩ Reconfigure</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="pv active" id="pv-dashboard">
+        <div class="sg" id="dashStats"></div>
+        <div class="g2 mb20">
+          <!-- Punch -->
+          <div class="punch-wrap">
+            <div class="punch-time" id="liveClock">09:42:17</div>
+            <div class="punch-date" id="liveDate">Friday, 13 March 2026</div>
+            <div class="pstatus"><div class="pdot"></div><span id="punchTxt">Punched In at 09:15 AM</span></div>
+            <div>
+              <button class="pbtn out" onclick="punch('out')">Punch Out 🚪</button>
+              <button class="pbtn brk" onclick="punch('brk')">Break ☕</button>
+            </div>
+            <div class="pstats">
+              <div><div class="pstat-val">6h 27m</div><div class="pstat-lbl">Today</div></div>
+              <div><div class="pstat-val">192h</div><div class="pstat-lbl">This Month</div></div>
+              <div><div class="pstat-val">96%</div><div class="pstat-lbl">Attendance</div></div>
+            </div>
+          </div>
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="ch"><span class="ct">Quick Actions</span></div>
+            <div class="cb">
+              <div class="qa-grid" id="qaGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="g2">
+          <!-- Leave Balance -->
+          <div class="card">
+            <div class="ch">
+              <span class="ct">Leave Balance</span>
+              <span style="font-size:12px;color:var(--muted)" id="fyLabel">FY 2025–26</span>
+            </div>
+            <div class="cb" id="leaveBalCont"></div>
+          </div>
+          <!-- Recent Requests -->
+          <div class="card">
+            <div class="ch"><span class="ct">Recent Requests</span></div>
+            <table class="dt" id="recentDt">
+              <thead><tr><th>Type</th><th>Dates</th><th>Days</th><th>Status</th></tr></thead>
+              <tbody id="recentTb"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE -->
+      <div class="pv" id="pv-attendance">
+        <div class="tabs">
+          <button class="tab active" onclick="swTab(this,'att-month')">Monthly</button>
+          <button class="tab" onclick="swTab(this,'att-daily')">Daily Log</button>
+          <button class="tab" onclick="swTab(this,'att-fy')">FY Summary</button>
+        </div>
+
+        <div id="att-month">
+          <div class="sg mb20" style="grid-template-columns:repeat(4,1fr)">
+            <div class="sc g"><div class="sc-icon g">✅</div><div class="sc-val">21</div><div class="sc-lbl">Present</div></div>
+            <div class="sc a"><div class="sc-icon a">🏠</div><div class="sc-val">2</div><div class="sc-lbl">WFH</div></div>
+            <div class="sc r"><div class="sc-icon r">🌴</div><div class="sc-val">1</div><div class="sc-lbl">Leave</div></div>
+            <div class="sc"><div class="sc-icon d">⏱️</div><div class="sc-val">184h</div><div class="sc-lbl">Hours</div></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">Attendance Register — March 2026</span></div>
+            <table class="dt"><thead><tr><th>Date</th><th>Day</th><th>Status</th><th>In</th><th>Out</th><th>Hours</th><th>OT</th></tr></thead>
+            <tbody id="attTb"></tbody></table>
+          </div>
+        </div>
+
+        <div id="att-daily" style="display:none">
+          <div class="card">
+            <div class="ch"><span class="ct">Today's Log — 13 Mar 2026</span></div>
+            <div class="cb" style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--green-bg);border-radius:8px;border-left:4px solid var(--green)">
+                <span style="font-size:18px">🟢</span>
+                <div><div style="font-weight:600;font-size:13px">Punch In</div><div style="font-size:12px;color:var(--muted)">09:15:32 AM</div></div>
+                <div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px">09:15 AM</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--amber-bg);border-radius:8px;border-left:4px solid var(--amber)">
+                <span style="font-size:18px">☕</span>
+                <div><div style="font-weight:600;font-size:13px">Break Start</div><div style="font-size:12px;color:var(--muted)">01:00 PM — Lunch</div></div>
+                <div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px">01:00 PM</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--green-bg);border-radius:8px;border-left:4px solid var(--green)">
+                <span style="font-size:18px">▶️</span>
+                <div><div style="font-weight:600;font-size:13px">Break End</div><div style="font-size:12px;color:var(--muted)">01:45 PM — Resumed</div></div>
+                <div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px">01:45 PM</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px dashed var(--border)">
+                <span style="font-size:18px">⏳</span>
+                <div><div style="font-weight:600;font-size:13px;color:var(--muted)">Punch Out</div><div style="font-size:12px;color:var(--light)">Pending</div></div>
+                <div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px;color:var(--light)">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="att-fy" style="display:none">
+          <div class="card">
+            <div class="ch"><span class="ct">FY Attendance Summary</span></div>
+            <div class="cb">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px">
+                <div style="text-align:center;padding:18px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
+                  <div style="font-family:'Syne';font-size:32px;font-weight:800;color:var(--green)" id="fyAttPct">94%</div>
+                  <div style="font-size:12px;color:var(--muted)">Overall Attendance</div>
+                </div>
+                <div style="text-align:center;padding:18px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
+                  <div style="font-family:'Syne';font-size:32px;font-weight:800;color:var(--brand)">242</div>
+                  <div style="font-size:12px;color:var(--muted)">Working Days</div>
+                </div>
+                <div style="text-align:center;padding:18px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">
+                  <div style="font-family:'Syne';font-size:32px;font-weight:800;color:var(--amber)">1,934h</div>
+                  <div style="font-size:12px;color:var(--muted)">Total Hours</div>
+                </div>
+              </div>
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--light);margin-bottom:10px">Month-wise Attendance %</div>
+              <div class="att-bar-row" id="fyBarChart"></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--light);margin-top:4px" id="fyBarLabels"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY LEAVES -->
+      <div class="pv" id="pv-myleaves">
+        <div class="fbar">
+          <select class="fsel" id="filterType"><option value="">All Types</option></select>
+          <select class="fsel">
+            <option>All Status</option><option>Approved</option><option>Pending</option><option>Rejected</option>
+          </select>
+          <button class="tb-btn p" onclick="openM('mApply')" style="margin-left:auto">+ Apply Leave</button>
+        </div>
+        <div class="card">
+          <table class="dt"><thead><tr><th>#</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="myLeavesTb"></tbody></table>
+        </div>
+      </div>
+
+      <!-- APPLY LEAVE -->
+      <div class="pv" id="pv-apply">
+        <div class="g2">
+          <div class="card">
+            <div class="ch"><span class="ct">New Leave Application</span></div>
+            <div class="cb">
+              <div class="fg">
+                <label class="fl">Leave Type</label>
+                <select class="fs" id="inlineType"></select>
+              </div>
+              <div class="fg-row">
+                <div class="fg"><label class="fl">From Date</label><input class="fi" type="date"></div>
+                <div class="fg"><label class="fl">To Date</label><input class="fi" type="date"></div>
+              </div>
+              <div class="fg">
+                <label class="fl">Session</label>
+                <select class="fs"><option>Full Day</option><option>First Half</option><option>Second Half</option></select>
+              </div>
+              <div class="fg">
+                <label class="fl">Reason</label>
+                <textarea class="fta" placeholder="Brief reason for leave..."></textarea>
+              </div>
+              <div class="fg">
+                <label class="fl">Handover To</label>
+                <select class="fs"><option>-- Select Colleague --</option><option>Rahul Verma</option><option>Sneha Nair</option></select>
+              </div>
+              <button class="btn btn-primary" onclick="submitInlineLeave()">Submit Application →</button>
+            </div>
+          </div>
+          <div>
+            <div class="card mb16">
+              <div class="ch"><span class="ct">Balance Summary</span></div>
+              <div class="cb" id="applyBalSummary"></div>
+            </div>
+            <div class="card">
+              <div class="ch"><span class="ct">Upcoming Holidays</span></div>
+              <div class="cb" id="applyHolidays"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROVALS -->
+      <div class="pv" id="pv-approvals">
+        <div class="tabs">
+          <button class="tab active" onclick="swTab(this,'apv-pending')">Pending (3)</button>
+          <button class="tab" onclick="swTab(this,'apv-history')">History</button>
+          <button class="tab" onclick="swTab(this,'apv-team')">Team Calendar</button>
+        </div>
+        <div id="apv-pending"><div id="apvCards"></div></div>
+        <div id="apv-history" style="display:none">
+          <div class="card">
+            <table class="dt">
+              <thead><tr><th>Employee</th><th>Type</th><th>Duration</th><th>Status</th><th>Actioned</th></tr></thead>
+              <tbody>
+                <tr><td>Anjali Mehta</td><td><span class="badge wfh">PL</span></td><td>10–12 Feb</td><td><span class="badge app">Approved</span></td><td>9 Feb 2026</td></tr>
+                <tr><td>Ravi Shankar</td><td><span class="badge wfh">CL</span></td><td>5 Jan</td><td><span class="badge rej">Rejected</span></td><td>4 Jan 2026</td></tr>
+                <tr><td>Priya Patel</td><td><span class="badge wfh">SL</span></td><td>20–21 Dec</td><td><span class="badge app">Approved</span></td><td>20 Dec 2025</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="apv-team" style="display:none">
+          <div class="card">
+            <div class="ch"><span class="ct">Team Leave Calendar — March 2026</span></div>
+            <div class="cb" id="teamCalCont"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEAM -->
+      <div class="pv" id="pv-team">
+        <div class="fbar">
+          <input class="fsrch" placeholder="Search employee...">
+          <select class="fsel"><option>All Depts</option><option>Engineering</option><option>HR</option><option>Finance</option></select>
+          <select class="fsel"><option>All Status</option><option>Present</option><option>WFH</option><option>Absent</option></select>
+        </div>
+        <div class="emp-grid" id="empGrid"></div>
+      </div>
+
+      <!-- HOLIDAYS -->
+      <div class="pv" id="pv-holidays">
+        <div class="g2">
+          <div class="card">
+            <div class="ch"><span class="ct" id="nationalHolTitle">National Holidays</span></div>
+            <div class="cb" id="nationalHolList"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">Optional / Restricted Holidays</span><span class="badge pen">Choose 2</span></div>
+            <div class="cb" id="optHolList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="pv" id="pv-reports">
+        <div class="sg mb20">
+          <div class="sc"><div class="sc-icon d">👥</div><div class="sc-val">247</div><div class="sc-lbl">Employees</div></div>
+          <div class="sc g"><div class="sc-icon g">✅</div><div class="sc-val">94%</div><div class="sc-lbl">Avg Attendance</div></div>
+          <div class="sc a"><div class="sc-icon a">🌴</div><div class="sc-val">1,842</div><div class="sc-lbl">Leave Days</div></div>
+          <div class="sc r"><div class="sc-icon r">⚠️</div><div class="sc-val">23</div><div class="sc-lbl">LWP Cases</div></div>
+        </div>
+        <div class="g2 mb16">
+          <div class="card">
+            <div class="ch"><span class="ct">Leave Distribution</span></div>
+            <div class="cb" id="repLeaveDist"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">Dept Attendance %</span></div>
+            <div class="cb" id="repDeptAtt"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">
+            <span class="ct">Absenteeism Report</span>
+            <div style="display:flex;gap:6px">
+              <button class="tb-btn g" style="font-size:12px;padding:5px 10px" onclick="toast('Exported!','ok')">📥 CSV</button>
+              <button class="tb-btn g" style="font-size:12px;padding:5px 10px" onclick="toast('Printing...','ok')">🖨️ Print</button>
+            </div>
+          </div>
+          <table class="dt">
+            <thead><tr><th>Employee</th><th>Dept</th><th>Present</th><th>Absent</th><th>LWP</th><th>Att%</th></tr></thead>
+            <tbody>
+              <tr><td>Sneha Nair</td><td>Engineering</td><td>22</td><td>2</td><td>0</td><td><span class="badge pen">92%</span></td></tr>
+              <tr><td>Suresh Babu</td><td>Engineering</td><td>20</td><td>4</td><td>2</td><td><span class="badge rej">83%</span></td></tr>
+              <tr><td>Asha Pillai</td><td>HR</td><td>24</td><td>0</td><td>0</td><td><span class="badge app">100%</span></td></tr>
+              <tr><td>Kiran Kumar</td><td>Finance</td><td>23</td><td>1</td><td>0</td><td><span class="badge app">96%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="pv" id="pv-settings">
+        <div class="g2">
+          <div>
+            <div class="card mb16">
+              <div class="ch"><span class="ct">App Identity</span></div>
+              <div class="cb">
+                <div class="fg"><label class="fl">App Name</label><input class="fi" id="settAppName" oninput="liveUpdateName()"></div>
+                <div class="fg"><label class="fl">Company Name</label><input class="fi" id="settCoName" oninput="liveUpdateName()"></div>
+                <div class="fg"><label class="fl">App Icon (emoji)</label><input class="fi" id="settIcon" maxlength="2" oninput="liveUpdateIcon()"></div>
+                <div class="fg">
+                  <label class="fl">Brand Color</label>
+                  <div class="color-picker-row" id="settColorPicker"></div>
+                </div>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="ch"><span class="ct">Policies</span></div>
+              <div class="cb">
+                <div class="fg"><label class="fl">Financial Year</label>
+                  <select class="fs" id="settFY"><option value="apr">April – March</option><option value="jan">January – December</option></select></div>
+                <div class="fg"><label class="fl">Weekend</label>
+                  <select class="fs" id="settWeekend"><option value="both">Sat & Sun Off</option><option value="alt">Alt Saturday Off</option><option value="sun">Sunday Only</option></select></div>
+                <div class="fg"><label class="fl">Attendance Marking</label>
+                  <select class="fs"><option>Biometric / RFID</option><option>Web Portal</option><option>Mobile App</option><option>Manual</option></select></div>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch"><span class="ct">Leave Types & Entitlements</span></div>
+            <div class="cb">
+              <div id="settLtList"></div>
+              <button class="btn btn-primary" onclick="saveSettings()">Save Policy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /mainApp -->
+
+<!-- ════ MODALS ════ -->
+<div class="moverlay" id="mApply">
+  <div class="modal">
+    <div class="mtitle">Apply for Leave <button class="mclose" onclick="closeM('mApply')">✕</button></div>
+    <div class="fg"><label class="fl">Leave Type</label><select class="fs" id="mLeaveType"></select></div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">From</label><input class="fi" type="date"></div>
+      <div class="fg"><label class="fl">To</label><input class="fi" type="date"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Session</label><select class="fs"><option>Full Day</option><option>First Half</option><option>Second Half</option></select></div>
+      <div class="fg"><label class="fl">Handover To</label><select class="fs"><option>— Select —</option><option>Rahul</option><option>Sneha</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">Reason</label><textarea class="fta" placeholder="Brief reason..."></textarea></div>
+    <div class="mfooter">
+      <button class="btn btn-ghost" onclick="closeM('mApply')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitLeave()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-zone" id="toastZone"></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIG STORE  (persisted to localStorage)
+// ══════════════════════════════════════════════
+const DEFAULT_CONFIG = {
+  appName:     'HR Portal',
+  companyName: 'Your Company',
+  appIcon:     '🏢',
+  brandColor:  '#2563EB',
+  country:     'India',
+  state:       'Maharashtra',
+  fy:          'apr',
+  weekend:     'both',
+  leaveTypes: [
+    { name:'Casual Leave',    short:'CL', days:12,  carryFwd:true,  encash:false, halfDay:true },
+    { name:'Privilege Leave', short:'PL', days:21,  carryFwd:true,  encash:true,  halfDay:true },
+    { name:'Sick Leave',      short:'SL', days:10,  carryFwd:false, encash:false, halfDay:true },
+    { name:'Comp-Off',        short:'CO', days:5,   carryFwd:false, encash:false, halfDay:true },
+    { name:'Maternity Leave', short:'ML', days:90,  carryFwd:false, encash:false, halfDay:false},
+    { name:'Paternity Leave', short:'PAT',days:15,  carryFwd:false, encash:false, halfDay:false},
+    { name:'Bereavement',     short:'BL', days:5,   carryFwd:false, encash:false, halfDay:false},
+  ],
+  holidays: [
+    { date:'2026-01-26', name:'Republic Day',       type:'national' },
+    { date:'2026-03-14', name:'Holi',               type:'national' },
+    { date:'2026-04-14', name:'Ambedkar Jayanti',   type:'national' },
+    { date:'2026-04-25', name:'Good Friday',        type:'optional' },
+    { date:'2026-05-01', name:'Labour Day',         type:'national' },
+    { date:'2026-08-15', name:'Independence Day',   type:'national' },
+    { date:'2026-08-23', name:'Janmashtami',        type:'optional' },
+    { date:'2026-10-02', name:'Gandhi Jayanti',     type:'national' },
+    { date:'2026-10-20', name:'Dussehra',           type:'national' },
+    { date:'2026-11-08', name:'Diwali',             type:'national' },
+    { date:'2026-12-25', name:'Christmas',          type:'national' },
+  ],
+  enableWFH:    true,
+  enableOD:     true,
+  enableCompOff:true,
+  maxLeavesAtOnce: 10,
+  noticePeriodDays: 1,
+  adminName:    'HR Admin',
+  adminEmail:   'hr@company.com',
+  isConfigured: false,
+};
+
+let CFG = JSON.parse(localStorage.getItem('hrSystemConfig') || 'null') || { ...DEFAULT_CONFIG };
+
+function saveConfig() {
+  localStorage.setItem('hrSystemConfig', JSON.stringify(CFG));
+}
+
+// ══════════════════════════════════════════════
+//  WIZARD STATE
+// ══════════════════════════════════════════════
+const STEPS = [
+  { id:'identity',   label:'App Identity',      icon:'🎨' },
+  { id:'company',    label:'Company Info',       icon:'🏢' },
+  { id:'leavetypes', label:'Leave Types',        icon:'🌴' },
+  { id:'holidays',   label:'Holidays',           icon:'🎉' },
+  { id:'policies',   label:'Policies',           icon:'⚙️' },
+  { id:'admin',      label:'Admin Account',      icon:'👤' },
+  { id:'preview',    label:'Preview & Launch',   icon:'🚀' },
+];
+
+let wizStep = 0;
+
+// ══════════════════════════════════════════════
+//  WIZARD RENDER
+// ══════════════════════════════════════════════
+function renderWizardSidebar() {
+  const el = document.getElementById('wizardStepList');
+  let html = '';
+  STEPS.forEach((s, i) => {
+    const cls = i === wizStep ? 'active' : (i < wizStep ? 'done' : '');
+    html += `<div class="wstep ${cls}">
+      <div class="wstep-num">${i < wizStep ? '✓' : (i + 1)}</div>
+      <div class="wstep-label">${s.icon} ${s.label}</div>
+    </div>`;
+    if (i < STEPS.length - 1) html += '<div class="wstep-connector"></div>';
+  });
+  el.innerHTML = html;
+  document.getElementById('wizardProgressFill').style.width = ((wizStep / (STEPS.length - 1)) * 100) + '%';
+}
+
+function renderWizardStep() {
+  renderWizardSidebar();
+  const panel = document.getElementById('wizardPanel');
+  const s = STEPS[wizStep];
+  let body = '', title = '', desc = '';
+
+  if (s.id === 'identity') {
+    title = 'Give your app an identity';
+    desc = 'Your employees will see this name and branding every day. Make it yours.';
+    const swatches = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0F172A'];
+    body = `
+      <div class="fg-row">
+        <div class="fg"><label class="fl">App Name <span style="color:var(--red)">*</span></label>
+          <input class="fi" id="wAppName" placeholder="e.g. LeaveDesk, PeopleHR, AttendEase" value="${CFG.appName}">
+          <div class="hint">This appears in the browser tab, sidebar, and login page</div>
+        </div>
+        <div class="fg"><label class="fl">App Icon (emoji)</label>
+          <input class="fi" id="wAppIcon" placeholder="🏢" value="${CFG.appIcon}" maxlength="2" style="font-size:22px">
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Tagline / Description</label>
+        <input class="fi" id="wTagline" placeholder="Leave & Attendance for modern teams" value="${CFG.tagline||''}">
+      </div>
+      <div class="fg">
+        <label class="fl">Brand Color</label>
+        <div class="color-picker-row">
+          ${swatches.map(c => `<div class="cp-swatch ${CFG.brandColor===c?'selected':''}" style="background:${c}" onclick="pickColor('${c}',this)" title="${c}"></div>`).join('')}
+          <div class="custom-color-wrap">
+            <input type="color" class="color-input" id="wCustomColor" value="${CFG.brandColor}" oninput="pickColor(this.value,null)">
+            <span style="font-size:12px;color:var(--muted)">Custom</span>
+          </div>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Live Preview</label>
+        <div class="preview-card" id="livePreview"></div>
+      </div>`;
+  }
+
+  else if (s.id === 'company') {
+    title = 'Tell us about your company';
+    desc = 'This configures region-specific holidays, compliance defaults, and financial year.';
+    body = `
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Company / Organisation Name</label>
+          <input class="fi" id="wCoName" placeholder="e.g. Acme Technologies Pvt Ltd" value="${CFG.companyName}">
+        </div>
+        <div class="fg"><label class="fl">Industry</label>
+          <select class="fs" id="wIndustry">
+            ${['IT / Software','BPO / KPO','Manufacturing','BFSI / Finance','Healthcare','Retail / E-Commerce','Education','Government / PSU','Startup','Other'].map(i => `<option ${CFG.industry===i?'selected':''}>${i}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Country</label>
+          <select class="fs" id="wCountry" onchange="updateStateList()">
+            ${['India 🇮🇳','UAE 🇦🇪','USA 🇺🇸','UK 🇬🇧','Singapore 🇸🇬','Australia 🇦🇺','Canada 🇨🇦','Other'].map(c => `<option ${CFG.country===c?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fg"><label class="fl">State / Region</label>
+          <select class="fs" id="wState">
+            ${['Maharashtra','Karnataka','Tamil Nadu','Delhi NCR','Telangana','Gujarat','West Bengal','Kerala','Rajasthan','Punjab','Other'].map(st => `<option ${CFG.state===st?'selected':''}>${st}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Financial Year</label>
+          <select class="fs" id="wFY">
+            <option value="apr" ${CFG.fy==='apr'?'selected':''}>April – March (India)</option>
+            <option value="jan" ${CFG.fy==='jan'?'selected':''}>January – December</option>
+            <option value="jul" ${CFG.fy==='jul'?'selected':''}>July – June</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Weekend Policy</label>
+          <select class="fs" id="wWeekend">
+            <option value="both" ${CFG.weekend==='both'?'selected':''}>Sat & Sun Off</option>
+            <option value="alt"  ${CFG.weekend==='alt'?'selected':''}>Alt Saturday Off</option>
+            <option value="sun"  ${CFG.weekend==='sun'?'selected':''}>Sunday Only</option>
+            <option value="none" ${CFG.weekend==='none'?'selected':''}>No Fixed Weekend</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Payroll Cycle</label>
+          <select class="fs">
+            ${['Monthly (1st–31st)','Monthly (26th–25th)','Bi-weekly','Weekly'].map(p=>`<option>${p}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Total Employees</label>
+          <input class="fi" id="wEmpCount" type="number" placeholder="e.g. 50" value="${CFG.empCount||''}">
+        </div>
+      </div>`;
+  }
+
+  else if (s.id === 'leavetypes') {
+    title = 'Configure leave types';
+    desc = 'Define every leave type your company offers. Set entitlements, carry-forward, and encashment rules.';
+    body = `
+      <div class="lt-header"><span>Leave Type Name</span><span>Short</span><span>Days/yr</span><span></span><span></span></div>
+      <div class="lt-list" id="wLtList"></div>
+      <button class="add-lt-btn" onclick="addLeaveType()">＋ Add Leave Type</button>
+      <div style="margin-top:14px;padding:10px 14px;background:var(--brand-light);border-radius:8px;font-size:12px;color:var(--brand)">
+        💡 <strong>Indian defaults included.</strong> Common types: CL (Casual), PL/EL (Privilege/Earned), SL (Sick), ML (Maternity 26 weeks), PL-Pat (Paternity 15 days), CO (Comp-Off).
+      </div>`;
+  }
+
+  else if (s.id === 'holidays') {
+    title = 'Set up your holiday calendar';
+    desc = 'Add national holidays, optional holidays, and company-specific off days for this year.';
+    body = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:12px;color:var(--muted)">${CFG.holidays.length} holidays configured</div>
+        <button class="add-lt-btn" onclick="addHoliday()">＋ Add Holiday</button>
+      </div>
+      <div style="margin-bottom:8px">
+        <div class="lt-header" style="grid-template-columns:120px 1fr auto"><span>Date</span><span>Name</span><span>Type</span></div>
+      </div>
+      <div class="hol-list" id="wHolList"></div>
+      <div style="margin-top:10px;padding:10px 14px;background:var(--amber-bg);border-radius:8px;font-size:12px;color:var(--amber)">
+        ⚡ Pre-loaded with major Indian national holidays. Add optional/restricted holidays for your state.
+      </div>`;
+  }
+
+  else if (s.id === 'policies') {
+    title = 'Configure leave policies';
+    desc = 'Set rules that govern how leaves are applied, approved, and tracked.';
+    body = `
+      <div class="toggle-group">
+        <div class="toggle-row">
+          <div><div class="toggle-label">Work From Home (WFH)</div><div class="toggle-desc">Employees can apply for WFH days</div></div>
+          <button class="toggle ${CFG.enableWFH?'on':''}" id="togWFH" onclick="tog('togWFH','enableWFH')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">On Duty (OD)</div><div class="toggle-desc">Field visit / client duty marking</div></div>
+          <button class="toggle ${CFG.enableOD?'on':''}" id="togOD" onclick="tog('togOD','enableOD')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Compensatory Off</div><div class="toggle-desc">Comp-off for weekend / holiday work</div></div>
+          <button class="toggle ${CFG.enableCompOff?'on':''}" id="togCO" onclick="tog('togCO','enableCompOff')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Half-Day Leave</div><div class="toggle-desc">Allow applying for half-day leaves</div></div>
+          <button class="toggle on" id="togHD" onclick="tog('togHD','enableHalfDay')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Leave Encashment</div><div class="toggle-desc">Allow encashing earned/privilege leaves</div></div>
+          <button class="toggle ${CFG.enableEncash?'on':''}" id="togEnc" onclick="tog('togEnc','enableEncash')"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Manager Approval Required</div><div class="toggle-desc">All leaves need manager sign-off</div></div>
+          <button class="toggle on" id="togMgr"></button>
+        </div>
+      </div>
+      <div class="fg-row" style="margin-top:16px">
+        <div class="fg"><label class="fl">Min Notice Period (days)</label>
+          <input class="fi" type="number" value="${CFG.noticePeriodDays}" min="0" max="30" id="wNotice">
+        </div>
+        <div class="fg"><label class="fl">Max Consecutive Leave Days</label>
+          <input class="fi" type="number" value="${CFG.maxLeavesAtOnce}" min="1" max="180" id="wMaxLeave">
+        </div>
+      </div>`;
+  }
+
+  else if (s.id === 'admin') {
+    title = 'Create the admin account';
+    desc = 'This will be the super-admin who can manage the entire system.';
+    body = `
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Full Name</label><input class="fi" id="wAdminName" placeholder="e.g. Priya Sharma" value="${CFG.adminName}"></div>
+        <div class="fg"><label class="fl">Employee ID</label><input class="fi" id="wAdminId" placeholder="e.g. EMP001" value="${CFG.adminId||'EMP001'}"></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Email</label><input class="fi" id="wAdminEmail" type="email" placeholder="admin@company.com" value="${CFG.adminEmail}"></div>
+        <div class="fg"><label class="fl">Department</label><select class="fs" id="wAdminDept">
+          ${['HR','Administration','Management','IT','Finance'].map(d=>`<option>${d}</option>`).join('')}
+        </select></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Password</label><input class="fi" type="password" placeholder="Min 8 characters" id="wAdminPass"></div>
+        <div class="fg"><label class="fl">Confirm Password</label><input class="fi" type="password" placeholder="Repeat password" id="wAdminPass2"></div>
+      </div>
+      <div class="fg"><label class="fl">Designation</label>
+        <input class="fi" id="wAdminDesig" placeholder="e.g. HR Manager, Head of People" value="${CFG.adminDesig||'HR Manager'}">
+      </div>
+      <div style="padding:12px 14px;background:var(--green-bg);border-radius:8px;font-size:13px;color:var(--green)">
+        🔐 You can add more admins, managers, and employees after setup.
+      </div>`;
+  }
+
+  else if (s.id === 'preview') {
+    title = 'Ready to launch!';
+    desc = 'Here\'s a summary of your configuration. Review and hit Launch to start using your HR system.';
+    body = `
+      <div class="success-icon">✨</div>
+      <div class="config-summary">
+        <div class="cs-item"><div class="cs-label">App Name</div><div class="cs-val">${CFG.appIcon} ${CFG.appName}</div></div>
+        <div class="cs-item"><div class="cs-label">Company</div><div class="cs-val">${CFG.companyName}</div></div>
+        <div class="cs-item"><div class="cs-label">Country / State</div><div class="cs-val">${CFG.country} • ${CFG.state}</div></div>
+        <div class="cs-item"><div class="cs-label">Financial Year</div><div class="cs-val">${CFG.fy==='apr'?'April – March':CFG.fy==='jan'?'Jan – Dec':'July – June'}</div></div>
+        <div class="cs-item"><div class="cs-label">Leave Types</div><div class="cs-val">${CFG.leaveTypes.length} types configured</div></div>
+        <div class="cs-item"><div class="cs-label">Holidays</div><div class="cs-val">${CFG.holidays.length} holidays</div></div>
+        <div class="cs-item"><div class="cs-label">Admin</div><div class="cs-val">${CFG.adminName}</div></div>
+        <div class="cs-item"><div class="cs-label">Features</div><div class="cs-val">${[CFG.enableWFH&&'WFH',CFG.enableOD&&'OD',CFG.enableCompOff&&'Comp-Off'].filter(Boolean).join(' · ')}</div></div>
+      </div>
+      <div style="margin-top:16px;padding:12px 14px;background:var(--brand-light);border-radius:8px;font-size:13px;color:var(--brand)">
+        💡 You can change any setting later from the <strong>Settings</strong> page without losing data.
+      </div>`;
+  }
+
+  panel.innerHTML = `
+    <div class="wp-header">
+      <div class="wp-step-tag">Step ${wizStep + 1} of ${STEPS.length} — ${s.icon} ${s.label}</div>
+      <div class="wp-title">${title}</div>
+      <div class="wp-desc">${desc}</div>
+    </div>
+    <div class="wp-body">${body}</div>
+    <div class="wp-footer">
+      <button class="btn btn-ghost ${wizStep===0?'':''}${wizStep===0?'style="visibility:hidden"':''}">
+        ${wizStep > 0 ? `<button class="btn btn-ghost" onclick="wizBack()">← Back</button>` : '<span></span>'}
+      </button>
+      ${wizStep < STEPS.length - 1
+        ? `<button class="btn btn-primary btn-big" onclick="wizNext()">Continue →</button>`
+        : `<button class="btn btn-primary btn-big" onclick="launch()" style="background:var(--green)">🚀 Launch My HR System</button>`
+      }
+    </div>`;
+
+  // Post-render actions
+  if (s.id === 'identity') {
+    renderLivePreview();
+    document.getElementById('wAppName').addEventListener('input', renderLivePreview);
+  }
+  if (s.id === 'leavetypes') renderWizLtList();
+  if (s.id === 'holidays') renderWizHolList();
+}
+
+function renderLivePreview() {
+  const name = document.getElementById('wAppName')?.value || CFG.appName;
+  const icon = document.getElementById('wAppIcon')?.value || CFG.appIcon;
+  const color = CFG.brandColor;
+  const el = document.getElementById('livePreview');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="preview-topbar" style="background:${color}">
+      <div class="preview-logo-dot">${icon}</div>
+      <div class="preview-app-name">${name || 'HR Portal'}</div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-sidebar-mini">
+        <div class="preview-nav-item active" style="background:${color}"></div>
+        <div class="preview-nav-item"></div>
+        <div class="preview-nav-item"></div>
+        <div class="preview-nav-item"></div>
+      </div>
+      <div class="preview-content-mini">
+        <div class="preview-stat-row">
+          <div class="preview-stat-card"><div class="preview-stat-dot" style="background:${color}"></div><div class="preview-stat-bar" style="background:${color}"></div></div>
+          <div class="preview-stat-card"><div class="preview-stat-dot" style="background:#059669"></div><div class="preview-stat-bar" style="background:#059669"></div></div>
+          <div class="preview-stat-card"><div class="preview-stat-dot" style="background:#D97706"></div><div class="preview-stat-bar" style="background:#D97706"></div></div>
+        </div>
+        <div style="height:50px;background:var(--bg);border-radius:6px;border:1px solid var(--border)"></div>
+      </div>
+    </div>`;
+}
+
+function pickColor(hex, swatchEl) {
+  CFG.brandColor = hex;
+  document.querySelectorAll('.cp-swatch').forEach(s => s.classList.remove('selected'));
+  if (swatchEl) swatchEl.classList.add('selected');
+  document.getElementById('wCustomColor') && (document.getElementById('wCustomColor').value = hex);
+  applyTheme();
+  renderLivePreview();
+}
+
+function applyTheme() {
+  const r = document.documentElement;
+  r.style.setProperty('--brand', CFG.brandColor);
+  // Compute dark variant
+  r.style.setProperty('--brand-dark', shadeColor(CFG.brandColor, -15));
+  r.style.setProperty('--brand-light', hexToRgba(CFG.brandColor, 0.1));
+  r.style.setProperty('--brand-mid',   hexToRgba(CFG.brandColor, 0.3));
+}
+
+function shadeColor(hex, pct) {
+  let num = parseInt(hex.replace('#',''), 16);
+  let r = Math.min(255, Math.max(0, (num >> 16) + pct));
+  let g = Math.min(255, Math.max(0, ((num >> 8) & 0xFF) + pct));
+  let b = Math.min(255, Math.max(0, (num & 0xFF) + pct));
+  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+function hexToRgba(hex, a) {
+  let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function tog(id, key) {
+  const el = document.getElementById(id);
+  el.classList.toggle('on');
+  CFG[key] = el.classList.contains('on');
+}
+
+// Leave type wizard list
+function renderWizLtList() {
+  const el = document.getElementById('wLtList');
+  if (!el) return;
+  el.innerHTML = CFG.leaveTypes.map((lt, i) => `
+    <div class="lt-item">
+      <input class="fi" value="${lt.name}" oninput="CFG.leaveTypes[${i}].name=this.value" placeholder="Leave name" style="font-size:13px;padding:7px 10px">
+      <input class="fi" value="${lt.short}" maxlength="5" oninput="CFG.leaveTypes[${i}].short=this.value" placeholder="Code" style="font-size:13px;padding:7px 10px;text-transform:uppercase">
+      <input class="fi" type="number" value="${lt.days}" min="1" max="365" oninput="CFG.leaveTypes[${i}].days=parseInt(this.value)||0" style="font-size:13px;padding:7px 10px">
+      <select class="fs" onchange="CFG.leaveTypes[${i}].carryFwd=this.value==='y'" style="font-size:12px;padding:7px 8px"><option value="y" ${lt.carryFwd?'selected':''}>CF ✓</option><option value="n" ${!lt.carryFwd?'selected':''}>CF ✗</option></select>
+      <button class="lt-del" onclick="delLT(${i})">✕</button>
+    </div>`).join('');
+}
+
+function addLeaveType() {
+  CFG.leaveTypes.push({ name:'New Leave', short:'NL', days:5, carryFwd:false, encash:false, halfDay:true });
+  renderWizLtList();
+}
+
+function delLT(i) {
+  CFG.leaveTypes.splice(i, 1);
+  renderWizLtList();
+}
+
+// Holiday wizard list
+function renderWizHolList() {
+  const el = document.getElementById('wHolList');
+  if (!el) return;
+  el.innerHTML = CFG.holidays.map((h, i) => `
+    <div class="hol-item">
+      <input class="fi" type="date" value="${h.date}" oninput="CFG.holidays[${i}].date=this.value" style="font-size:12px;padding:6px 8px">
+      <input class="fi" value="${h.name}" oninput="CFG.holidays[${i}].name=this.value" placeholder="Holiday name" style="font-size:13px;padding:6px 8px">
+      <select class="fs" onchange="CFG.holidays[${i}].type=this.value" style="font-size:12px;padding:6px 8px;min-width:100px">
+        <option value="national" ${h.type==='national'?'selected':''}>National</option>
+        <option value="optional" ${h.type==='optional'?'selected':''}>Optional</option>
+        <option value="company"  ${h.type==='company'?'selected':''}>Company</option>
+      </select>
+      <button class="lt-del" onclick="delHol(${i})">✕</button>
+    </div>`).join('');
+}
+
+function addHoliday() {
+  CFG.holidays.push({ date: '2026-01-01', name: 'New Holiday', type: 'company' });
+  renderWizHolList();
+}
+
+function delHol(i) {
+  CFG.holidays.splice(i, 1);
+  renderWizHolList();
+}
+
+function wizNext() {
+  // Collect data per step
+  const s = STEPS[wizStep];
+  if (s.id === 'identity') {
+    CFG.appName = document.getElementById('wAppName')?.value || CFG.appName;
+    CFG.appIcon  = document.getElementById('wAppIcon')?.value || CFG.appIcon;
+    CFG.tagline  = document.getElementById('wTagline')?.value || '';
+    if (!CFG.appName.trim()) { toast('Please enter an app name','err'); return; }
+  }
+  if (s.id === 'company') {
+    CFG.companyName = document.getElementById('wCoName')?.value || CFG.companyName;
+    CFG.fy          = document.getElementById('wFY')?.value    || CFG.fy;
+    CFG.weekend     = document.getElementById('wWeekend')?.value || CFG.weekend;
+    CFG.state       = document.getElementById('wState')?.value || CFG.state;
+    CFG.country     = document.getElementById('wCountry')?.value || CFG.country;
+    CFG.industry    = document.getElementById('wIndustry')?.value;
+    CFG.empCount    = parseInt(document.getElementById('wEmpCount')?.value) || 0;
+    if (!CFG.companyName.trim()) { toast('Please enter company name','err'); return; }
+  }
+  if (s.id === 'policies') {
+    CFG.noticePeriodDays = parseInt(document.getElementById('wNotice')?.value) || 1;
+    CFG.maxLeavesAtOnce  = parseInt(document.getElementById('wMaxLeave')?.value) || 10;
+  }
+  if (s.id === 'admin') {
+    CFG.adminName  = document.getElementById('wAdminName')?.value || CFG.adminName;
+    CFG.adminEmail = document.getElementById('wAdminEmail')?.value || CFG.adminEmail;
+    CFG.adminId    = document.getElementById('wAdminId')?.value || 'EMP001';
+    CFG.adminDesig = document.getElementById('wAdminDesig')?.value || '';
+    const p1 = document.getElementById('wAdminPass')?.value;
+    const p2 = document.getElementById('wAdminPass2')?.value;
+    if (!CFG.adminName.trim()) { toast('Please enter admin name','err'); return; }
+    if (p1 && p1 !== p2) { toast('Passwords do not match','err'); return; }
+  }
+  saveConfig();
+  wizStep = Math.min(wizStep + 1, STEPS.length - 1);
+  renderWizardStep();
+}
+
+function wizBack() {
+  wizStep = Math.max(wizStep - 1, 0);
+  renderWizardStep();
+}
+
+function launch() {
+  CFG.isConfigured = true;
+  saveConfig();
+  applyTheme();
+  document.getElementById('setupWizard').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  document.title = CFG.appName;
+  bootstrapApp();
+  toast(`Welcome to ${CFG.appName}! 🎉`, 'ok');
+}
+
+function reconfigure() {
+  CFG.isConfigured = false;
+  saveConfig();
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('setupWizard').style.display = 'flex';
+  wizStep = 0;
+  renderWizardStep();
+}
+
+// ══════════════════════════════════════════════
+//  APP BOOTSTRAP
+// ══════════════════════════════════════════════
+function bootstrapApp() {
+  // Apply names
+  document.getElementById('sbAppName').textContent   = CFG.appName;
+  document.getElementById('sbCoName').textContent    = CFG.companyName;
+  document.getElementById('sbIcon').textContent      = CFG.appIcon;
+  document.title = CFG.appName;
+  document.getElementById('appUserAv').textContent   = initials(CFG.adminName);
+  document.getElementById('appUserName').textContent = CFG.adminName;
+  document.getElementById('appUserRole').textContent = CFG.adminDesig || 'HR Admin';
+
+  // FY label
+  const fyLbl = CFG.fy === 'apr' ? `FY ${new Date().getFullYear()-1}–${String(new Date().getFullYear()).slice(-2)}`
+                : `FY ${new Date().getFullYear()}`;
+  document.getElementById('fyLabel').textContent = fyLbl;
+
+  populateLeaveTypeDropdowns();
+  renderDashStats();
+  renderLeaveBalance();
+  renderRecentRequests();
+  renderAttendanceTb();
+  renderApprovals();
+  renderTeam();
+  renderHolidays();
+  renderReports();
+  renderSettings();
+  renderQA();
+  renderFyBarChart();
+  renderApplyBal();
+  renderApplyHolidays();
+  renderTeamCal();
+  startClock();
+  goPage('dashboard', document.querySelector('.sb-item.active'));
+}
+
+function initials(name) {
+  return (name || 'HR').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function populateLeaveTypeDropdowns() {
+  ['mLeaveType','inlineType','filterType'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id === 'filterType') el.innerHTML = '<option value="">All Types</option>';
+    else el.innerHTML = '';
+    CFG.leaveTypes.forEach(lt => {
+      const o = document.createElement('option');
+      o.value = lt.short;
+      o.textContent = `${lt.name} (${lt.short})${id !== 'filterType' ? ` — ${lt.days - Math.floor(lt.days*0.5)} left` : ''}`;
+      el.appendChild(o);
+    });
+  });
+}
+
+// Stats
+function renderDashStats() {
+  const el = document.getElementById('dashStats');
+  if (!el) return;
+  const totalBal = CFG.leaveTypes.reduce((s, lt) => s + lt.days, 0);
+  el.innerHTML = `
+    <div class="sc"><div class="sc-icon d">🌴</div><div class="sc-val">${Math.floor(totalBal * 0.5)}</div><div class="sc-lbl">Leaves Available</div><div class="sc-sub">of ${totalBal} entitled</div></div>
+    <div class="sc g"><div class="sc-icon g">📅</div><div class="sc-val">24</div><div class="sc-lbl">Days Present</div><div class="sc-sub">96% attendance</div></div>
+    <div class="sc a"><div class="sc-icon a">✅</div><div class="sc-val">8</div><div class="sc-lbl">Leaves Taken</div><div class="sc-sub">YTD</div></div>
+    <div class="sc r"><div class="sc-icon r">⏳</div><div class="sc-val">1</div><div class="sc-lbl">Pending</div><div class="sc-sub">Awaiting approval</div></div>`;
+}
+
+// Leave Balance
+function renderLeaveBalance(containerId = 'leaveBalCont') {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const colors = ['#2563EB','#7C3AED','#059669','#D97706','#DC2626','#DB2777','#0891B2'];
+  el.innerHTML = CFG.leaveTypes.map((lt, i) => {
+    const used = Math.floor(lt.days * 0.45);
+    const rem = lt.days - used;
+    const pct = Math.round((used / lt.days) * 100);
+    const col = colors[i % colors.length];
+    return `<div class="lb-item">
+      <div class="lb-dot" style="background:${col}"></div>
+      <div class="lb-name">${lt.short}</div>
+      <div class="lb-track"><div class="lb-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="lb-nums"><div class="lb-left" style="color:${col}">${rem}</div><div style="font-size:10px">of ${lt.days}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// Recent requests
+const SAMPLE_LEAVES = [
+  { id:'L001', type:'CL', from:'10 Jan', to:'12 Jan', days:3, applied:'08 Jan', reason:'Family function', status:'app' },
+  { id:'L002', type:'SL', from:'05 Feb', to:'06 Feb', days:2, applied:'05 Feb', reason:'Fever',          status:'app' },
+  { id:'L003', type:'PL', from:'20 Mar', to:'22 Mar', days:3, applied:'10 Mar', reason:'Vacation',        status:'pen' },
+  { id:'L004', type:'CL', from:'01 Mar', to:'01 Mar', days:1, applied:'28 Feb', reason:'Personal work',   status:'rej' },
+];
+
+function renderRecentRequests() {
+  const el = document.getElementById('recentTb');
+  if (!el) return;
+  const BADGE = { app:'<span class="badge app">✓ Approved</span>', pen:'<span class="badge pen">⏳ Pending</span>', rej:'<span class="badge rej">✕ Rejected</span>' };
+  el.innerHTML = SAMPLE_LEAVES.slice(0,4).map(l =>
+    `<tr><td><span class="badge wfh">${l.type}</span></td><td>${l.from} – ${l.to}</td><td>${l.days}</td><td>${BADGE[l.status]}</td></tr>`
+  ).join('');
+}
+
+function renderAttendanceTb() {
+  const el = document.getElementById('attTb');
+  if (!el) return;
+  const rows = [
+    {d:'02 Mar',day:'Mon',st:'present',in:'09:05',out:'18:30',hrs:'9h 25m',ot:'1h 25m'},
+    {d:'03 Mar',day:'Tue',st:'present',in:'09:12',out:'18:15',hrs:'9h 03m',ot:'1h 03m'},
+    {d:'04 Mar',day:'Wed',st:'wfh',    in:'09:30',out:'17:45',hrs:'8h 15m',ot:'—'},
+    {d:'05 Mar',day:'Thu',st:'present',in:'09:00',out:'18:00',hrs:'9h 00m',ot:'1h 00m'},
+    {d:'06 Mar',day:'Fri',st:'present',in:'09:20',out:'18:10',hrs:'8h 50m',ot:'50m'},
+    {d:'09 Mar',day:'Mon',st:'leave',  in:'—',    out:'—',    hrs:'—',     ot:'—'},
+    {d:'10 Mar',day:'Tue',st:'present',in:'09:08',out:'18:20',hrs:'9h 12m',ot:'1h 12m'},
+    {d:'13 Mar',day:'Fri',st:'present',in:'09:15',out:'—',    hrs:'6h 27m',ot:'—'},
+  ];
+  const SB = { present:`<span class="badge app">Present</span>`, wfh:`<span class="badge wfh">🏠 WFH</span>`, leave:`<span class="badge pen">Leave</span>` };
+  el.innerHTML = rows.map(r =>
+    `<tr><td>${r.d}</td><td>${r.day}</td><td>${SB[r.st]}</td><td>${r.in}</td><td>${r.out}</td><td>${r.hrs}</td><td style="color:var(--brand);font-weight:500">${r.ot}</td></tr>`
+  ).join('');
+}
+
+function renderApprovals() {
+  const el = document.getElementById('apvCards');
+  if (!el) return;
+  const pending = [
+    { name:'Anjali Mehta', id:'EMP003', dept:'Engineering', type:'CL', from:'14 Mar', to:'16 Mar', days:3, reason:'Personal' },
+    { name:'Ravi Shankar', id:'EMP007', dept:'Finance',     type:'PL', from:'20 Mar', to:'22 Mar', days:3, reason:'Vacation' },
+    { name:'Pooja Singh',  id:'EMP012', dept:'HR',          type:'SL', from:'13 Mar', to:'13 Mar', days:1, reason:'Medical'  },
+  ];
+  el.innerHTML = pending.map((a,i) => `
+    <div class="acard" id="ac${i}">
+      <div class="acard-head">
+        <div class="acard-user">
+          <div class="ua" style="background:${['#2563EB','#7C3AED','#059669'][i]}">${initials(a.name)}</div>
+          <div><div style="font-size:13px;font-weight:600">${a.name}</div><div style="font-size:11px;color:var(--muted)">${a.id} · ${a.dept}</div></div>
+        </div>
+        <div class="acard-actions">
+          <button class="aact apv" onclick="approveLv(${i})">✓ Approve</button>
+          <button class="aact rej" onclick="rejectLv(${i})">✕ Reject</button>
+        </div>
+      </div>
+      <div class="acard-meta">
+        <span>📋 ${a.type}</span>
+        <span>📅 ${a.from} – ${a.to}</span>
+        <span>🗓️ ${a.days} day${a.days>1?'s':''}</span>
+        <span>💬 ${a.reason}</span>
+      </div>
+    </div>`).join('');
+
+  const mtb = document.getElementById('myLeavesTb');
+  if (mtb) {
+    const BD = {app:`<span class="badge app">Approved</span>`,pen:`<span class="badge pen">Pending</span>`,rej:`<span class="badge rej">Rejected</span>`};
+    mtb.innerHTML = SAMPLE_LEAVES.map(l =>
+      `<tr><td style="font-size:11px;color:var(--light)">${l.id}</td><td><span class="badge wfh">${l.type}</span></td><td>${l.from}</td><td>${l.to}</td><td>${l.days}</td><td>${l.applied}</td><td>${BD[l.status]}</td>
+      <td>${l.status==='pen'?`<button class="aact rej" onclick="toast('Cancelled','ok')">Cancel</button>`:'—'}</td></tr>`
+    ).join('');
+  }
+}
+
+function approveLv(i) {
+  const c = document.getElementById('ac'+i);
+  if (c) { c.style.opacity='0.5'; c.style.pointerEvents='none'; c.querySelector('.acard-actions').innerHTML='<span class="badge app">Approved</span>'; }
+  let b = document.getElementById('appBadge');
+  if (b) b.textContent = Math.max(0, parseInt(b.textContent)-1);
+  toast('Leave approved','ok');
+}
+
+function rejectLv(i) {
+  const c = document.getElementById('ac'+i);
+  if (c) { c.style.opacity='0.5'; c.style.pointerEvents='none'; c.querySelector('.acard-actions').innerHTML='<span class="badge rej">Rejected</span>'; }
+  let b = document.getElementById('appBadge');
+  if (b) b.textContent = Math.max(0, parseInt(b.textContent)-1);
+  toast('Leave rejected','err');
+}
+
+function renderTeam() {
+  const el = document.getElementById('empGrid');
+  if (!el) return;
+  const members = [
+    {name:'Priya Sharma',  dept:'Product',     status:'app', col:'#2563EB'},
+    {name:'Rahul Verma',   dept:'Finance',     status:'app', col:'#7C3AED'},
+    {name:'Sneha Nair',    dept:'Engineering', status:'wfh', col:'#059669'},
+    {name:'Arjun Patel',   dept:'Operations',  status:'rej', col:'#DC2626'},
+    {name:'Divya Reddy',   dept:'HR',          status:'app', col:'#DB2777'},
+    {name:'Kiran Kumar',   dept:'Engineering', status:'app', col:'#0891B2'},
+    {name:'Meena Iyer',    dept:'Product',     status:'app', col:'#D97706'},
+    {name:'Suresh Babu',   dept:'Engineering', status:'wfh', col:'#7C3AED'},
+    {name:'Asha Pillai',   dept:'Finance',     status:'app', col:'#059669'},
+  ];
+  const SB = {app:`<span class="badge app">Present</span>`,wfh:`<span class="badge wfh">WFH</span>`,rej:`<span class="badge rej">Absent</span>`};
+  el.innerHTML = members.map(m => `
+    <div class="emp-card">
+      <div class="emp-av" style="background:${m.col}">${initials(m.name)}</div>
+      <div style="flex:1">
+        <div class="emp-name">${m.name}</div>
+        <div class="emp-dept">${m.dept}</div>
+      </div>
+      ${SB[m.status]}
+    </div>`).join('');
+}
+
+function renderHolidays() {
+  const nat = document.getElementById('nationalHolList');
+  const opt = document.getElementById('optHolList');
+  if (!nat || !opt) return;
+
+  const title = document.getElementById('nationalHolTitle');
+  if (title) title.textContent = `National Holidays — ${CFG.country || 'India'}`;
+
+  const fmt = (d) => {
+    const dt = new Date(d);
+    return { day: dt.getDate(), month: dt.toLocaleString('en',{month:'short'}) };
+  };
+
+  const nationals = CFG.holidays.filter(h => h.type === 'national');
+  const optionals = CFG.holidays.filter(h => h.type !== 'national');
+
+  nat.innerHTML = (nationals.length ? nationals : CFG.holidays.slice(0,6)).map(h => {
+    const {day,month} = fmt(h.date);
+    return `<div class="hol-row">
+      <div class="hol-badge"><div class="hol-day">${day}</div><div class="hol-month">${month}</div></div>
+      <div><div class="hol-name">${h.name}</div><div class="hol-type">Compulsory</div></div>
+    </div>`;
+  }).join('');
+
+  opt.innerHTML = optionals.map(h => {
+    const {day,month} = fmt(h.date);
+    return `<div class="hol-row">
+      <div class="hol-badge" style="background:var(--amber-bg);border-color:#FDE68A"><div class="hol-day" style="color:var(--amber)">${day}</div><div class="hol-month">${month}</div></div>
+      <div><div class="hol-name">${h.name}</div><div class="hol-type">Optional</div></div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">No optional holidays configured</div>';
+}
+
+function renderReports() {
+  const ld = document.getElementById('repLeaveDist');
+  const da = document.getElementById('repDeptAtt');
+  if (!ld || !da) return;
+
+  const colors = ['#2563EB','#7C3AED','#059669','#D97706','#DC2626'];
+  const total = 1842;
+  const chunks = CFG.leaveTypes.slice(0,5).map((lt,i) => ({ name:lt.short, count: Math.floor(total / (i+1.5)) }));
+
+  ld.innerHTML = chunks.map((c,i) => `
+    <div class="progress-row">
+      <div class="pr-label">${c.name}</div>
+      <div class="pr-track"><div class="pr-fill" style="width:${Math.round(c.count/chunks[0].count*100)}%;background:${colors[i%colors.length]}"></div></div>
+      <div class="pr-val">${c.count}</div>
+    </div>`).join('');
+
+  const depts = ['Engineering','HR','Finance','Operations','Product','Sales'];
+  const atts  = [96,98,94,91,97,89];
+  da.innerHTML = depts.map((d,i) => `
+    <div class="progress-row">
+      <div class="pr-label">${d}</div>
+      <div class="pr-track"><div class="pr-fill" style="width:${atts[i]}%;background:${atts[i]>=95?'var(--green)':atts[i]>=90?'var(--brand)':'var(--red)'}"></div></div>
+      <div class="pr-val" style="color:${atts[i]>=95?'var(--green)':atts[i]>=90?'var(--brand)':'var(--red)'}">${atts[i]}%</div>
+    </div>`).join('');
+}
+
+function renderSettings() {
+  const el = document.getElementById('settLtList');
+  if (!el) return;
+  el.innerHTML = CFG.leaveTypes.map((lt,i) => `
+    <div class="lt-config-item">
+      <div>
+        <div style="font-size:13px;font-weight:600">${lt.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${lt.short} · ${lt.carryFwd?'Carry-forward':'No carry-forward'}</div>
+      </div>
+      <input class="lt-config-num" type="number" value="${lt.days}" oninput="CFG.leaveTypes[${i}].days=parseInt(this.value)||0">
+      <span style="font-size:12px;color:var(--muted)">days/yr</span>
+    </div>`).join('');
+
+  const sn = document.getElementById('settAppName');  if (sn) sn.value = CFG.appName;
+  const sc = document.getElementById('settCoName');   if (sc) sc.value = CFG.companyName;
+  const si = document.getElementById('settIcon');     if (si) si.value = CFG.appIcon;
+  const sf = document.getElementById('settFY');       if (sf) sf.value = CFG.fy;
+  const sw = document.getElementById('settWeekend');  if (sw) sw.value = CFG.weekend;
+
+  const cp = document.getElementById('settColorPicker');
+  if (cp) {
+    const swatches = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0F172A'];
+    cp.innerHTML = swatches.map(c => `<div class="cp-swatch ${CFG.brandColor===c?'selected':''}" style="background:${c}" onclick="pickColor('${c}',this)"></div>`).join('')
+      + `<input type="color" class="color-input" value="${CFG.brandColor}" oninput="pickColor(this.value,null)">`;
+  }
+}
+
+function renderQA() {
+  const el = document.getElementById('qaGrid');
+  if (!el) return;
+  const actions = [
+    {ico:'✈️', lbl:'Apply Leave',   sub:'All types', fn:"openM('mApply')"},
+  ];
+  if (CFG.enableWFH)     actions.push({ico:'🏠', lbl:'WFH Request',  sub:'Work from home', fn:"toast('WFH applied!','ok')"});
+  if (CFG.enableOD)      actions.push({ico:'🚗', lbl:'On Duty (OD)', sub:'Field / client',  fn:"toast('OD applied!','ok')"});
+  if (CFG.enableCompOff) actions.push({ico:'🔄', lbl:'Comp-Off',     sub:'Compensatory off',fn:"toast('Comp-off applied!','ok')"});
+
+  el.innerHTML = actions.slice(0,4).map(a =>
+    `<button class="qa-btn" onclick="${a.fn}">
+      <div class="qa-ico">${a.ico}</div>
+      <div><div class="qa-lbl">${a.lbl}</div><div class="qa-sub">${a.sub}</div></div>
+    </button>`).join('');
+}
+
+function renderFyBarChart() {
+  const el   = document.getElementById('fyBarChart');
+  const lbls = document.getElementById('fyBarLabels');
+  if (!el) return;
+  const months = CFG.fy === 'apr'
+    ? ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar']
+    : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const vals = [95,92,97,91,94,96,88,93,95,97,94,96];
+  el.innerHTML = vals.map((v,i) => `
+    <div class="att-bar-col">
+      <div style="font-size:10px;color:${v>=95?'var(--green)':v>=90?'var(--brand)':'var(--red)'};font-weight:700">${v}</div>
+      <div class="att-bar-fill" style="height:${v}%;background:${v>=95?'var(--green)':v>=90?'var(--brand)':'var(--red)'}"></div>
+    </div>`).join('');
+  if (lbls) lbls.innerHTML = months.map(m => `<span>${m}</span>`).join('');
+  document.getElementById('fyAttPct').textContent = '94%';
+}
+
+function renderApplyBal() {
+  renderLeaveBalance('applyBalSummary');
+}
+
+function renderApplyHolidays() {
+  const el = document.getElementById('applyHolidays');
+  if (!el) return;
+  const upcoming = CFG.holidays.filter(h => h.date >= '2026-03-13').slice(0, 4);
+  const fmt = d => { const dt = new Date(d); return {day:dt.getDate(), month:dt.toLocaleString('en',{month:'short'})}; };
+  el.innerHTML = upcoming.map(h => {
+    const {day,month} = fmt(h.date);
+    return `<div class="hol-row">
+      <div class="hol-badge"><div class="hol-day">${day}</div><div class="hol-month">${month}</div></div>
+      <div><div class="hol-name">${h.name}</div><div class="hol-type">${h.type==='national'?'National':'Optional'}</div></div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:13px">No upcoming holidays</div>';
+}
+
+function renderTeamCal() {
+  const el = document.getElementById('teamCalCont');
+  if (!el) return;
+  el.innerHTML = [
+    {name:'Anjali Mehta', type:'CL', dates:'14–16 Mar', st:'pen'},
+    {name:'Ravi Shankar',  type:'PL', dates:'20–22 Mar', st:'pen'},
+    {name:'Pooja Singh',   type:'SL', dates:'13 Mar',    st:'app'},
+  ].map(e => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:8px">
+      <div class="ua" style="background:var(--brand)">${initials(e.name)}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${e.name}</div><div style="font-size:12px;color:var(--muted)">${e.type} · ${e.dates}</div></div>
+      <span class="badge ${e.st}">${e.st==='app'?'Approved':'Pending'}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  NAVIGATION & UI
+// ══════════════════════════════════════════════
+function goPage(id, el) {
+  document.querySelectorAll('.pv').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n => n.classList.remove('active'));
+  const pv = document.getElementById('pv-'+id);
+  if (pv) pv.classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = { dashboard:'Dashboard', attendance:'Attendance', myleaves:'My Leaves', apply:'Apply Leave', approvals:'Approvals', team:'Team', holidays:'Holidays', reports:'Reports', settings:'Settings' };
+  document.getElementById('pageTitle').textContent = titles[id] || id;
+}
+
+function swTab(el, id) {
+  const parent = el.closest('.tabs');
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const panel = parent.nextElementSibling;
+  panel.querySelectorAll('[id]').forEach(c => { if (c.id === id) c.style.display=''; else c.style.display='none'; });
+}
+
+function openM(id) { document.getElementById(id).classList.add('open'); }
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.moverlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+function punch(type) {
+  const txt = document.getElementById('punchTxt');
+  if (type === 'out') { toast('Punched out. Have a great evening! 🌙','ok'); if (txt) txt.textContent = 'Punched Out at ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+  else toast('Break started ☕','wrn');
+}
+
+function submitLeave() { closeM('mApply'); toast('Leave application submitted! ✅','ok'); }
+function submitInlineLeave() { toast('Leave application submitted! ✅','ok'); }
+
+function liveUpdateName() {
+  const n = document.getElementById('settAppName')?.value;
+  const c = document.getElementById('settCoName')?.value;
+  if (n) { document.getElementById('sbAppName').textContent = n; document.title = n; }
+  if (c) document.getElementById('sbCoName').textContent = c;
+}
+
+function liveUpdateIcon() {
+  const v = document.getElementById('settIcon')?.value;
+  if (v) document.getElementById('sbIcon').textContent = v;
+}
+
+function saveSettings() {
+  CFG.appName     = document.getElementById('settAppName')?.value || CFG.appName;
+  CFG.companyName = document.getElementById('settCoName')?.value  || CFG.companyName;
+  CFG.appIcon     = document.getElementById('settIcon')?.value    || CFG.appIcon;
+  CFG.fy          = document.getElementById('settFY')?.value      || CFG.fy;
+  CFG.weekend     = document.getElementById('settWeekend')?.value || CFG.weekend;
+  saveConfig();
+  bootstrapApp();
+  toast('Settings saved! Changes applied instantly.','ok');
+}
+
+function startClock() {
+  function tick() {
+    const el = document.getElementById('liveClock');
+    if (el) el.textContent = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  tick();
+  setInterval(tick, 1000);
+  const d = document.getElementById('liveDate');
+  if (d) d.textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+function toast(msg, type='') {
+  const z = document.getElementById('toastZone');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = `<span>${type==='ok'?'✓':type==='err'?'✕':'⚠'}</span> ${msg}`;
+  z.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  if (CFG.isConfigured) {
+    document.getElementById('setupWizard').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootstrapApp();
+  } else {
+    renderWizardStep();
+  }
+});
+</script>
+</body>
+</html>
