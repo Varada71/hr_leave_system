@@ -564,12 +564,12 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
      SETUP WIZARD  (shown on first run)
 ================================================================ -->
 <!-- LOGIN SCREEN -->
-<div id="loginScreen" style="display:none;min-height:100vh;background:var(--sidebar-bg);position:relative;overflow:hidden;flex-direction:column">
+<div id="loginScreen" style="display:none;min-height:100vh;background:var(--sidebar-bg);position:relative;overflow:hidden">
   <div style="position:absolute;inset:0;background:radial-gradient(ellipse 600px 400px at 20% 20%,rgba(37,99,235,0.28),transparent 70%),radial-gradient(ellipse 400px 400px at 80% 80%,rgba(245,158,11,0.12),transparent 70%);pointer-events:none"></div>
   <div style="position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
     <div style="background:white;border-radius:18px;width:420px;max-width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.3);overflow:hidden;animation:panelIn 0.35s ease">
       <div style="background:var(--brand);padding:28px 32px 24px;text-align:center">
-        <div id="loginIcon" style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;overflow:hidden">🏢</div>
+        <div id="loginIcon" style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px">🏢</div>
         <div id="loginAppName" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:white;margin-bottom:3px">HR Portal</div>
         <div id="loginCoName"  style="font-size:12px;color:rgba(255,255,255,0.6)">Your Company</div>
       </div>
@@ -624,7 +624,7 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
   <nav class="sidebar">
     <div class="sb-header">
       <div class="sb-brand">
-        <div class="sb-icon" id="sbIcon" style="overflow:hidden;padding:0">🏢</div>
+        <div class="sb-icon" id="sbIcon">🏢</div>
         <div>
           <div class="sb-name" id="sbAppName">HR Portal</div>
           <div class="sb-co"   id="sbCoName">Your Company</div>
@@ -1172,7 +1172,7 @@ const DEFAULT_CONFIG = {
   adminDesig: 'HR Manager',
   adminPass:   'admin123',
 
-  companyLogo: '',   // base64 data URL of uploaded company logo
+  companyLogo: '',
   isConfigured: false,
   // ── Employees (added during wizard Step 11 or via Settings) ──
   employees: [],
@@ -1232,100 +1232,65 @@ function renderWizardSidebar() {
 // ================================================================
 //  SECTION 4 — WIZARD PANEL RENDER  (all 12 steps)
 // ================================================================
-// ── Permission step body builder (no nested template literals) ──
+
+// Permission step body builder - no nested template literals
 function buildPermBody() {
   var onClass  = CFG.permissionEnabled ? 'on' : '';
   var condOpen = CFG.permissionEnabled ? 'open' : '';
-
-  // Build leave type options
   var ltOpts = '';
   CFG.leaveTypes.forEach(function(lt) {
-    var sel = CFG.permExcessFrom === lt.short ? ' selected' : '';
-    ltOpts += '<option value="' + lt.short + '"' + sel + '>' + lt.name + ' (' + lt.short + ')</option>';
+    ltOpts += '<option value="'+lt.short+'"'+(CFG.permExcessFrom===lt.short?' selected':'')+'>'+lt.name+' ('+lt.short+')</option>';
   });
-  ltOpts += '<option value="LWP"' + (CFG.permExcessFrom === 'LWP' ? ' selected' : '') + '>LWP (Loss of Pay)</option>';
-
-  var excessModeOpts =
-    '<option value="leave"'      + (CFG.permExcessMode === 'leave'      ? ' selected' : '') + '>Deduct from Leave Balance (CL / LWP)</option>' +
-    '<option value="next_month"' + (CFG.permExcessMode === 'next_month' ? ' selected' : '') + '>Reduce from Next Month\'s Permission Balance</option>' +
-    '<option value="both"'       + (CFG.permExcessMode === 'both'       ? ' selected' : '') + '>Next Month first \u2014 then Leave Balance if still excess</option>';
-
-  var leaveSecStyle     = CFG.permExcessMode === 'next_month' ? 'display:none' : '';
-  var nextMonthSecStyle = CFG.permExcessMode === 'leave'      ? 'display:none' : '';
-  var nextMonthLimit    = CFG.permMonthlyHours > 1 ? CFG.permMonthlyHours - 1 : 0;
-
-  // Use data attributes for onclick to avoid quote-escaping nightmare
-  var h = '';
-  h += '<div class="toggle-group">';
-  h +=   '<div class="toggle-row ' + onClass + '" id="tr-perm">';
-  h +=     '<div><div class="toggle-label">Enable Permission Policy</div>';
-  h +=     '<div class="toggle-desc">Employees can take short leaves / early exits within a monthly hour limit</div></div>';
-  h +=     '<button class="toggle ' + onClass + '" id="togPerm" onclick="togWiz(\'togPerm\',\'permissionEnabled\',\'tr-perm\');toggleCondWiz(\'cond-perm\')"></button>';
-  h +=   '</div>';
-  h += '</div>';
-
-  h += '<div class="cond-section ' + condOpen + '" id="cond-perm">';
-  h +=   '<div style="padding-top:14px">';
-
-  h +=   '<div class="fg-row">';
-  h +=     '<div class="fg"><label class="fl">Monthly Permission Limit <span class="req">*</span></label>';
-  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermHrs" value="' + CFG.permMonthlyHours + '" min="0.5" max="24" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hrs/month</span></div>';
-  h +=       '<div class="hint">Total permission hours allowed per employee per calendar month</div>';
-  h +=     '</div>';
-  h +=     '<div class="fg"><label class="fl">Min Permission Duration</label>';
-  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermMin" value="' + CFG.permMinDuration + '" min="15" max="240" step="15"><span class="fi-unit">minutes</span></div>';
-  h +=     '</div>';
-  h +=   '</div>';
-
-  h +=   '<div class="fg-row">';
-  h +=     '<div class="fg"><label class="fl">Max Single Permission Duration</label>';
-  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermMax" value="' + CFG.permMaxSingle + '" min="30" max="480" step="30"><span class="fi-unit">minutes</span></div>';
-  h +=       '<div class="hint">Requests longer than this must be filed as a full leave application</div>';
-  h +=     '</div>';
-  h +=     '<div class="fg"><label class="fl">Max Permissions Per Month (count)</label>';
-  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermCount" value="' + CFG.permMaxCount + '" min="1" max="30"><span class="fi-unit">times</span></div>';
-  h +=     '</div>';
-  h +=   '</div>';
-
-  h +=   '<div class="sec-lbl">Excess Permission \u2192 Deduction Rules</div>';
-  h +=   '<div class="info-box red"><div class="ib-icon">\u26a0\ufe0f</div>';
-  h +=     '<div><strong>Your Policy:</strong> Permissions above the permissible limit can be deducted from Leave Balance <strong>or</strong> adjusted against next month\'s permission balance.</div>';
-  h +=   '</div>';
-
-  h +=   '<div class="fg">';
-  h +=     '<label class="fl">How to Handle Excess Permission?</label>';
-  h +=     '<select class="fs" id="wPermExcessMode" onchange="togglePermExcessMode(this.value)">' + excessModeOpts + '</select>';
-  h +=     '<div class="hint info">\ud83d\udca1 "Next Month" option carries the excess as a debt \u2014 the employee\'s next month permission limit is reduced by the excess hours taken.</div>';
-  h +=   '</div>';
-
-  h +=   '<div id="permLeaveDeductSection" style="' + leaveSecStyle + '">';
-  h +=     '<div class="fg-row">';
-  h +=       '<div class="fg"><label class="fl">Deduct Excess From Leave Type</label>';
-  h +=         '<select class="fs" id="wPermFrom">' + ltOpts + '</select>';
-  h +=       '</div>';
-  h +=       '<div class="fg"><label class="fl">Working Hours Per Day</label>';
-  h +=         '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermWrkHrs" value="' + CFG.permWorkHrsDay + '" min="4" max="12" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hours</span></div>';
-  h +=       '</div>';
-  h +=     '</div>';
-  h +=   '</div>';
-
-  h +=   '<div id="permNextMonthSection" style="' + nextMonthSecStyle + '">';
-  h +=     '<div class="fg">';
-  h +=       '<label class="fl">Max Excess Hours Carried to Next Month</label>';
-  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermNextMonthMax" value="' + CFG.permNextMonthMaxDeduct + '" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div>';
-  h +=       '<div class="hint">If excess exceeds this limit, the remaining is deducted from Leave Balance.</div>';
-  h +=     '</div>';
-  h +=     '<div class="info-box amber"><div class="ib-icon">\ud83d\udccb</div>';
-  h +=       '<div><strong>Example:</strong> Limit = <strong>' + CFG.permMonthlyHours + 'h</strong>/month. Employee takes <strong>' + (CFG.permMonthlyHours + 1) + 'h</strong> \u2192 1h excess debt \u2192 next month limit = <strong>' + nextMonthLimit + 'h</strong>.</div>';
-  h +=     '</div>';
-  h +=   '</div>';
-
-  h +=   '<div class="info-box blue" id="permCalcBoxWiz"><div class="ib-icon">\ud83e\uddee</div><div id="permCalcTxtWiz">Loading\u2026</div></div>';
-  h +=   '</div>';
-  h += '</div>';
+  ltOpts += '<option value="LWP"'+(CFG.permExcessFrom==='LWP'?' selected':'')+'>LWP (Loss of Pay)</option>';
+  var lsStyle = CFG.permExcessMode==='next_month'?'display:none':'';
+  var nmStyle = CFG.permExcessMode==='leave'?'display:none':'';
+  var exOpts =
+    '<option value="leave"'+(CFG.permExcessMode==='leave'?' selected':'')+'>Deduct from Leave Balance</option>'+
+    '<option value="next_month"'+(CFG.permExcessMode==='next_month'?' selected':'')+'>Reduce from Next Month Balance</option>'+
+    '<option value="both"'+(CFG.permExcessMode==='both'?' selected':'')+'>Next Month first, then Leave Balance</option>';
+  var h='';
+  h+='<div class="toggle-group">';
+  h+='<div class="toggle-row '+onClass+'" id="tr-perm">';
+  h+='<div><div class="toggle-label">Enable Permission Policy</div>';
+  h+='<div class="toggle-desc">Employees can take short leaves within a monthly hour limit</div></div>';
+  h+='<button class="toggle '+onClass+'" id="togPerm" onclick="togWiz(\x27togPerm\x27,\x27permissionEnabled\x27,\x27tr-perm\x27);toggleCondWiz(\x27cond-perm\x27)"></button>';
+  h+='</div></div>';
+  h+='<div class="cond-section '+condOpen+'" id="cond-perm"><div style="padding-top:14px">';
+  h+='<div class="fg-row">';
+  h+='<div class="fg"><label class="fl">Monthly Permission Limit <span class="req">*</span></label>';
+  h+='<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermHrs" value="'+CFG.permMonthlyHours+'" min="0.5" max="24" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hrs/month</span></div>';
+  h+='<div class="hint">Total permission hours allowed per employee per calendar month</div></div>';
+  h+='<div class="fg"><label class="fl">Min Permission Duration</label>';
+  h+='<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermMin" value="'+CFG.permMinDuration+'" min="15" max="240" step="15"><span class="fi-unit">minutes</span></div></div>';
+  h+='</div>';
+  h+='<div class="fg-row">';
+  h+='<div class="fg"><label class="fl">Max Single Permission Duration</label>';
+  h+='<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermMax" value="'+CFG.permMaxSingle+'" min="30" max="480" step="30"><span class="fi-unit">minutes</span></div>';
+  h+='<div class="hint">Requests longer than this require a full leave application</div></div>';
+  h+='<div class="fg"><label class="fl">Max Permissions Per Month</label>';
+  h+='<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermCount" value="'+CFG.permMaxCount+'" min="1" max="30"><span class="fi-unit">times</span></div></div>';
+  h+='</div>';
+  h+='<div class="sec-lbl">Excess Permission &rarr; Deduction Rules</div>';
+  h+='<div class="info-box red"><div class="ib-icon">&#9888;&#65039;</div>';
+  h+='<div><strong>Your Policy:</strong> Permissions above the limit are deducted from Leave Balance or next month balance.</div></div>';
+  h+='<div class="fg"><label class="fl">How to Handle Excess Permission?</label>';
+  h+='<select class="fs" id="wPermExcessMode" onchange="togglePermExcessMode(this.value)">'+exOpts+'</select>';
+  h+='<div class="hint info">Next Month option carries excess as a debt against next month permission limit.</div></div>';
+  h+='<div id="permLeaveDeductSection" style="'+lsStyle+'">';
+  h+='<div class="fg-row">';
+  h+='<div class="fg"><label class="fl">Deduct Excess From Leave Type</label>';
+  h+='<select class="fs" id="wPermFrom">'+ltOpts+'</select></div>';
+  h+='<div class="fg"><label class="fl">Working Hours Per Day</label>';
+  h+='<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermWrkHrs" value="'+CFG.permWorkHrsDay+'" min="4" max="12" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hours</span></div>';
+  h+='</div></div></div>';
+  h+='<div id="permNextMonthSection" style="'+nmStyle+'">';
+  h+='<div class="fg"><label class="fl">Max Excess Hours to Next Month</label>';
+  h+='<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermNextMonthMax" value="'+CFG.permNextMonthMaxDeduct+'" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div>';
+  h+='<div class="hint">Excess above this deducts from Leave Balance instead.</div></div></div>';
+  h+='<div class="info-box blue" id="permCalcBoxWiz"><div class="ib-icon">&#129518;</div><div id="permCalcTxtWiz">Loading...</div></div>';
+  h+='</div></div>';
   return h;
 }
-
 function renderWizardStep() {
   renderWizardSidebar();
   const panel = document.getElementById('wizardPanel');
@@ -1337,6 +1302,10 @@ function renderWizardStep() {
     title = 'Give your app an identity';
     desc  = 'Your employees will see this name and branding every day. Make it yours.';
     const sw = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0F172A'];
+    var _swHtml = sw.map(function(col){
+      return '<div class="cp-swatch '+(CFG.brandColor===col?'selected':'')
+        +'" style="background:'+col+'" onclick="pickColor(\''+col+'\',this)"></div>';
+    }).join('');
     body = `
       <div class="fg-row">
         <div class="fg"><label class="fl">App Name <span class="req">*</span></label>
@@ -1352,7 +1321,7 @@ function renderWizardStep() {
       </div>
       <div class="fg"><label class="fl">Brand Color</label>
         <div class="color-picker-row">
-          ${sw.map(c=>`<div class="cp-swatch ${CFG.brandColor===c?'selected':''}" style="background:${c}" onclick="pickColor('${c}',this)"></div>`).join('')}
+          ${_swHtml}
           <div class="custom-color-wrap">
             <input type="color" class="color-input" id="wCustomColor" value="${CFG.brandColor}" oninput="pickColor(this.value,null)">
             <span style="font-size:12px;color:var(--muted)">Custom</span>
@@ -1367,6 +1336,14 @@ function renderWizardStep() {
   // ── STEP 2: COMPANY INFO ─────────────────────────────────────
   else if (s.id === 'company') {
     title = 'Tell us about your company';
+    // Pre-compute select options to avoid nested template literals
+    var _indOpts  = ['IT / Software','BPO / KPO','Manufacturing','BFSI / Finance','Healthcare','Retail / E-Commerce','Education','Government / PSU','Startup','Other'].map(function(x){return '<option'+(CFG.industry===x?' selected':'')+'>'+x+'</option>';}).join('');
+    var _cntOpts  = ['India','UAE','USA','UK','Singapore','Australia','Canada','Other'].map(function(x){return '<option'+(CFG.country===x?' selected':'')+'>'+x+'</option>';}).join('');
+    var _stOpts   = ['Maharashtra','Karnataka','Tamil Nadu','Delhi NCR','Telangana','Gujarat','West Bengal','Kerala','Rajasthan','Punjab','Other'].map(function(x){return '<option'+(CFG.state===x?' selected':'')+'>'+x+'</option>';}).join('');
+    var _fyOpts   = '<option value="apr"'+(CFG.fy==='apr'?' selected':'')+'>April - March (India)</option><option value="jan"'+(CFG.fy==='jan'?' selected':'')+'>January - December</option><option value="jul"'+(CFG.fy==='jul'?' selected':'')+'>July - June</option>';
+    var _wkOpts   = '<option value="both"'+(CFG.weekend==='both'?' selected':'')+'>Sat &amp; Sun Off</option><option value="alt"'+(CFG.weekend==='alt'?' selected':'')+'>Alt Saturday Off</option><option value="sun"'+(CFG.weekend==='sun'?' selected':'')+'>Sunday Only</option><option value="none"'+(CFG.weekend==='none'?' selected':'')+'>No Fixed Weekend</option>';
+    var _payOpts  = ['Monthly (1st-31st)','Monthly (26th-25th)','Bi-weekly','Weekly'].map(function(x){return '<option>'+x+'</option>';}).join('');
+
     desc  = 'Configures region-specific holidays, compliance defaults, and financial year.';
     body = `
       <div class="fg-row">
@@ -1394,9 +1371,7 @@ function renderWizardStep() {
       <div class="fg-row">
         <div class="fg"><label class="fl">Financial Year</label>
           <select class="fs" id="wFY">
-            <option value="apr" ${CFG.fy==='apr'?'selected':''}>April – March (India)</option>
-            <option value="jan" ${CFG.fy==='jan'?'selected':''}>January – December</option>
-            <option value="jul" ${CFG.fy==='jul'?'selected':''}>July – June</option>
+            ${_fyOpts}
           </select>
         </div>
         <div class="fg"><label class="fl">Weekend Policy</label>
@@ -1410,7 +1385,7 @@ function renderWizardStep() {
       </div>
       <div class="fg-row">
         <div class="fg"><label class="fl">Payroll Cycle</label>
-          <select class="fs">${['Monthly (1st–31st)','Monthly (26th–25th)','Bi-weekly','Weekly'].map(p=>`<option>${p}</option>`).join('')}</select>
+          <select class="fs">${_payOpts}</select>
         </div>
         <div class="fg"><label class="fl">Total Employees</label>
           <input class="fi" id="wEmpCount" type="number" placeholder="e.g. 50" value="${CFG.empCount||''}">
@@ -1418,17 +1393,16 @@ function renderWizardStep() {
       </div>
       <div class="fg">
         <label class="fl">Company Logo</label>
-        <div style="display:flex;align-items:flex-start;gap:16px">
-          <div id="wLogoPreview" style="width:80px;height:80px;border-radius:var(--radius-sm);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--bg);flex-shrink:0;overflow:hidden">
-            ${CFG.companyLogo ? '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain">' : '🏢'}
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div id="wLogoPreview" style="width:72px;height:72px;border-radius:var(--radius-sm);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--bg);flex-shrink:0;overflow:hidden">
+            ${CFG.companyLogo ? '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain">' : '&#x1F3E2;'}
           </div>
           <div style="flex:1">
-            <label style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:var(--brand-light);color:var(--brand);border:1.5px dashed var(--brand-mid);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s" onmouseover="this.style.background='var(--brand)';this.style.color='white'" onmouseout="this.style.background='var(--brand-light)';this.style.color='var(--brand)'">
-              📁 Upload Logo
+            <label style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:var(--brand-light);color:var(--brand);border:1.5px dashed var(--brand-mid);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer">
+              &#x1F4C1; Upload Logo
               <input type="file" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
             </label>
-            <div class="hint" style="margin-top:8px">PNG, JPG or SVG. Recommended: square, at least 128×128px. Shown in the login screen and sidebar.</div>
-            ${CFG.companyLogo ? '<button onclick="CFG.companyLogo=\'\';document.getElementById(\'wLogoPreview\').innerHTML=\'🏢\';toast(\'Logo removed\',\'wrn\')" style="margin-top:8px;padding:5px 12px;background:var(--red-bg);color:var(--red);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✕ Remove Logo</button>' : ''}
+            <div class="hint" style="margin-top:8px">PNG, JPG or SVG. Square image recommended (128x128px min). Appears on login screen and sidebar.</div>
           </div>
         </div>
       </div>`;
@@ -1653,11 +1627,10 @@ function renderWizardStep() {
   // ── STEP 10: PERMISSION POLICY ───────────────────────────────
   else if (s.id === 'permissions') {
     title = 'Permission policy';
-    desc  = "Configure the monthly permission hour limit. Any excess is automatically deducted from the employee's leave balance.";
+    desc  = "Configure the monthly permission hour limit. Excess is deducted from leave balance or next month's limit.";
     body  = buildPermBody();
   }
 
-  // ── STEP 11: ADD EMPLOYEES ──────────────────────────────────
   else if (s.id === 'employees') {
     title = 'Add your employees';
     desc  = 'Add employees who will use this system. Fill in personal details, contact info, family details, and login credentials. You can add/edit more from Settings → Employees anytime.';
@@ -1674,6 +1647,8 @@ function renderWizardStep() {
   // ── STEP 12: ADMIN ACCOUNT ───────────────────────────────────
   else if (s.id === 'admin') {
     title = 'Create the admin account';
+    var _adDepts = ['HR','Administration','Management','IT','Finance'].map(function(d){return '<option>'+d+'</option>';}).join('');
+
     desc  = 'This will be the super-admin who can manage the entire system.';
     body = `
       <div class="fg-row">
@@ -1682,7 +1657,7 @@ function renderWizardStep() {
       </div>
       <div class="fg-row">
         <div class="fg"><label class="fl">Email <span class="req">*</span></label><input class="fi" id="wAdminEmail" type="email" placeholder="admin@company.com" value="${CFG.adminEmail}"></div>
-        <div class="fg"><label class="fl">Department</label><select class="fs" id="wAdminDept">${['HR','Administration','Management','IT','Finance'].map(d=>`<option>${d}</option>`).join('')}</select></div>
+        <div class="fg"><label class="fl">Department</label><select class="fs" id="wAdminDept">${_adDepts}</select></div>
       </div>
       <div class="fg-row">
         <div class="fg"><label class="fl">Password</label><input class="fi" type="password" placeholder="Min 8 characters" id="wAdminPass"></div>
@@ -1704,7 +1679,7 @@ function renderWizardStep() {
     body = `
       <div class="success-icon">✨</div>
       <div class="config-summary">
-        <div class="cs-item"><div class="cs-label">App Name</div><div class="cs-val">${CFG.companyLogo?'<img src="'+CFG.companyLogo+'" style="width:20px;height:20px;object-fit:contain;border-radius:4px;vertical-align:middle">':CFG.appIcon} ${CFG.appName}</div></div>
+        <div class="cs-item"><div class="cs-label">App Name</div><div class="cs-val">${CFG.appIcon} ${CFG.appName}</div></div>
         <div class="cs-item"><div class="cs-label">Company</div><div class="cs-val">${CFG.companyName}</div></div>
         <div class="cs-item"><div class="cs-label">Country / State</div><div class="cs-val">${CFG.country} • ${CFG.state}</div></div>
         <div class="cs-item"><div class="cs-label">Financial Year</div><div class="cs-val">${CFG.fy==='apr'?'April – March':CFG.fy==='jan'?'Jan – Dec':'July – June'}</div></div>
@@ -1723,19 +1698,19 @@ function renderWizardStep() {
   }
 
   // ── RENDER PANEL ─────────────────────────────────────────────
-  panel.innerHTML = `
-    <div class="wp-header">
-      <div class="wp-step-tag">Step ${wizStep+1} of ${STEPS.length} — ${s.icon} ${s.label}</div>
-      <div class="wp-title">${title}</div>
-      <div class="wp-desc">${desc}</div>
-    </div>
-    <div class="wp-body">${body}</div>
-    <div class="wp-footer">
-      ${wizStep > 0 ? `<button class="btn btn-ghost" onclick="wizBack()">← Back</button>` : '<span></span>'}
-      ${wizStep < STEPS.length-1
-        ? `<button class="btn btn-primary btn-big" onclick="wizNext()">Continue →</button>`
-        : `<button class="btn btn-primary btn-big" onclick="launch()" style="background:var(--green)">🚀 Launch My HR System</button>`}
-    </div>`;
+  var _bb = wizStep > 0
+    ? '<button class="btn btn-ghost" onclick="wizBack()">&larr; Back</button>'
+    : '<span></span>';
+  var _nb = wizStep < STEPS.length - 1
+    ? '<button class="btn btn-primary btn-big" onclick="wizNext()">Continue &rarr;</button>'
+    : '<button class="btn btn-primary btn-big" onclick="launch()" style="background:var(--green)">Launch</button>';
+  panel.innerHTML =
+    '<div class="wp-header">'+
+    '<div class="wp-step-tag">Step '+(wizStep+1)+' of '+STEPS.length+' &mdash; '+s.icon+' '+s.label+'</div>'+
+    '<div class="wp-title">'+title+'</div>'+
+    '<div class="wp-desc">'+desc+'</div></div>'+
+    '<div class="wp-body">'+body+'</div>'+
+    '<div class="wp-footer">'+_bb+_nb+'</div>';
 
   // Post-render hooks
   if (s.id === 'identity')   { renderLivePreview(); document.getElementById('wAppName')?.addEventListener('input', renderLivePreview); }
@@ -1788,37 +1763,33 @@ function pickColor(hex, swatchEl) {
   renderLivePreview();
 }
 
+
 function handleLogoUpload(input) {
-  const file = input.files[0];
+  var file = input.files[0];
   if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { toast('Logo must be under 2MB','err'); return; }
-  const reader = new FileReader();
+  if (file.size > 2*1024*1024) { toast('Logo must be under 2MB','err'); return; }
+  var reader = new FileReader();
   reader.onload = function(e) {
     CFG.companyLogo = e.target.result;
-    const preview = document.getElementById('wLogoPreview');
-    if (preview) preview.innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain">';
-    // Also update login screen logo if visible
+    var p = document.getElementById('wLogoPreview');
+    if (p) p.innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain">';
     updateLogoEverywhere();
-    toast('Logo uploaded ✓','ok');
+    toast('Logo uploaded','ok');
   };
   reader.readAsDataURL(file);
 }
 
 function updateLogoEverywhere() {
-  // Login screen logo
-  const loginLogo = document.getElementById('loginLogoImg');
-  const loginIcon = document.getElementById('loginIcon');
+  var li = document.getElementById('loginIcon');
+  var si = document.getElementById('sbIcon');
   if (CFG.companyLogo) {
-    if (loginLogo) loginLogo.src = CFG.companyLogo;
-    if (loginIcon) loginIcon.innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain;border-radius:10px">';
+    if (li) li.innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain;border-radius:10px">';
+    if (si) si.innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain;border-radius:7px">';
   } else {
-    if (loginIcon) loginIcon.textContent = CFG.appIcon || '🏢';
+    if (li) li.textContent = CFG.appIcon || '&#x1F3E2;';
+    if (si) si.textContent = CFG.appIcon || '&#x1F3E2;';
   }
-  // Sidebar logo
-  const sbLogo = document.getElementById('sbLogoImg');
-  if (CFG.companyLogo && sbLogo) sbLogo.src = CFG.companyLogo;
 }
-
 function applyTheme() {
   const r = document.documentElement;
   r.style.setProperty('--brand',       CFG.brandColor);
@@ -2068,13 +2039,17 @@ function renderWizEmpList() {
 }
 
 function addEmpRow() {
-  // Open the add modal pre-filled with a suggested Employee No.
   const nextId = 'WT/' + new Date().getFullYear() + '/EMP' + String(CFG.employees.length + 2).padStart(3,'0');
-  // Temporarily push a blank record so modal idx works
-  _addingFromWizard = true;
-  openAddEmpModal(undefined, nextId);
+  CFG.employees.push({
+    name:'', empId:nextId, dept:'Engineering', role:'Employee',
+    desig:'', dob:'', doj:'', fatherName:'', motherName:'',
+    maritalStatus:'Un-Married', marriageDate:'', spouseName:'', spouseDob:'',
+    children:[], qualification:'', experience:'',
+    contact1:'', contact2:'', workEmail:'',
+    password:'', loginEnabled:true, color: randColor()
+  });
+  renderWizEmpList();
 }
-let _addingFromWizard = false;
 
 function addChild(empIdx) {
   if (!CFG.employees[empIdx].children) CFG.employees[empIdx].children = [];
@@ -2263,7 +2238,7 @@ function bootstrapApp() {
   document.getElementById('sbAppName').textContent   = CFG.appName;
   document.getElementById('sbCoName').textContent    = CFG.companyName;
   if (CFG.companyLogo) {
-    document.getElementById('sbIcon').innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain;border-radius:8px">';
+    document.getElementById('sbIcon').innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain;border-radius:7px">';
   } else {
     document.getElementById('sbIcon').textContent = CFG.appIcon;
   }
@@ -2880,9 +2855,8 @@ function doLogout() {
 
 function showLoginScreen() {
   applyTheme();
-  // Hide all other screens
-  document.getElementById('setupWizard').style.display = 'none';
-  document.getElementById('mainApp').style.display     = 'none';
+  document.getElementById('setupWizard').style.display='none';
+  document.getElementById('mainApp').style.display='none';
   // Update login screen branding
   const li = document.getElementById('loginIcon');
   const la = document.getElementById('loginAppName');
@@ -2891,7 +2865,7 @@ function showLoginScreen() {
   if(la) la.textContent = CFG.appName;
   if(lc) lc.textContent = CFG.companyName;
   document.getElementById('loginScreen').style.display = 'flex';
-  document.title = CFG.appName + ' — Login';
+  document.title = CFG.appName + ' - Login';
   updateLogoEverywhere();
 }
 
@@ -2940,15 +2914,15 @@ function renderModalChildren() {
     </div>`).join('');
 }
 
-function openAddEmpModal(idx, prefilledId) {
-  const isEdit = idx !== undefined && idx >= 0;
+function openAddEmpModal(idx) {
+  const isEdit = idx !== undefined;
   document.getElementById('mEmpTitle').textContent = isEdit ? 'Edit Employee' : 'Add Employee';
   document.getElementById('mEmpIdx').value = isEdit ? idx : -1;
   const e = isEdit ? CFG.employees[idx] : {};
   _modalChildren = isEdit ? JSON.parse(JSON.stringify(e.children||[])) : [];
 
   document.getElementById('mEmpName').value       = e.name        || '';
-  document.getElementById('mEmpId').value         = e.empId       || prefilledId || ('WT/'+new Date().getFullYear()+'/EMP'+String(CFG.employees.length+2).padStart(3,'0'));
+  document.getElementById('mEmpId').value         = e.empId       || ('WT/'+new Date().getFullYear()+'/EMP'+String(CFG.employees.length+2).padStart(3,'0'));
   document.getElementById('mEmpDOB').value        = e.dob         || '';
   document.getElementById('mEmpDOJ').value        = e.doj         || '';
   document.getElementById('mEmpDesig').value      = e.desig       || '';
@@ -3025,10 +2999,6 @@ function saveEmpModal() {
   closeM('mEmp');
   renderSettEmpTable();
   renderTeam();
-  // If called from wizard step, refresh the wizard list too
-  const wizList = document.getElementById('wEmpList');
-  if (wizList) renderWizEmpList();
-  _addingFromWizard = false;
   toast(idx>=0 ? emp.name+' updated ✓' : emp.name+' added ✓', 'ok');
 }
 
@@ -3309,50 +3279,12 @@ window.addEventListener('DOMContentLoaded', () => {
   if (CFG.isConfigured) {
     showLoginScreen();
   } else {
-    // Show wizard, hide everything else
-    document.getElementById('setupWizard').style.display  = 'flex';
-    document.getElementById('loginScreen').style.display  = 'none';
-    document.getElementById('mainApp').style.display      = 'none';
+    document.getElementById('setupWizard').style.display='flex';
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('mainApp').style.display='none';
     renderWizardStep();
   }
 });
 </script>
 </body>
-</html>// Employee roster in wizard — clean summary list, edit via modal
-function renderWizEmpList() {
-  const el = document.getElementById('wEmpList');
-  if (!el) return;
-
-  if (!CFG.employees.length) {
-    el.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px;background:var(--bg);border-radius:var(--radius-sm);border:1.5px dashed var(--border)">No employees added yet. Click ＋ Add Employee above to add team members.</div>';
-    const lbl = document.getElementById('empCountLbl');
-    if (lbl) lbl.textContent = 0;
-    return;
-  }
-
-  const colors = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0D9488'];
-  el.innerHTML = CFG.employees.map((e, i) => {
-    const col = e.color || colors[i % colors.length];
-    const initl = (e.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    const hasLogin = e.loginEnabled !== false;
-    const hasDOB   = e.dob ? '🎂' : '';
-    const hasDOJ   = e.doj ? '📅' : '';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:white;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:all 0.15s" onclick="openAddEmpModal('+i+')" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'">'
-      + '<div style="width:36px;height:36px;border-radius:9px;background:'+col+';display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;flex-shrink:0">'+initl+'</div>'
-      + '<div style="flex:1">'
-      +   '<div style="font-size:13px;font-weight:600">'+(e.name||'Unnamed')+'</div>'
-      +   '<div style="font-size:11px;color:var(--muted)">'+(e.empId||'')+(e.dept?' · '+e.dept:'')+(e.desig?' · '+e.desig:'')+'</div>'
-      + '</div>'
-      + '<div style="display:flex;align-items:center;gap:6px">'
-      +   (hasDOB ? '<span title="Birthday set" style="font-size:13px">🎂</span>' : '')
-      +   (hasDOJ ? '<span title="DOJ set" style="font-size:13px">📅</span>' : '')
-      +   '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:'+(hasLogin?'var(--green-bg)':'var(--red-bg)')+';color:'+(hasLogin?'var(--green)':'var(--red)')+'">'+( hasLogin?'Login ✓':'Login ✗')+'</span>'
-      +   '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--brand-light);color:var(--brand)">✏️ Edit</span>'
-      +   '<button class="lt-del" onclick="event.stopPropagation();delEmp('+i+')" title="Remove">✕</button>'
-      + '</div>'
-      + '</div>';
-  }).join('');
-
-  const lbl = document.getElementById('empCountLbl');
-  if (lbl) lbl.textContent = CFG.employees.length;
-}
+</html>
