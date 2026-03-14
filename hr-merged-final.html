@@ -1232,6 +1232,100 @@ function renderWizardSidebar() {
 // ================================================================
 //  SECTION 4 — WIZARD PANEL RENDER  (all 12 steps)
 // ================================================================
+// ── Permission step body builder (no nested template literals) ──
+function buildPermBody() {
+  var onClass  = CFG.permissionEnabled ? 'on' : '';
+  var condOpen = CFG.permissionEnabled ? 'open' : '';
+
+  // Build leave type options
+  var ltOpts = '';
+  CFG.leaveTypes.forEach(function(lt) {
+    var sel = CFG.permExcessFrom === lt.short ? ' selected' : '';
+    ltOpts += '<option value="' + lt.short + '"' + sel + '>' + lt.name + ' (' + lt.short + ')</option>';
+  });
+  ltOpts += '<option value="LWP"' + (CFG.permExcessFrom === 'LWP' ? ' selected' : '') + '>LWP (Loss of Pay)</option>';
+
+  var excessModeOpts =
+    '<option value="leave"'      + (CFG.permExcessMode === 'leave'      ? ' selected' : '') + '>Deduct from Leave Balance (CL / LWP)</option>' +
+    '<option value="next_month"' + (CFG.permExcessMode === 'next_month' ? ' selected' : '') + '>Reduce from Next Month\'s Permission Balance</option>' +
+    '<option value="both"'       + (CFG.permExcessMode === 'both'       ? ' selected' : '') + '>Next Month first \u2014 then Leave Balance if still excess</option>';
+
+  var leaveSecStyle     = CFG.permExcessMode === 'next_month' ? 'display:none' : '';
+  var nextMonthSecStyle = CFG.permExcessMode === 'leave'      ? 'display:none' : '';
+  var nextMonthLimit    = CFG.permMonthlyHours > 1 ? CFG.permMonthlyHours - 1 : 0;
+
+  // Use data attributes for onclick to avoid quote-escaping nightmare
+  var h = '';
+  h += '<div class="toggle-group">';
+  h +=   '<div class="toggle-row ' + onClass + '" id="tr-perm">';
+  h +=     '<div><div class="toggle-label">Enable Permission Policy</div>';
+  h +=     '<div class="toggle-desc">Employees can take short leaves / early exits within a monthly hour limit</div></div>';
+  h +=     '<button class="toggle ' + onClass + '" id="togPerm" onclick="togWiz(\'togPerm\',\'permissionEnabled\',\'tr-perm\');toggleCondWiz(\'cond-perm\')"></button>';
+  h +=   '</div>';
+  h += '</div>';
+
+  h += '<div class="cond-section ' + condOpen + '" id="cond-perm">';
+  h +=   '<div style="padding-top:14px">';
+
+  h +=   '<div class="fg-row">';
+  h +=     '<div class="fg"><label class="fl">Monthly Permission Limit <span class="req">*</span></label>';
+  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermHrs" value="' + CFG.permMonthlyHours + '" min="0.5" max="24" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hrs/month</span></div>';
+  h +=       '<div class="hint">Total permission hours allowed per employee per calendar month</div>';
+  h +=     '</div>';
+  h +=     '<div class="fg"><label class="fl">Min Permission Duration</label>';
+  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermMin" value="' + CFG.permMinDuration + '" min="15" max="240" step="15"><span class="fi-unit">minutes</span></div>';
+  h +=     '</div>';
+  h +=   '</div>';
+
+  h +=   '<div class="fg-row">';
+  h +=     '<div class="fg"><label class="fl">Max Single Permission Duration</label>';
+  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermMax" value="' + CFG.permMaxSingle + '" min="30" max="480" step="30"><span class="fi-unit">minutes</span></div>';
+  h +=       '<div class="hint">Requests longer than this must be filed as a full leave application</div>';
+  h +=     '</div>';
+  h +=     '<div class="fg"><label class="fl">Max Permissions Per Month (count)</label>';
+  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermCount" value="' + CFG.permMaxCount + '" min="1" max="30"><span class="fi-unit">times</span></div>';
+  h +=     '</div>';
+  h +=   '</div>';
+
+  h +=   '<div class="sec-lbl">Excess Permission \u2192 Deduction Rules</div>';
+  h +=   '<div class="info-box red"><div class="ib-icon">\u26a0\ufe0f</div>';
+  h +=     '<div><strong>Your Policy:</strong> Permissions above the permissible limit can be deducted from Leave Balance <strong>or</strong> adjusted against next month\'s permission balance.</div>';
+  h +=   '</div>';
+
+  h +=   '<div class="fg">';
+  h +=     '<label class="fl">How to Handle Excess Permission?</label>';
+  h +=     '<select class="fs" id="wPermExcessMode" onchange="togglePermExcessMode(this.value)">' + excessModeOpts + '</select>';
+  h +=     '<div class="hint info">\ud83d\udca1 "Next Month" option carries the excess as a debt \u2014 the employee\'s next month permission limit is reduced by the excess hours taken.</div>';
+  h +=   '</div>';
+
+  h +=   '<div id="permLeaveDeductSection" style="' + leaveSecStyle + '">';
+  h +=     '<div class="fg-row">';
+  h +=       '<div class="fg"><label class="fl">Deduct Excess From Leave Type</label>';
+  h +=         '<select class="fs" id="wPermFrom">' + ltOpts + '</select>';
+  h +=       '</div>';
+  h +=       '<div class="fg"><label class="fl">Working Hours Per Day</label>';
+  h +=         '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermWrkHrs" value="' + CFG.permWorkHrsDay + '" min="4" max="12" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hours</span></div>';
+  h +=       '</div>';
+  h +=     '</div>';
+  h +=   '</div>';
+
+  h +=   '<div id="permNextMonthSection" style="' + nextMonthSecStyle + '">';
+  h +=     '<div class="fg">';
+  h +=       '<label class="fl">Max Excess Hours Carried to Next Month</label>';
+  h +=       '<div class="fi-unit-wrap"><input class="fi" type="number" id="wPermNextMonthMax" value="' + CFG.permNextMonthMaxDeduct + '" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div>';
+  h +=       '<div class="hint">If excess exceeds this limit, the remaining is deducted from Leave Balance.</div>';
+  h +=     '</div>';
+  h +=     '<div class="info-box amber"><div class="ib-icon">\ud83d\udccb</div>';
+  h +=       '<div><strong>Example:</strong> Limit = <strong>' + CFG.permMonthlyHours + 'h</strong>/month. Employee takes <strong>' + (CFG.permMonthlyHours + 1) + 'h</strong> \u2192 1h excess debt \u2192 next month limit = <strong>' + nextMonthLimit + 'h</strong>.</div>';
+  h +=     '</div>';
+  h +=   '</div>';
+
+  h +=   '<div class="info-box blue" id="permCalcBoxWiz"><div class="ib-icon">\ud83e\uddee</div><div id="permCalcTxtWiz">Loading\u2026</div></div>';
+  h +=   '</div>';
+  h += '</div>';
+  return h;
+}
+
 function renderWizardStep() {
   renderWizardSidebar();
   const panel = document.getElementById('wizardPanel');
@@ -1559,75 +1653,8 @@ function renderWizardStep() {
   // ── STEP 10: PERMISSION POLICY ───────────────────────────────
   else if (s.id === 'permissions') {
     title = 'Permission policy';
-    desc  = 'Configure the monthly permission hour limit. Any excess is automatically deducted from the employee\'s leave balance.';
-    body = `
-      <div class="toggle-group">
-        <div class="toggle-row ${CFG.permissionEnabled?'on':''}" id="tr-perm">
-          <div><div class="toggle-label">Enable Permission Policy</div><div class="toggle-desc">Employees can take short leaves / early exits within a monthly hour limit</div></div>
-          <button class="toggle ${CFG.permissionEnabled?'on':''}" id="togPerm" onclick="togWiz('togPerm','permissionEnabled','tr-perm');toggleCondWiz('cond-perm')"></button>
-        </div>
-      </div>
-      <div class="cond-section ${CFG.permissionEnabled?'open':''}" id="cond-perm">
-        <div style="padding-top:14px">
-          <div class="fg-row">
-            <div class="fg"><label class="fl">Monthly Permission Limit <span class="req">*</span></label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermHrs" value="${CFG.permMonthlyHours}" min="0.5" max="24" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hrs/month</span></div>
-              <div class="hint">Total permission hours allowed per employee per calendar month</div>
-            </div>
-            <div class="fg"><label class="fl">Min Permission Duration</label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermMin" value="${CFG.permMinDuration}" min="15" max="240" step="15"><span class="fi-unit">minutes</span></div>
-            </div>
-          </div>
-          <div class="fg-row">
-            <div class="fg"><label class="fl">Max Single Permission Duration</label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermMax" value="${CFG.permMaxSingle}" min="30" max="480" step="30"><span class="fi-unit">minutes</span></div>
-              <div class="hint">Requests longer than this must be filed as a full leave application</div>
-            </div>
-            <div class="fg"><label class="fl">Max Permissions Per Month (count)</label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermCount" value="${CFG.permMaxCount}" min="1" max="30"><span class="fi-unit">times</span></div>
-            </div>
-          </div>
-          <div class="sec-lbl">Excess Permission → Deduction Rules</div>
-          <div class="info-box red"><div class="ib-icon">⚠️</div>
-            <div><strong>Your Policy:</strong> Any permissions above the permissible limit can be deducted from the Leave Balance <strong>or</strong> adjusted against the next month's permission balance.</div></div>
-
-          <div class="fg">
-            <label class="fl">How to Handle Excess Permission?</label>
-            <select class="fs" id="wPermExcessMode" onchange="togglePermExcessMode(this.value)">
-              <option value="leave"      ${CFG.permExcessMode==='leave'      ?'selected':''}>Deduct from Leave Balance (CL / LWP)</option>
-              <option value="next_month" ${CFG.permExcessMode==='next_month' ?'selected':''}>Reduce from Next Month's Permission Balance</option>
-              <option value="both"       ${CFG.permExcessMode==='both'       ?'selected':''}>Next Month first — then Leave Balance if still excess</option>
-            </select>
-            <div class="hint info">💡 "Next Month" option carries the excess as a debt — the employee's next month permission limit is reduced by the excess hours taken.</div>
-          </div>
-
-          <div id="permLeaveDeductSection" style="${CFG.permExcessMode==='next_month'?'display:none':''}">
-            <div class="fg-row">
-              <div class="fg"><label class="fl">Deduct Excess From Leave Type</label>
-                <select class="fs" id="wPermFrom">
-                  ${CFG.leaveTypes.map(lt=>`<option value="${lt.short}" ${CFG.permExcessFrom===lt.short?'selected':''}>${lt.name} (${lt.short})</option>`).join('')}
-                  <option value="LWP" ${CFG.permExcessFrom==='LWP'?'selected':''}>LWP (Loss of Pay)</option>
-                </select>
-              </div>
-              <div class="fg"><label class="fl">Working Hours Per Day</label>
-                <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermWrkHrs" value="${CFG.permWorkHrsDay}" min="4" max="12" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hours</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div id="permNextMonthSection" style="${CFG.permExcessMode==='leave'?'display:none':''}">
-            <div class="fg">
-              <label class="fl">Max Excess Hours Carried to Next Month</label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermNextMonthMax" value="${CFG.permNextMonthMaxDeduct}" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div>
-              <div class="hint">If excess exceeds this limit, the remaining is deducted from Leave Balance. Set high (e.g. 8) to always use next month first.</div>
-            </div>
-            <div class="info-box amber"><div class="ib-icon">📋</div>
-              <div><strong>Example:</strong> Employee is allowed <strong>${CFG.permMonthlyHours}h</strong>/month. They take <strong>${CFG.permMonthlyHours+1}h</strong> in March → <strong>1h excess</strong> is carried as debt. In April, their available permission is reduced to <strong>${CFG.permMonthlyHours-1}h</strong> for that month.</div></div>
-          </div>
-
-          <div class="info-box blue" id="permCalcBoxWiz"><div class="ib-icon">🧮</div><div id="permCalcTxtWiz">Loading…</div></div>
-        </div>
-      </div>`;
+    desc  = "Configure the monthly permission hour limit. Any excess is automatically deducted from the employee's leave balance.";
+    body  = buildPermBody();
   }
 
   // ── STEP 11: ADD EMPLOYEES ──────────────────────────────────
