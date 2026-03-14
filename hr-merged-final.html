@@ -950,14 +950,23 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
     </div>
     <input type="hidden" id="mEmpIdx" value="-1">
 
-    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px">Basic Information</div>
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px">Employee Details</div>
     <div class="fg-row">
-      <div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mEmpName" placeholder="e.g. Priya Sharma"></div>
+      <div class="fg"><label class="fl">Employee Name <span class="req">*</span></label><input class="fi" id="mEmpName" placeholder="e.g. Priya Sharma"></div>
       <div class="fg"><label class="fl">Employee No. <span class="req">*</span></label><input class="fi" id="mEmpId" placeholder="WT/2024/EMP001" oninput="this.value=this.value.toUpperCase()"></div>
     </div>
     <div class="fg-row">
-      <div class="fg"><label class="fl">Date of Birth</label><input class="fi" type="date" id="mEmpDOB"></div>
-      <div class="fg"><label class="fl">Date of Joining</label><input class="fi" type="date" id="mEmpDOJ"></div>
+      <div class="fg"><label class="fl">Employee Login ID</label><input class="fi" id="mEmpWorkEmail" type="email" placeholder="name@gmail.com or work email"></div>
+      <div class="fg"><label class="fl">Role / Access Level</label>
+        <select class="fs" id="mEmpRole">
+          <option value="Employee">Employee</option><option value="Manager">Manager</option>
+          <option value="Team Lead">Team Lead</option><option value="HR Admin">HR Admin</option><option value="Director">Director</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">DOB (Date of Birth)</label><input class="fi" type="date" id="mEmpDOB"></div>
+      <div class="fg"><label class="fl">DOJ (Date of Joining)</label><input class="fi" type="date" id="mEmpDOJ"></div>
     </div>
     <div class="fg-row">
       <div class="fg"><label class="fl">Department</label>
@@ -967,17 +976,8 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
       </div>
       <div class="fg"><label class="fl">Designation</label><input class="fi" id="mEmpDesig" placeholder="e.g. Software Engineer"></div>
     </div>
-    <div class="fg-row">
-      <div class="fg"><label class="fl">Role / Access Level</label>
-        <select class="fs" id="mEmpRole">
-          <option value="Employee">Employee</option><option value="Manager">Manager</option>
-          <option value="Team Lead">Team Lead</option><option value="HR Admin">HR Admin</option><option value="Director">Director</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Work Email</label><input class="fi" id="mEmpWorkEmail" type="email" placeholder="name@company.com"></div>
-    </div>
 
-    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Family Information</div>
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Family Details</div>
     <div class="fg-row">
       <div class="fg"><label class="fl">Father's Name</label><input class="fi" id="mEmpFather" placeholder="Father's name"></div>
       <div class="fg"><label class="fl">Mother's Name</label><input class="fi" id="mEmpMother" placeholder="Mother's name"></div>
@@ -1003,12 +1003,12 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
 
     <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Contact & Education</div>
     <div class="fg-row">
-      <div class="fg"><label class="fl">Mobile (Self)</label><input class="fi" id="mEmpMobile" placeholder="Mobile number"></div>
-      <div class="fg"><label class="fl">Emergency Contact</label><input class="fi" id="mEmpContact2" placeholder="Parent / Spouse number"></div>
+      <div class="fg"><label class="fl">Contact 1 (Self)</label><input class="fi" id="mEmpMobile" placeholder="Mobile number"></div>
+      <div class="fg"><label class="fl">Contact 2 (Parents / Spouse)</label><input class="fi" id="mEmpContact2" placeholder="Parent / Spouse number"></div>
     </div>
     <div class="fg-row">
-      <div class="fg"><label class="fl">Qualification</label><input class="fi" id="mEmpQual" placeholder="e.g. B.E., MCA, MBA"></div>
-      <div class="fg"><label class="fl">Total Experience (yrs)</label><input class="fi" type="number" id="mEmpExp" placeholder="e.g. 5"></div>
+      <div class="fg"><label class="fl">Educational Qualification</label><input class="fi" id="mEmpQual" placeholder="e.g. B.E., MCA, MBA"></div>
+      <div class="fg"><label class="fl">Professional Experience (yrs)</label><input class="fi" type="number" id="mEmpExp" placeholder="e.g. 5"></div>
     </div>
 
     <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Login Credentials</div>
@@ -1631,17 +1631,18 @@ function renderWizardStep() {
     body  = buildPermBody();
   }
 
-  else if (s.id === 'employees') {
+    else if (s.id === 'employees') {
     title = 'Add your employees';
-    desc  = 'Add employees who will use this system. Fill in personal details, contact info, family details, and login credentials. You can add/edit more from Settings → Employees anytime.';
-    body = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="font-size:13px;color:var(--muted)"><strong id="empCountLbl">${CFG.employees.length}</strong> employee(s) added</div>
-        <button class="add-lt-btn" onclick="addEmpRow()">＋ Add Employee</button>
-      </div>
-      <div id="wEmpList" style="display:flex;flex-direction:column;gap:10px;max-height:360px;overflow-y:auto;margin-bottom:12px;padding-right:4px"></div>
-      <div class="info-box blue"><div class="ib-icon">🔑</div>
-        <div>Each employee logs in with their <strong>Employee ID + Password</strong>. Birthdays, anniversaries and work anniversaries trigger <strong>personalised greeting messages</strong> on login.</div></div>`;
+    desc  = 'Add employees who will use this system. You can add/edit more from Settings anytime.';
+    body  =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+        '<div style="font-size:13px;color:var(--muted)"><strong id="empCountLbl">' + CFG.employees.length + '</strong> employee(s) added</div>' +
+        '<button class="add-lt-btn" onclick="addEmpRow()">＋ Add Employee</button>' +
+      '</div>' +
+      '<div id="wEmpList" style="display:flex;flex-direction:column;gap:10px;max-height:360px;overflow-y:auto;margin-bottom:12px"></div>' +
+      '<div class="info-box blue"><div class="ib-icon">&#128273;</div>' +
+        '<div>Each employee logs in with their <strong>Employee ID + Password</strong>. Birthdays, anniversaries and work anniversaries trigger <strong>personalised greetings</strong> on login.</div>' +
+      '</div>';
   }
 
   // ── STEP 12: ADMIN ACCOUNT ───────────────────────────────────
@@ -1897,147 +1898,43 @@ function addSlab() {
 
 function delSlab(i) { CFG.slabs.splice(i,1); renderWizSlabs(); }
 
-// Employee roster in wizard — card style with all fields
+// Employee roster in wizard - zero backticks, pure string concat
 function renderWizEmpList() {
-  const el = document.getElementById('wEmpList');
+  var el = document.getElementById('wEmpList');
   if (!el) return;
-  const depts  = ['Engineering','HR','Finance','Operations','Product','Sales','Administration','Management','Other'];
-  const roles  = ['Employee','Manager','Team Lead','HR Admin','Director'];
-  const mstat  = ['Married','Un-Married','Divorced','Widowed'];
+  var lbl = document.getElementById('empCountLbl');
 
   if (!CFG.employees.length) {
-    el.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px;background:var(--bg);border-radius:var(--radius-sm);border:1.5px dashed var(--border)">No employees added yet. Click ＋ Add Employee above.</div>';
-    const lbl = document.getElementById('empCountLbl');
+    el.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px;background:var(--bg);border-radius:var(--radius-sm);border:1.5px dashed var(--border)">No employees added yet. Click + Add Employee above.</div>';
     if (lbl) lbl.textContent = 0;
     return;
   }
 
-  el.innerHTML = CFG.employees.map((e, i) => `
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;animation:ltIn 0.2s ease">
+  var colours = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0D9488'];
+  var rows = '';
+  CFG.employees.forEach(function(e, i) {
+    var col   = e.color || colours[i % colours.length];
+    var inits = (e.name || '?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+    var login = e.loginEnabled !== false;
+    var loginBadge = login
+      ? '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--green-bg);color:var(--green)">Login &#10003;</span>'
+      : '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--red-bg);color:var(--red)">Login &#10007;</span>';
+    rows +=
+      '<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:white;border-radius:var(--radius-sm);border:1px solid var(--border)">' +
+        '<div style="width:36px;height:36px;border-radius:9px;background:' + col + ';display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;flex-shrink:0">' + inits + '</div>' +
+        '<div style="flex:1">' +
+          '<div style="font-size:13px;font-weight:600">' + (e.name || 'Unnamed') + '</div>' +
+          '<div style="font-size:11px;color:var(--muted)">' + (e.empId||'') + (e.dept?' &middot; '+e.dept:'') + (e.desig?' &middot; '+e.desig:'') + '</div>' +
+        '</div>' +
+        loginBadge +
+        '<button onclick="openAddEmpModal(' + i + ')" style="padding:4px 10px;background:var(--brand-light);color:var(--brand);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">&#9998; Edit</button>' +
+        '<button class="lt-del" onclick="delEmp(' + i + ')">&#10005;</button>' +
+      '</div>';
+  });
 
-      <!-- Header row -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:32px;height:32px;border-radius:8px;background:${e.color||CFG.brandColor};display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700">${(e.name||'?')[0].toUpperCase()}</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">${e.name||'New Employee'}</div>
-          <div style="font-size:11px;color:var(--muted);background:white;padding:2px 8px;border-radius:10px;border:1px solid var(--border)">${e.empId||''}</div>
-        </div>
-        <button class="lt-del" onclick="delEmp(${i})">✕ Remove</button>
-      </div>
-
-      <!-- Section: Basic Info -->
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin-bottom:8px">Basic Information</div>
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Full Name *</label>
-          <input class="fi fi-sm" value="${e.name||''}" placeholder="e.g. Priya Sharma" oninput="CFG.employees[${i}].name=this.value;renderWizEmpList()"></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">Employee No. *</label>
-          <input class="fi fi-sm" value="${e.empId||''}" placeholder="WT/2024/EMP001" oninput="CFG.employees[${i}].empId=this.value.toUpperCase();this.value=this.value.toUpperCase()"></div>
-      </div>
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Date of Birth</label>
-          <input class="fi fi-sm" type="date" value="${e.dob||''}" oninput="CFG.employees[${i}].dob=this.value"></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">Date of Joining</label>
-          <input class="fi fi-sm" type="date" value="${e.doj||''}" oninput="CFG.employees[${i}].doj=this.value"></div>
-      </div>
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Department</label>
-          <select class="fs fs-sm" onchange="CFG.employees[${i}].dept=this.value">
-            ${depts.map(d=>`<option ${e.dept===d?'selected':''}>${d}</option>`).join('')}
-          </select></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">Designation</label>
-          <input class="fi fi-sm" value="${e.desig||''}" placeholder="e.g. Software Engineer" oninput="CFG.employees[${i}].desig=this.value"></div>
-      </div>
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Role / Access</label>
-          <select class="fs fs-sm" onchange="CFG.employees[${i}].role=this.value">
-            ${roles.map(r=>`<option ${e.role===r?'selected':''}>${r}</option>`).join('')}
-          </select></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">Work Email</label>
-          <input class="fi fi-sm" value="${e.workEmail||''}" placeholder="name@company.com" oninput="CFG.employees[${i}].workEmail=this.value"></div>
-      </div>
-
-      <!-- Section: Family Info -->
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin:10px 0 8px">Family Information</div>
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Father's Name</label>
-          <input class="fi fi-sm" value="${e.fatherName||''}" placeholder="Father's name" oninput="CFG.employees[${i}].fatherName=this.value"></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">Mother's Name</label>
-          <input class="fi fi-sm" value="${e.motherName||''}" placeholder="Mother's name" oninput="CFG.employees[${i}].motherName=this.value"></div>
-      </div>
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Marital Status</label>
-          <select class="fs fs-sm" onchange="CFG.employees[${i}].maritalStatus=this.value;renderWizEmpList()">
-            ${mstat.map(m=>`<option ${e.maritalStatus===m?'selected':''}>${m}</option>`).join('')}
-          </select></div>
-        ${e.maritalStatus==='Married'?`
-        <div class="fg" style="margin-bottom:0"><label class="fl">Marriage Date</label>
-          <input class="fi fi-sm" type="date" value="${e.marriageDate||''}" oninput="CFG.employees[${i}].marriageDate=this.value"></div>
-        `:`<div></div>`}
-      </div>
-      ${e.maritalStatus==='Married'?`
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Spouse Name</label>
-          <input class="fi fi-sm" value="${e.spouseName||''}" placeholder="Spouse's full name" oninput="CFG.employees[${i}].spouseName=this.value"></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">Spouse Date of Birth</label>
-          <input class="fi fi-sm" type="date" value="${e.spouseDob||''}" oninput="CFG.employees[${i}].spouseDob=this.value"></div>
-      </div>`:''}
-
-      <!-- Children -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light)">Children</div>
-        <button class="add-lt-btn" style="padding:4px 10px;font-size:11px" onclick="addChild(${i})">＋ Add Child</button>
-      </div>
-      <div id="childList_${i}">
-        ${(e.children||[]).map((c,ci)=>`
-          <div style="display:grid;grid-template-columns:1fr 90px 110px 80px auto;gap:6px;align-items:center;margin-bottom:6px;padding:7px 8px;background:white;border-radius:6px;border:1px solid var(--border)">
-            <input class="fi fi-sm" value="${c.name||''}" placeholder="Child's name" oninput="CFG.employees[${i}].children[${ci}].name=this.value">
-            <select class="fs fs-sm" onchange="CFG.employees[${i}].children[${ci}].gender=this.value">
-              <option ${c.gender==='Male'?'selected':''}>Male</option>
-              <option ${c.gender==='Female'?'selected':''}>Female</option>
-            </select>
-            <input class="fi fi-sm" type="date" value="${c.dob||''}" oninput="CFG.employees[${i}].children[${ci}].dob=this.value">
-            <select class="fs fs-sm" onchange="CFG.employees[${i}].children[${ci}].studying=this.value">
-              <option value="yes" ${c.studying==='yes'?'selected':''}>Studying</option>
-              <option value="no"  ${c.studying==='no' ?'selected':''}>Not studying</option>
-            </select>
-            <button class="lt-del" onclick="delChild(${i},${ci})">✕</button>
-          </div>`).join('')}
-      </div>
-
-      <!-- Section: Contact -->
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin:10px 0 8px">Contact & Education</div>
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Mobile (Self)</label>
-          <input class="fi fi-sm" value="${e.contact1||''}" placeholder="Mobile number" oninput="CFG.employees[${i}].contact1=this.value"></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">Emergency Contact</label>
-          <input class="fi fi-sm" value="${e.contact2||''}" placeholder="Parent / Spouse number" oninput="CFG.employees[${i}].contact2=this.value"></div>
-      </div>
-      <div class="fg-row" style="margin-bottom:10px">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Qualification</label>
-          <input class="fi fi-sm" value="${e.qualification||''}" placeholder="e.g. B.E., MCA, MBA" oninput="CFG.employees[${i}].qualification=this.value"></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">Total Experience (yrs)</label>
-          <input class="fi fi-sm" type="number" value="${e.experience||''}" placeholder="e.g. 5" oninput="CFG.employees[${i}].experience=this.value"></div>
-      </div>
-
-      <!-- Section: Login -->
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin:10px 0 8px">Login Credentials</div>
-      <div class="fg-row">
-        <div class="fg" style="margin-bottom:0"><label class="fl">Login Password *</label>
-          <input class="fi fi-sm" type="password" value="${e.password||''}" placeholder="Min 6 characters" oninput="CFG.employees[${i}].password=this.value"></div>
-        <div class="fg" style="margin-bottom:0">
-          <label class="fl">Login Enabled</label>
-          <div style="display:flex;align-items:center;gap:8px;padding-top:4px">
-            <button class="toggle ${e.loginEnabled!==false?'on':''}" onclick="CFG.employees[${i}].loginEnabled=!CFG.employees[${i}].loginEnabled;this.classList.toggle('on')"></button>
-            <span style="font-size:12px;color:var(--muted)">${e.loginEnabled!==false?'Enabled':'Disabled'}</span>
-          </div>
-        </div>
-      </div>
-    </div>`).join('');
-
-  const lbl = document.getElementById('empCountLbl');
+  el.innerHTML = rows;
   if (lbl) lbl.textContent = CFG.employees.length;
 }
-
 function addEmpRow() {
   const nextId = 'WT/' + new Date().getFullYear() + '/EMP' + String(CFG.employees.length + 2).padStart(3,'0');
   CFG.employees.push({
