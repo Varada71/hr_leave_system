@@ -467,6 +467,80 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
 .psm-val{margin-left:auto;font-size:12px;font-weight:700;color:var(--brand);text-align:right;flex-shrink:0;}
 
 /* ================================================================
+   SECTION L2 — GREETING FLASH MODAL
+================================================================ */
+#greetingOverlay {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,0.55); backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center;
+  animation:fadeIn 0.4s ease;
+}
+#greetingOverlay.show { display:flex; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+.greeting-card {
+  background:white; border-radius:20px; padding:0;
+  width:460px; max-width:95vw;
+  box-shadow:0 32px 80px rgba(0,0,0,0.35);
+  overflow:hidden; animation:greetIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative;
+}
+@keyframes greetIn {
+  from{opacity:0;transform:scale(0.8) translateY(30px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+.greeting-banner {
+  padding:32px 32px 24px; text-align:center; position:relative; overflow:hidden;
+}
+.greeting-banner::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+}
+.greeting-emoji {
+  font-size:56px; margin-bottom:12px; display:block;
+  animation:bounceIn 0.6s ease 0.3s both;
+}
+@keyframes bounceIn {
+  0%{transform:scale(0) rotate(-10deg)}
+  60%{transform:scale(1.2) rotate(3deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+.greeting-title {
+  font-family:'Syne',sans-serif; font-size:24px; font-weight:800;
+  color:white; margin-bottom:6px; position:relative;
+}
+.greeting-subtitle {
+  font-size:14px; color:rgba(255,255,255,0.8); position:relative; line-height:1.5;
+}
+.greeting-body { padding:20px 28px 24px; }
+.greeting-msg {
+  font-size:14px; color:var(--muted); text-align:center; line-height:1.7;
+  margin-bottom:16px;
+}
+.greeting-close {
+  width:100%; padding:12px; border:none; border-radius:var(--radius-sm);
+  font-family:inherit; font-size:14px; font-weight:700; cursor:pointer;
+  transition:all 0.15s; color:white;
+}
+.greeting-close:hover { filter:brightness(0.9); transform:translateY(-1px); }
+
+/* Confetti particles */
+.confetti-wrap {
+  position:fixed; inset:0; pointer-events:none; z-index:499;
+  overflow:hidden; display:none;
+}
+.confetti-wrap.show { display:block; }
+.confetti-piece {
+  position:absolute; width:10px; height:10px;
+  top:-10px; border-radius:2px;
+  animation:confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%  { transform:translateY(0) rotate(0deg); opacity:1; }
+  100%{ transform:translateY(110vh) rotate(720deg); opacity:0; }
+}
+
+/* ================================================================
    SECTION M — MODAL & TOAST
 ================================================================ */
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:200;display:none;align-items:center;justify-content:center;}
@@ -869,17 +943,26 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
 
 <!-- ── Add / Edit Employee Modal ── -->
 <div class="moverlay" id="mEmp">
-  <div class="modal" style="width:560px">
-    <div class="mtitle"><span id="mEmpTitle">Add Employee</span><button class="mclose" onclick="closeM('mEmp')">✕</button></div>
+  <div class="modal" style="width:660px;max-height:90vh;overflow-y:auto">
+    <div class="mtitle" style="position:sticky;top:0;background:white;z-index:5;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:16px">
+      <span id="mEmpTitle">Add Employee</span>
+      <button class="mclose" onclick="closeM('mEmp')">✕</button>
+    </div>
     <input type="hidden" id="mEmpIdx" value="-1">
+
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px">Basic Information</div>
     <div class="fg-row">
       <div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mEmpName" placeholder="e.g. Priya Sharma"></div>
-      <div class="fg"><label class="fl">Employee ID <span class="req">*</span></label><input class="fi" id="mEmpId" placeholder="e.g. EMP002" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label class="fl">Employee No. <span class="req">*</span></label><input class="fi" id="mEmpId" placeholder="WT/2024/EMP001" oninput="this.value=this.value.toUpperCase()"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Date of Birth</label><input class="fi" type="date" id="mEmpDOB"></div>
+      <div class="fg"><label class="fl">Date of Joining</label><input class="fi" type="date" id="mEmpDOJ"></div>
     </div>
     <div class="fg-row">
       <div class="fg"><label class="fl">Department</label>
         <select class="fs" id="mEmpDept">
-          <option>Engineering</option><option>HR</option><option>Finance</option><option>Operations</option><option>Product</option><option>Sales</option><option>Administration</option><option>Management</option>
+          <option>Engineering</option><option>HR</option><option>Finance</option><option>Operations</option><option>Product</option><option>Sales</option><option>Administration</option><option>Management</option><option>Other</option>
         </select>
       </div>
       <div class="fg"><label class="fl">Designation</label><input class="fi" id="mEmpDesig" placeholder="e.g. Software Engineer"></div>
@@ -887,19 +970,48 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
     <div class="fg-row">
       <div class="fg"><label class="fl">Role / Access Level</label>
         <select class="fs" id="mEmpRole">
-          <option value="Employee">Employee</option>
-          <option value="Manager">Manager</option>
-          <option value="Team Lead">Team Lead</option>
-          <option value="HR Admin">HR Admin</option>
-          <option value="Director">Director</option>
+          <option value="Employee">Employee</option><option value="Manager">Manager</option>
+          <option value="Team Lead">Team Lead</option><option value="HR Admin">HR Admin</option><option value="Director">Director</option>
         </select>
       </div>
-      <div class="fg"><label class="fl">Date of Joining</label><input class="fi" type="date" id="mEmpDOJ"></div>
+      <div class="fg"><label class="fl">Work Email</label><input class="fi" id="mEmpWorkEmail" type="email" placeholder="name@company.com"></div>
+    </div>
+
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Family Information</div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Father's Name</label><input class="fi" id="mEmpFather" placeholder="Father's name"></div>
+      <div class="fg"><label class="fl">Mother's Name</label><input class="fi" id="mEmpMother" placeholder="Mother's name"></div>
     </div>
     <div class="fg-row">
-      <div class="fg"><label class="fl">Email</label><input class="fi" id="mEmpEmail" type="email" placeholder="emp@company.com"></div>
-      <div class="fg"><label class="fl">Mobile</label><input class="fi" id="mEmpMobile" placeholder="10-digit number"></div>
+      <div class="fg"><label class="fl">Marital Status</label>
+        <select class="fs" id="mEmpMarital" onchange="toggleSpouseFields(this.value)">
+          <option>Un-Married</option><option>Married</option><option>Divorced</option><option>Widowed</option>
+        </select>
+      </div>
+      <div class="fg" id="mEmpMarriageDateWrap"><label class="fl">Marriage Date</label><input class="fi" type="date" id="mEmpMarriageDate"></div>
     </div>
+    <div class="fg-row" id="mEmpSpouseWrap">
+      <div class="fg"><label class="fl">Spouse Name</label><input class="fi" id="mEmpSpouse" placeholder="Spouse's full name"></div>
+      <div class="fg"><label class="fl">Spouse Date of Birth</label><input class="fi" type="date" id="mEmpSpouseDob"></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Children</div>
+      <button class="add-lt-btn" style="padding:4px 12px;font-size:12px" onclick="addChildModal()">＋ Add Child</button>
+    </div>
+    <div id="mEmpChildrenList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Contact & Education</div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Mobile (Self)</label><input class="fi" id="mEmpMobile" placeholder="Mobile number"></div>
+      <div class="fg"><label class="fl">Emergency Contact</label><input class="fi" id="mEmpContact2" placeholder="Parent / Spouse number"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Qualification</label><input class="fi" id="mEmpQual" placeholder="e.g. B.E., MCA, MBA"></div>
+      <div class="fg"><label class="fl">Total Experience (yrs)</label><input class="fi" type="number" id="mEmpExp" placeholder="e.g. 5"></div>
+    </div>
+
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Login Credentials</div>
     <div class="fg-row">
       <div class="fg"><label class="fl">Login Password <span class="req">*</span></label><input class="fi" type="password" id="mEmpPass" placeholder="Min 6 characters"></div>
       <div class="fg"><label class="fl">Confirm Password</label><input class="fi" type="password" id="mEmpPass2" placeholder="Repeat password"></div>
@@ -932,6 +1044,22 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
     <div class="mfooter">
       <button class="btn btn-ghost" onclick="closeM('mApply')">Cancel</button>
       <button class="btn btn-primary" onclick="closeM('mApply');toast('Leave application submitted! ✅','ok')">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Greeting Flash Modal ── -->
+<div id="confettiWrap" class="confetti-wrap"></div>
+<div id="greetingOverlay">
+  <div class="greeting-card" id="greetingCard">
+    <div class="greeting-banner" id="greetingBanner">
+      <span class="greeting-emoji" id="greetingEmoji">🎉</span>
+      <div class="greeting-title"  id="greetingTitle">Happy Birthday!</div>
+      <div class="greeting-subtitle" id="greetingSubtitle">Wishing you a wonderful day</div>
+    </div>
+    <div class="greeting-body">
+      <div class="greeting-msg" id="greetingMsg"></div>
+      <button class="greeting-close" id="greetingCloseBtn" onclick="closeGreeting()">Thank you! 🙏</button>
     </div>
   </div>
 </div>
@@ -1047,6 +1175,13 @@ const DEFAULT_CONFIG = {
   isConfigured: false,
   // ── Employees (added during wizard Step 11 or via Settings) ──
   employees: [],
+  // Employee fields (per employee object):
+  // { name, empId, dept, role, desig, email, mobile, doj, dob,
+  //   fatherName, motherName, qualification, experience,
+  //   maritalStatus, marriageDate, spouseName, spouseDob,
+  //   children: [{name, gender, dob, studying}],
+  //   contact1, contact2, workEmail,
+  //   loginEnabled, password, color }
 };
 
 let CFG = JSON.parse(localStorage.getItem('hrMergedConfig') || 'null') || { ...DEFAULT_CONFIG };
@@ -1485,18 +1620,15 @@ function renderWizardStep() {
   // ── STEP 11: ADD EMPLOYEES ──────────────────────────────────
   else if (s.id === 'employees') {
     title = 'Add your employees';
-    desc  = 'Add employees who will use this system. You can add more any time from Settings → Employees. Each employee gets a login with Employee ID and password.';
+    desc  = 'Add employees who will use this system. Fill in personal details, contact info, family details, and login credentials. You can add/edit more from Settings → Employees anytime.';
     body = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="font-size:13px;color:var(--muted)"><strong id="empCountLbl">${CFG.employees.length}</strong> employee(s) added</div>
         <button class="add-lt-btn" onclick="addEmpRow()">＋ Add Employee</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 110px 110px auto;gap:6px;padding:0 8px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--light)">
-        <span>Full Name</span><span>Emp ID</span><span>Department</span><span>Role</span><span>Password</span><span></span>
-      </div>
-      <div id="wEmpList" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-bottom:12px"></div>
+      <div id="wEmpList" style="display:flex;flex-direction:column;gap:10px;max-height:360px;overflow-y:auto;margin-bottom:12px;padding-right:4px"></div>
       <div class="info-box blue"><div class="ib-icon">🔑</div>
-        <div>Each employee logs in using their <strong>Employee ID</strong> and the <strong>Password</strong> you set here. They can change their password after first login. The admin account added in the next step is separate.</div></div>`;
+        <div>Each employee logs in with their <strong>Employee ID + Password</strong>. Birthdays, anniversaries and work anniversaries trigger <strong>personalised greeting messages</strong> on login.</div></div>`;
   }
 
   // ── STEP 12: ADMIN ACCOUNT ───────────────────────────────────
@@ -1723,32 +1855,168 @@ function addSlab() {
 
 function delSlab(i) { CFG.slabs.splice(i,1); renderWizSlabs(); }
 
-// Employee roster in wizard
+// Employee roster in wizard — card style with all fields
 function renderWizEmpList() {
   const el = document.getElementById('wEmpList');
   if (!el) return;
-  const depts = ['Engineering','HR','Finance','Operations','Product','Sales','Administration','Management'];
-  const roles  = ['Employee','Manager','HR Admin','Team Lead','Director'];
-  el.innerHTML = CFG.employees.map((e,i) => `
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 110px 110px auto;gap:6px;align-items:center;padding:8px 8px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);animation:ltIn 0.2s ease">
-      <input class="fi fi-sm" value="${e.name}" placeholder="Full name" oninput="CFG.employees[${i}].name=this.value">
-      <input class="fi fi-sm" value="${e.empId}" placeholder="EMP002" oninput="CFG.employees[${i}].empId=this.value.toUpperCase();this.value=this.value.toUpperCase()">
-      <select class="fs fs-sm" onchange="CFG.employees[${i}].dept=this.value">
-        ${depts.map(d=>`<option ${e.dept===d?'selected':''}>${d}</option>`).join('')}
-      </select>
-      <select class="fs fs-sm" onchange="CFG.employees[${i}].role=this.value">
-        ${roles.map(r=>`<option ${e.role===r?'selected':''}>${r}</option>`).join('')}
-      </select>
-      <input class="fi fi-sm" type="password" value="${e.password}" placeholder="Password" oninput="CFG.employees[${i}].password=this.value">
-      <button class="lt-del" onclick="delEmp(${i})">✕</button>
+  const depts  = ['Engineering','HR','Finance','Operations','Product','Sales','Administration','Management','Other'];
+  const roles  = ['Employee','Manager','Team Lead','HR Admin','Director'];
+  const mstat  = ['Married','Un-Married','Divorced','Widowed'];
+
+  if (!CFG.employees.length) {
+    el.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px;background:var(--bg);border-radius:var(--radius-sm);border:1.5px dashed var(--border)">No employees added yet. Click ＋ Add Employee above.</div>';
+    const lbl = document.getElementById('empCountLbl');
+    if (lbl) lbl.textContent = 0;
+    return;
+  }
+
+  el.innerHTML = CFG.employees.map((e, i) => `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;animation:ltIn 0.2s ease">
+
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:32px;height:32px;border-radius:8px;background:${e.color||CFG.brandColor};display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700">${(e.name||'?')[0].toUpperCase()}</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">${e.name||'New Employee'}</div>
+          <div style="font-size:11px;color:var(--muted);background:white;padding:2px 8px;border-radius:10px;border:1px solid var(--border)">${e.empId||''}</div>
+        </div>
+        <button class="lt-del" onclick="delEmp(${i})">✕ Remove</button>
+      </div>
+
+      <!-- Section: Basic Info -->
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin-bottom:8px">Basic Information</div>
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Full Name *</label>
+          <input class="fi fi-sm" value="${e.name||''}" placeholder="e.g. Priya Sharma" oninput="CFG.employees[${i}].name=this.value;renderWizEmpList()"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Employee No. *</label>
+          <input class="fi fi-sm" value="${e.empId||''}" placeholder="WT/2024/EMP001" oninput="CFG.employees[${i}].empId=this.value.toUpperCase();this.value=this.value.toUpperCase()"></div>
+      </div>
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Date of Birth</label>
+          <input class="fi fi-sm" type="date" value="${e.dob||''}" oninput="CFG.employees[${i}].dob=this.value"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Date of Joining</label>
+          <input class="fi fi-sm" type="date" value="${e.doj||''}" oninput="CFG.employees[${i}].doj=this.value"></div>
+      </div>
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Department</label>
+          <select class="fs fs-sm" onchange="CFG.employees[${i}].dept=this.value">
+            ${depts.map(d=>`<option ${e.dept===d?'selected':''}>${d}</option>`).join('')}
+          </select></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Designation</label>
+          <input class="fi fi-sm" value="${e.desig||''}" placeholder="e.g. Software Engineer" oninput="CFG.employees[${i}].desig=this.value"></div>
+      </div>
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Role / Access</label>
+          <select class="fs fs-sm" onchange="CFG.employees[${i}].role=this.value">
+            ${roles.map(r=>`<option ${e.role===r?'selected':''}>${r}</option>`).join('')}
+          </select></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Work Email</label>
+          <input class="fi fi-sm" value="${e.workEmail||''}" placeholder="name@company.com" oninput="CFG.employees[${i}].workEmail=this.value"></div>
+      </div>
+
+      <!-- Section: Family Info -->
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin:10px 0 8px">Family Information</div>
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Father's Name</label>
+          <input class="fi fi-sm" value="${e.fatherName||''}" placeholder="Father's name" oninput="CFG.employees[${i}].fatherName=this.value"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Mother's Name</label>
+          <input class="fi fi-sm" value="${e.motherName||''}" placeholder="Mother's name" oninput="CFG.employees[${i}].motherName=this.value"></div>
+      </div>
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Marital Status</label>
+          <select class="fs fs-sm" onchange="CFG.employees[${i}].maritalStatus=this.value;renderWizEmpList()">
+            ${mstat.map(m=>`<option ${e.maritalStatus===m?'selected':''}>${m}</option>`).join('')}
+          </select></div>
+        ${e.maritalStatus==='Married'?`
+        <div class="fg" style="margin-bottom:0"><label class="fl">Marriage Date</label>
+          <input class="fi fi-sm" type="date" value="${e.marriageDate||''}" oninput="CFG.employees[${i}].marriageDate=this.value"></div>
+        `:`<div></div>`}
+      </div>
+      ${e.maritalStatus==='Married'?`
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Spouse Name</label>
+          <input class="fi fi-sm" value="${e.spouseName||''}" placeholder="Spouse's full name" oninput="CFG.employees[${i}].spouseName=this.value"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Spouse Date of Birth</label>
+          <input class="fi fi-sm" type="date" value="${e.spouseDob||''}" oninput="CFG.employees[${i}].spouseDob=this.value"></div>
+      </div>`:''}
+
+      <!-- Children -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light)">Children</div>
+        <button class="add-lt-btn" style="padding:4px 10px;font-size:11px" onclick="addChild(${i})">＋ Add Child</button>
+      </div>
+      <div id="childList_${i}">
+        ${(e.children||[]).map((c,ci)=>`
+          <div style="display:grid;grid-template-columns:1fr 90px 110px 80px auto;gap:6px;align-items:center;margin-bottom:6px;padding:7px 8px;background:white;border-radius:6px;border:1px solid var(--border)">
+            <input class="fi fi-sm" value="${c.name||''}" placeholder="Child's name" oninput="CFG.employees[${i}].children[${ci}].name=this.value">
+            <select class="fs fs-sm" onchange="CFG.employees[${i}].children[${ci}].gender=this.value">
+              <option ${c.gender==='Male'?'selected':''}>Male</option>
+              <option ${c.gender==='Female'?'selected':''}>Female</option>
+            </select>
+            <input class="fi fi-sm" type="date" value="${c.dob||''}" oninput="CFG.employees[${i}].children[${ci}].dob=this.value">
+            <select class="fs fs-sm" onchange="CFG.employees[${i}].children[${ci}].studying=this.value">
+              <option value="yes" ${c.studying==='yes'?'selected':''}>Studying</option>
+              <option value="no"  ${c.studying==='no' ?'selected':''}>Not studying</option>
+            </select>
+            <button class="lt-del" onclick="delChild(${i},${ci})">✕</button>
+          </div>`).join('')}
+      </div>
+
+      <!-- Section: Contact -->
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin:10px 0 8px">Contact & Education</div>
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Mobile (Self)</label>
+          <input class="fi fi-sm" value="${e.contact1||''}" placeholder="Mobile number" oninput="CFG.employees[${i}].contact1=this.value"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Emergency Contact</label>
+          <input class="fi fi-sm" value="${e.contact2||''}" placeholder="Parent / Spouse number" oninput="CFG.employees[${i}].contact2=this.value"></div>
+      </div>
+      <div class="fg-row" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Qualification</label>
+          <input class="fi fi-sm" value="${e.qualification||''}" placeholder="e.g. B.E., MCA, MBA" oninput="CFG.employees[${i}].qualification=this.value"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Total Experience (yrs)</label>
+          <input class="fi fi-sm" type="number" value="${e.experience||''}" placeholder="e.g. 5" oninput="CFG.employees[${i}].experience=this.value"></div>
+      </div>
+
+      <!-- Section: Login -->
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin:10px 0 8px">Login Credentials</div>
+      <div class="fg-row">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Login Password *</label>
+          <input class="fi fi-sm" type="password" value="${e.password||''}" placeholder="Min 6 characters" oninput="CFG.employees[${i}].password=this.value"></div>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Login Enabled</label>
+          <div style="display:flex;align-items:center;gap:8px;padding-top:4px">
+            <button class="toggle ${e.loginEnabled!==false?'on':''}" onclick="CFG.employees[${i}].loginEnabled=!CFG.employees[${i}].loginEnabled;this.classList.toggle('on')"></button>
+            <span style="font-size:12px;color:var(--muted)">${e.loginEnabled!==false?'Enabled':'Disabled'}</span>
+          </div>
+        </div>
+      </div>
     </div>`).join('');
+
   const lbl = document.getElementById('empCountLbl');
   if (lbl) lbl.textContent = CFG.employees.length;
 }
 
 function addEmpRow() {
-  const nextId = 'EMP' + String(CFG.employees.length + 2).padStart(3,'0');
-  CFG.employees.push({ name:'', empId:nextId, dept:'Engineering', role:'Employee', password:'', loginEnabled:true, color: randColor() });
+  const nextId = 'WT/' + new Date().getFullYear() + '/EMP' + String(CFG.employees.length + 2).padStart(3,'0');
+  CFG.employees.push({
+    name:'', empId:nextId, dept:'Engineering', role:'Employee',
+    desig:'', dob:'', doj:'', fatherName:'', motherName:'',
+    maritalStatus:'Un-Married', marriageDate:'', spouseName:'', spouseDob:'',
+    children:[], qualification:'', experience:'',
+    contact1:'', contact2:'', workEmail:'',
+    password:'', loginEnabled:true, color: randColor()
+  });
+  renderWizEmpList();
+}
+
+function addChild(empIdx) {
+  if (!CFG.employees[empIdx].children) CFG.employees[empIdx].children = [];
+  CFG.employees[empIdx].children.push({ name:'', gender:'Female', dob:'', studying:'yes' });
+  renderWizEmpList();
+}
+
+function delChild(empIdx, childIdx) {
+  CFG.employees[empIdx].children.splice(childIdx, 1);
   renderWizEmpList();
 }
 
@@ -2519,6 +2787,8 @@ function startSession() {
   initPunchUI();
   bootstrapApp();
   toast('Welcome back, ' + CURRENT_USER.name.split(' ')[0] + '! 👋','ok');
+  // Check for special occasions after a short delay (let the dashboard render first)
+  setTimeout(checkGreetings, 800);
   // Update today log title
   const tl = document.getElementById('todayLogTitle');
   const td = document.getElementById('todayLogDate');
@@ -2551,23 +2821,85 @@ function showLoginScreen() {
 }
 
 // ── Employee modal ──
+// Temp children array while editing in modal
+let _modalChildren = [];
+
+function toggleSpouseFields(val) {
+  const sw = document.getElementById('mEmpSpouseWrap');
+  const mw = document.getElementById('mEmpMarriageDateWrap');
+  const show = val === 'Married';
+  if(sw) sw.style.display = show ? '' : 'none';
+  if(mw) mw.style.display = show ? '' : 'none';
+}
+
+function addChildModal() {
+  _modalChildren.push({ name:'', gender:'Female', dob:'', studying:'yes' });
+  renderModalChildren();
+}
+
+function delChildModal(ci) {
+  _modalChildren.splice(ci,1);
+  renderModalChildren();
+}
+
+function renderModalChildren() {
+  const el = document.getElementById('mEmpChildrenList');
+  if (!el) return;
+  if (!_modalChildren.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--light);padding:6px 0">No children added.</div>';
+    return;
+  }
+  el.innerHTML = _modalChildren.map((c,ci) => `
+    <div style="display:grid;grid-template-columns:1fr 90px 130px 100px auto;gap:6px;align-items:center;padding:7px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+      <input class="fi fi-sm" value="${c.name||''}" placeholder="Child's name" oninput="_modalChildren[${ci}].name=this.value">
+      <select class="fs fs-sm" onchange="_modalChildren[${ci}].gender=this.value">
+        <option ${c.gender==='Male'?'selected':''}>Male</option>
+        <option ${c.gender==='Female'?'selected':''}>Female</option>
+      </select>
+      <input class="fi fi-sm" type="date" value="${c.dob||''}" oninput="_modalChildren[${ci}].dob=this.value">
+      <select class="fs fs-sm" onchange="_modalChildren[${ci}].studying=this.value">
+        <option value="yes" ${c.studying==='yes'?'selected':''}>Studying</option>
+        <option value="no"  ${c.studying==='no'?'selected':''}>Not studying</option>
+      </select>
+      <button class="lt-del" onclick="delChildModal(${ci})">✕</button>
+    </div>`).join('');
+}
+
 function openAddEmpModal(idx) {
   const isEdit = idx !== undefined;
   document.getElementById('mEmpTitle').textContent = isEdit ? 'Edit Employee' : 'Add Employee';
   document.getElementById('mEmpIdx').value = isEdit ? idx : -1;
   const e = isEdit ? CFG.employees[idx] : {};
-  document.getElementById('mEmpName').value   = e.name    || '';
-  document.getElementById('mEmpId').value     = e.empId   || ('EMP' + String(CFG.employees.length+2).padStart(3,'0'));
-  document.getElementById('mEmpDesig').value  = e.desig   || '';
-  document.getElementById('mEmpEmail').value  = e.email   || '';
-  document.getElementById('mEmpMobile').value = e.mobile  || '';
-  document.getElementById('mEmpPass').value   = '';
-  document.getElementById('mEmpPass2').value  = '';
-  document.getElementById('mEmpDOJ').value    = e.doj     || '';
-  const deptSel = document.getElementById('mEmpDept');
-  const roleSel = document.getElementById('mEmpRole');
-  if(deptSel) deptSel.value = e.dept || 'Engineering';
-  if(roleSel) roleSel.value = e.role || 'Employee';
+  _modalChildren = isEdit ? JSON.parse(JSON.stringify(e.children||[])) : [];
+
+  document.getElementById('mEmpName').value       = e.name        || '';
+  document.getElementById('mEmpId').value         = e.empId       || ('WT/'+new Date().getFullYear()+'/EMP'+String(CFG.employees.length+2).padStart(3,'0'));
+  document.getElementById('mEmpDOB').value        = e.dob         || '';
+  document.getElementById('mEmpDOJ').value        = e.doj         || '';
+  document.getElementById('mEmpDesig').value      = e.desig       || '';
+  document.getElementById('mEmpWorkEmail').value  = e.workEmail   || '';
+  document.getElementById('mEmpFather').value     = e.fatherName  || '';
+  document.getElementById('mEmpMother').value     = e.motherName  || '';
+  document.getElementById('mEmpMarriageDate').value= e.marriageDate|| '';
+  document.getElementById('mEmpSpouse').value     = e.spouseName  || '';
+  document.getElementById('mEmpSpouseDob').value  = e.spouseDob   || '';
+  document.getElementById('mEmpMobile').value     = e.contact1    || '';
+  document.getElementById('mEmpContact2').value   = e.contact2    || '';
+  document.getElementById('mEmpQual').value       = e.qualification|| '';
+  document.getElementById('mEmpExp').value        = e.experience  || '';
+  document.getElementById('mEmpPass').value       = '';
+  document.getElementById('mEmpPass2').value      = '';
+
+  const deptSel   = document.getElementById('mEmpDept');
+  const roleSel   = document.getElementById('mEmpRole');
+  const marSel    = document.getElementById('mEmpMarital');
+  if(deptSel) deptSel.value = e.dept          || 'Engineering';
+  if(roleSel) roleSel.value = e.role          || 'Employee';
+  if(marSel)  marSel.value  = e.maritalStatus || 'Un-Married';
+
+  toggleSpouseFields(e.maritalStatus || 'Un-Married');
+  renderModalChildren();
+
   const tog = document.getElementById('mEmpLoginTog');
   if(tog) { tog.classList.remove('on'); if(e.loginEnabled !== false) tog.classList.add('on'); }
   openM('mEmp');
@@ -2581,20 +2913,31 @@ function saveEmpModal() {
   const pass2 = document.getElementById('mEmpPass2').value;
   if (!name)  { toast('Please enter employee name','err'); return; }
   if (!empId) { toast('Please enter Employee ID','err'); return; }
-  if (idx < 0 && !pass) { toast('Please set a password','err'); return; }
+  if (idx < 0 && !pass) { toast('Please set a login password','err'); return; }
   if (pass && pass !== pass2) { toast('Passwords do not match','err'); return; }
-  // Check duplicate empId
   const dup = CFG.employees.findIndex((e,i) => e.empId.toUpperCase()===empId && i!==idx);
-  if (dup>=0) { toast('Employee ID '+empId+' already exists','err'); return; }
+  if (dup>=0) { toast('Employee No. '+empId+' already exists','err'); return; }
 
+  const marital = document.getElementById('mEmpMarital').value;
   const emp = {
     name, empId,
+    dob:          document.getElementById('mEmpDOB').value,
+    doj:          document.getElementById('mEmpDOJ').value,
     dept:         document.getElementById('mEmpDept').value,
     role:         document.getElementById('mEmpRole').value,
     desig:        document.getElementById('mEmpDesig').value,
-    email:        document.getElementById('mEmpEmail').value,
-    mobile:       document.getElementById('mEmpMobile').value,
-    doj:          document.getElementById('mEmpDOJ').value,
+    workEmail:    document.getElementById('mEmpWorkEmail').value,
+    fatherName:   document.getElementById('mEmpFather').value,
+    motherName:   document.getElementById('mEmpMother').value,
+    maritalStatus:marital,
+    marriageDate: marital==='Married' ? document.getElementById('mEmpMarriageDate').value : '',
+    spouseName:   marital==='Married' ? document.getElementById('mEmpSpouse').value : '',
+    spouseDob:    marital==='Married' ? document.getElementById('mEmpSpouseDob').value : '',
+    children:     JSON.parse(JSON.stringify(_modalChildren)),
+    qualification:document.getElementById('mEmpQual').value,
+    experience:   document.getElementById('mEmpExp').value,
+    contact1:     document.getElementById('mEmpMobile').value,
+    contact2:     document.getElementById('mEmpContact2').value,
     loginEnabled: document.getElementById('mEmpLoginTog').classList.contains('on'),
     color:        idx >= 0 ? (CFG.employees[idx].color || randColor()) : randColor(),
     password:     pass || (idx>=0 ? CFG.employees[idx].password : ''),
@@ -2675,7 +3018,212 @@ function renderSettEmpTable() {
 }
 
 // ================================================================
-//  SECTION 10 — INIT
+//  SECTION 10 — GREETING ENGINE
+// ================================================================
+
+// Greeting configs: type → { color, emoji, title, msg(emp,extra) }
+const GREETING_TYPES = {
+  birthday: {
+    color:  '#EC4899',
+    emoji:  '🎂',
+    title:  'Happy Birthday!',
+    subtitle: (emp) => `Wishing you a wonderful day, ${emp.name.split(' ')[0]}!`,
+    msg:    (emp)  => `The entire ${CFG.companyName} family wishes you a very happy birthday! 🎉 May this year bring you joy, good health, and great success. Have a fantastic day!`,
+    close:  'Thank you! 🎉',
+  },
+  anniversary: {
+    color:  '#EF4444',
+    emoji:  '💑',
+    title:  'Happy Wedding Anniversary!',
+    subtitle: (emp) => `Congratulations, ${emp.name.split(' ')[0]}!`,
+    msg:    (emp)  => `Wishing you and ${emp.spouseName||'your partner'} a very happy wedding anniversary! 💕 May your bond grow stronger with each passing year. Congratulations from everyone at ${CFG.companyName}!`,
+    close:  'Thank you! 💕',
+  },
+  workanniversary: {
+    color:  '#2563EB',
+    emoji:  '🏆',
+    title:  (yrs)  => `${yrs} Year${yrs>1?'s':''} at ${CFG.companyName}!`,
+    subtitle:(emp,yrs)=>`Congratulations on ${yrs} year${yrs>1?'s':''} of service!`,
+    msg:    (emp,yrs)=>`Today marks ${yrs} wonderful year${yrs>1?'s':''} since you joined ${CFG.companyName}! 🌟 Your dedication, hard work, and contributions have been truly invaluable. Here's to many more years of success together. Thank you, ${emp.name.split(' ')[0]}!`,
+    close:  'Thank you! 🌟',
+  },
+  child_birthday: {
+    color:  '#F59E0B',
+    emoji:  '🎈',
+    title:  "Your Child's Birthday!",
+    subtitle:(emp,child)=>`Happy Birthday, little ${child.name.split(' ')[0]}!`,
+    msg:    (emp,child)=>`Wishing your child ${child.name} a very happy birthday! 🎂🎁 May ${child.gender==='Male'?'he':'she'} have a day full of laughter and joy. Warm wishes from the ${CFG.companyName} family!`,
+    close:  'Thank you! 🎈',
+  },
+  spouse_birthday: {
+    color:  '#8B5CF6',
+    emoji:  '💜',
+    title:  "Spouse's Birthday!",
+    subtitle:(emp)=>`Happy Birthday to ${emp.spouseName||'your spouse'}!`,
+    msg:    (emp)=>`Wishing ${emp.spouseName||'your spouse'} a very happy birthday! 💜 May this special day be filled with happiness and beautiful moments. Warm wishes from everyone at ${CFG.companyName}!`,
+    close:  'Thank you! 💜',
+  },
+};
+
+// Parse a date string that could be "Dec 25th", "2024-12-25", or a JS Date
+function parseDateToMonthDay(val) {
+  if (!val) return null;
+  // ISO format: YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+    const d = new Date(val);
+    return { month: d.getMonth()+1, day: d.getDate() };
+  }
+  // Format: "Dec 25th", "March 8th", "Sept 29th", "June 21st"
+  const months = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  const m = val.toLowerCase().match(/([a-z]+)[.\s]+(\d+)/);
+  if (m) {
+    const mKey = m[1].slice(0,3);
+    return { month: months[mKey]||null, day: parseInt(m[2]) };
+  }
+  // Numeric DD/MM/YYYY or MM/DD/YYYY — treat as DD.MM.YYYY (Indian format)
+  const parts = val.match(/(\d+)[\/.](\d+)[\/.](\d+)/);
+  if (parts) return { month: parseInt(parts[2]), day: parseInt(parts[1]) };
+  return null;
+}
+
+function isTodayMD(val) {
+  const md = parseDateToMonthDay(val);
+  if (!md) return false;
+  const now = new Date();
+  return md.month === (now.getMonth()+1) && md.day === now.getDate();
+}
+
+function yearsElapsed(val) {
+  if (!val) return 0;
+  let date;
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) date = new Date(val);
+  else {
+    const parts = val.match(/(\d+)[\/.](\d+)[\/.](\d+)/);
+    if (parts) date = new Date(parseInt(parts[3]), parseInt(parts[2])-1, parseInt(parts[1]));
+    else return 0;
+  }
+  const now = new Date();
+  return now.getFullYear() - date.getFullYear();
+}
+
+// Check all special occasions for currently logged-in user
+function checkGreetings() {
+  if (!CURRENT_USER) return;
+  const emp = CURRENT_USER.isAdmin
+    ? { name:CFG.adminName, dob:'', doj:CFG.adminId, maritalStatus:'', marriageDate:'', spouseName:'', spouseDob:'', children:[] }
+    : CFG.employees.find(e => e.empId === CURRENT_USER.empId);
+  if (!emp) return;
+
+  const occasions = [];
+
+  // 1. Employee birthday
+  if (isTodayMD(emp.dob)) occasions.push({ type:'birthday', emp });
+
+  // 2. Wedding anniversary
+  if (emp.maritalStatus === 'Married' && isTodayMD(emp.marriageDate))
+    occasions.push({ type:'anniversary', emp });
+
+  // 3. Work anniversary
+  if (emp.doj) {
+    const md = parseDateToMonthDay(emp.doj);
+    const now = new Date();
+    if (md && md.month === (now.getMonth()+1) && md.day === now.getDate()) {
+      const yrs = yearsElapsed(emp.doj);
+      if (yrs > 0) occasions.push({ type:'workanniversary', emp, yrs });
+    }
+  }
+
+  // 4. Spouse birthday
+  if (emp.maritalStatus === 'Married' && isTodayMD(emp.spouseDob))
+    occasions.push({ type:'spouse_birthday', emp });
+
+  // 5. Children birthdays
+  (emp.children||[]).forEach(child => {
+    if (isTodayMD(child.dob)) occasions.push({ type:'child_birthday', emp, child });
+  });
+
+  if (occasions.length > 0) showGreeting(occasions, 0);
+}
+
+// Show greeting for one occasion (call recursively for multiple)
+let _greetingQueue = [];
+let _greetingIdx   = 0;
+
+function showGreeting(occasions, idx) {
+  _greetingQueue = occasions;
+  _greetingIdx   = idx;
+  if (idx >= occasions.length) return;
+  const occ = occasions[idx];
+  const gt  = GREETING_TYPES[occ.type];
+  if (!gt) return;
+
+  const color = gt.color;
+  const emoji = gt.emoji;
+  const title   = typeof gt.title    === 'function' ? gt.title(occ.yrs||occ.child)    : gt.title;
+  const subtitle= typeof gt.subtitle === 'function' ? gt.subtitle(occ.emp, occ.yrs||occ.child) : gt.subtitle;
+  const msg     = typeof gt.msg      === 'function' ? gt.msg(occ.emp, occ.yrs||occ.child)      : gt.msg;
+  const closeLabel = gt.close || 'Thank you!';
+
+  document.getElementById('greetingBanner').style.background = `linear-gradient(135deg, ${color}, ${shadeColor(color, -20)})`;
+  document.getElementById('greetingEmoji').textContent   = emoji;
+  document.getElementById('greetingTitle').textContent   = title;
+  document.getElementById('greetingSubtitle').textContent= subtitle;
+  document.getElementById('greetingMsg').textContent     = msg;
+  document.getElementById('greetingCloseBtn').textContent= closeLabel;
+  document.getElementById('greetingCloseBtn').style.background = color;
+
+  // Show remaining count if multiple occasions
+  if (occasions.length > 1) {
+    document.getElementById('greetingSubtitle').textContent =
+      subtitle + (idx < occasions.length-1 ? ` (${idx+1} of ${occasions.length})` : '');
+  }
+
+  document.getElementById('greetingOverlay').classList.add('show');
+  launchConfetti(color);
+}
+
+function closeGreeting() {
+  document.getElementById('greetingOverlay').classList.remove('show');
+  stopConfetti();
+  // If there are more occasions queued, show next after a short pause
+  _greetingIdx++;
+  if (_greetingIdx < _greetingQueue.length) {
+    setTimeout(() => showGreeting(_greetingQueue, _greetingIdx), 400);
+  }
+}
+
+// ── Confetti ──
+let _confettiTimer = null;
+function launchConfetti(color) {
+  const wrap = document.getElementById('confettiWrap');
+  wrap.innerHTML = '';
+  wrap.classList.add('show');
+  const colors = [color, '#FCD34D', '#34D399', '#60A5FA', '#F472B6', '#A78BFA'];
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      width:${6+Math.random()*8}px; height:${6+Math.random()*8}px;
+      animation-duration:${2+Math.random()*3}s;
+      animation-delay:${Math.random()*1.5}s;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      opacity:${0.7+Math.random()*0.3};
+    `;
+    wrap.appendChild(p);
+  }
+  _confettiTimer = setTimeout(stopConfetti, 5000);
+}
+
+function stopConfetti() {
+  if (_confettiTimer) { clearTimeout(_confettiTimer); _confettiTimer = null; }
+  const wrap = document.getElementById('confettiWrap');
+  if (wrap) { wrap.classList.remove('show'); wrap.innerHTML = ''; }
+}
+
+// ================================================================
+//  SECTION 11 — INIT
 // ================================================================
 window.addEventListener('DOMContentLoaded', () => {
   applyTheme();
