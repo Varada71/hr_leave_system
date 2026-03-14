@@ -489,6 +489,42 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
 <!-- ================================================================
      SETUP WIZARD  (shown on first run)
 ================================================================ -->
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="display:none;min-height:100vh;background:var(--sidebar-bg);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 600px 400px at 20% 20%,rgba(37,99,235,0.28),transparent 70%),radial-gradient(ellipse 400px 400px at 80% 80%,rgba(245,158,11,0.12),transparent 70%);pointer-events:none"></div>
+  <div style="position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
+    <div style="background:white;border-radius:18px;width:420px;max-width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.3);overflow:hidden;animation:panelIn 0.35s ease">
+      <div style="background:var(--brand);padding:28px 32px 24px;text-align:center">
+        <div id="loginIcon" style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px">🏢</div>
+        <div id="loginAppName" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:white;margin-bottom:3px">HR Portal</div>
+        <div id="loginCoName"  style="font-size:12px;color:rgba(255,255,255,0.6)">Your Company</div>
+      </div>
+      <div style="padding:28px 32px">
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:4px">Welcome back</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:22px">Sign in with your Employee ID and password</div>
+        <div class="fg">
+          <label class="fl">Employee ID</label>
+          <input class="fi" id="loginEmpId" placeholder="e.g. EMP001" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div class="fg">
+          <label class="fl">Password</label>
+          <div style="position:relative">
+            <input class="fi" id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:44px">
+            <button onclick="togglePwVis()" style="position:absolute;right:11px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;font-size:16px;color:var(--muted)" id="pwVisBtn">👁️</button>
+          </div>
+        </div>
+        <div id="loginError" style="display:none;padding:9px 13px;background:var(--red-bg);color:var(--red);border-radius:var(--radius-sm);font-size:13px;margin-bottom:14px;border-left:3px solid var(--red)">
+          ✕ Invalid Employee ID or Password
+        </div>
+        <button onclick="doLogin()" style="width:100%;padding:13px;background:var(--brand);color:white;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;margin-top:4px" onmouseover="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--brand-dark')" onmouseout="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--brand')">
+          Sign In →
+        </button>
+        <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--light)">Forgot your password? Contact your HR Admin.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="setupWizard">
   <div class="wizard-sidebar">
     <div class="wizard-logo-area">
@@ -534,16 +570,17 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
       <div class="sb-section">People</div>
       <div class="sb-item" onclick="goPage('team',this)"><span class="ico">👥</span> Team</div>
       <div class="sb-item" onclick="goPage('holidays',this)"><span class="ico">🎉</span> Holidays</div>
-      <div class="sb-section">Admin</div>
-      <div class="sb-item" onclick="goPage('reports',this)"><span class="ico">📈</span> Reports</div>
-      <div class="sb-item" onclick="goPage('settings',this)"><span class="ico">⚙️</span> Settings</div>
+      <div class="sb-section admin-only">Admin</div>
+      <div class="sb-item admin-only" onclick="goPage('reports',this)"><span class="ico">📈</span> Reports</div>
+      <div class="sb-item admin-only" onclick="goPage('settings',this)"><span class="ico">⚙️</span> Settings</div>
     </div>
     <div class="sb-foot">
       <div class="ua" id="appUserAv">JS</div>
-      <div>
+      <div style="flex:1">
         <div class="ua-name" id="appUserName">John Smith</div>
         <div class="ua-role" id="appUserRole">HR Admin</div>
       </div>
+      <button onclick="doLogout()" title="Logout" style="border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s" onmouseover="this.style.background='rgba(220,38,38,0.3)';this.style.color='white'" onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.5)'">⏻</button>
     </div>
   </nav>
 
@@ -566,10 +603,9 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
           <div class="punch-wrap">
             <div class="punch-time" id="liveClock">09:42:17</div>
             <div class="punch-date" id="liveDate">Friday, 13 March 2026</div>
-            <div class="pstatus"><div class="pdot"></div><span id="punchTxt">Punched In at 09:15 AM</span></div>
-            <div>
-              <button class="pbtn out" onclick="punch('out')">Punch Out 🚪</button>
-              <button class="pbtn brk" onclick="punch('brk')">Break ☕</button>
+            <div class="pstatus"><div class="pdot"></div><span id="punchTxt">Not Punched In</span></div>
+            <div id="punchBtns">
+              <button class="pbtn brk" onclick="punch('in')">Punch In 🟢</button>
             </div>
             <div class="pstats">
               <div><div class="pstat-val">6h 27m</div><div class="pstat-lbl">Today</div></div>
@@ -619,13 +655,15 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
           </div>
         </div>
         <div id="att-daily" style="display:none">
-          <div class="card"><div class="ch"><span class="ct">Today's Log — 13 Mar 2026</span></div>
-          <div class="cb" style="display:flex;flex-direction:column;gap:10px">
-            <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--green-bg);border-radius:8px;border-left:4px solid var(--green)"><span style="font-size:18px">🟢</span><div><div style="font-weight:600;font-size:13px">Punch In</div><div style="font-size:12px;color:var(--muted)">09:15:32 AM</div></div><div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px">09:15 AM</div></div>
-            <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--amber-bg);border-radius:8px;border-left:4px solid var(--amber)"><span style="font-size:18px">☕</span><div><div style="font-weight:600;font-size:13px">Break Start</div><div style="font-size:12px;color:var(--muted)">01:00 PM — Lunch</div></div><div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px">01:00 PM</div></div>
-            <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--green-bg);border-radius:8px;border-left:4px solid var(--green)"><span style="font-size:18px">▶️</span><div><div style="font-weight:600;font-size:13px">Break End</div><div style="font-size:12px;color:var(--muted)">01:45 PM — Resumed</div></div><div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px">01:45 PM</div></div>
-            <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px dashed var(--border)"><span style="font-size:18px">⏳</span><div><div style="font-weight:600;font-size:13px;color:var(--muted)">Punch Out</div><div style="font-size:12px;color:var(--light)">Pending</div></div><div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px;color:var(--light)">—</div></div>
-          </div></div>
+          <div class="card">
+            <div class="ch">
+              <span class="ct" id="todayLogTitle">Today's Log</span>
+              <span id="todayLogDate" style="font-size:12px;color:var(--muted)"></span>
+            </div>
+            <div class="cb" style="display:flex;flex-direction:column;gap:8px" id="todayLogList">
+              <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">No activity recorded today. Punch in to start.</div>
+            </div>
+          </div>
         </div>
         <div id="att-fy" style="display:none">
           <div class="card"><div class="ch"><span class="ct">FY Attendance Summary</span></div>
@@ -768,6 +806,11 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
 
       <!-- SETTINGS -->
       <div class="pv" id="pv-settings">
+        <div class="tabs" style="margin-bottom:18px">
+          <button class="tab active" onclick="swTab(this,'sett-general')">General</button>
+          <button class="tab" onclick="swTab(this,'sett-employees')">Employees</button>
+        </div>
+        <div id="sett-general">
         <div class="g2">
           <div>
             <div class="card mb16">
@@ -800,11 +843,77 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
             </div>
           </div>
         </div>
+        </div><!-- /sett-general -->
+
+        <!-- EMPLOYEE MANAGEMENT TAB -->
+        <div id="sett-employees" style="display:none">
+          <div class="card">
+            <div class="ch">
+              <span class="ct">Employee Roster</span>
+              <button class="tb-btn p" style="font-size:12px;padding:6px 14px" onclick="openAddEmpModal()">＋ Add Employee</button>
+            </div>
+            <div class="cb" style="padding:0">
+              <table class="dt" id="settEmpTable">
+                <thead><tr><th>Name</th><th>Emp ID</th><th>Department</th><th>Role</th><th>Login</th><th>Punch Status</th><th>Actions</th></tr></thead>
+                <tbody id="settEmpTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /mainApp -->
+
+<!-- ── Add / Edit Employee Modal ── -->
+<div class="moverlay" id="mEmp">
+  <div class="modal" style="width:560px">
+    <div class="mtitle"><span id="mEmpTitle">Add Employee</span><button class="mclose" onclick="closeM('mEmp')">✕</button></div>
+    <input type="hidden" id="mEmpIdx" value="-1">
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mEmpName" placeholder="e.g. Priya Sharma"></div>
+      <div class="fg"><label class="fl">Employee ID <span class="req">*</span></label><input class="fi" id="mEmpId" placeholder="e.g. EMP002" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Department</label>
+        <select class="fs" id="mEmpDept">
+          <option>Engineering</option><option>HR</option><option>Finance</option><option>Operations</option><option>Product</option><option>Sales</option><option>Administration</option><option>Management</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Designation</label><input class="fi" id="mEmpDesig" placeholder="e.g. Software Engineer"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Role / Access Level</label>
+        <select class="fs" id="mEmpRole">
+          <option value="Employee">Employee</option>
+          <option value="Manager">Manager</option>
+          <option value="Team Lead">Team Lead</option>
+          <option value="HR Admin">HR Admin</option>
+          <option value="Director">Director</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Date of Joining</label><input class="fi" type="date" id="mEmpDOJ"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Email</label><input class="fi" id="mEmpEmail" type="email" placeholder="emp@company.com"></div>
+      <div class="fg"><label class="fl">Mobile</label><input class="fi" id="mEmpMobile" placeholder="10-digit number"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Login Password <span class="req">*</span></label><input class="fi" type="password" id="mEmpPass" placeholder="Min 6 characters"></div>
+      <div class="fg"><label class="fl">Confirm Password</label><input class="fi" type="password" id="mEmpPass2" placeholder="Repeat password"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:4px">
+      <div><div style="font-size:13px;font-weight:500">Login Enabled</div><div style="font-size:12px;color:var(--muted)">Allow this employee to log in to the system</div></div>
+      <button class="toggle on" id="mEmpLoginTog" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-ghost" onclick="closeM('mEmp')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEmpModal()">Save Employee</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── Leave Application Modal ── -->
 <div class="moverlay" id="mApply">
@@ -933,8 +1042,11 @@ const DEFAULT_CONFIG = {
   adminEmail: 'hr@company.com',
   adminId:    'EMP001',
   adminDesig: 'HR Manager',
+  adminPass:   'admin123',
 
   isConfigured: false,
+  // ── Employees (added during wizard Step 11 or via Settings) ──
+  employees: [],
 };
 
 let CFG = JSON.parse(localStorage.getItem('hrMergedConfig') || 'null') || { ...DEFAULT_CONFIG };
@@ -954,6 +1066,7 @@ const STEPS = [
   { id:'carryforward',phase:'Policy Rules',    label:'Carry Forward',     icon:'🔄' },
   { id:'compoff',     phase:'Policy Rules',    label:'Comp-Off Rules',    icon:'⏱️' },
   { id:'permissions', phase:'Policy Rules',    label:'Permission Policy', icon:'🚪' },
+  { id:'employees',    phase:'Go Live',         label:'Add Employees',     icon:'👥' },
   { id:'admin',       phase:'Go Live',         label:'Admin Account',     icon:'👤' },
   { id:'preview',     phase:'Go Live',         label:'Review & Launch',   icon:'🚀' },
 ];
@@ -1369,7 +1482,24 @@ function renderWizardStep() {
       </div>`;
   }
 
-  // ── STEP 11: ADMIN ACCOUNT ───────────────────────────────────
+  // ── STEP 11: ADD EMPLOYEES ──────────────────────────────────
+  else if (s.id === 'employees') {
+    title = 'Add your employees';
+    desc  = 'Add employees who will use this system. You can add more any time from Settings → Employees. Each employee gets a login with Employee ID and password.';
+    body = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:13px;color:var(--muted)"><strong id="empCountLbl">${CFG.employees.length}</strong> employee(s) added</div>
+        <button class="add-lt-btn" onclick="addEmpRow()">＋ Add Employee</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 110px 110px auto;gap:6px;padding:0 8px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--light)">
+        <span>Full Name</span><span>Emp ID</span><span>Department</span><span>Role</span><span>Password</span><span></span>
+      </div>
+      <div id="wEmpList" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-bottom:12px"></div>
+      <div class="info-box blue"><div class="ib-icon">🔑</div>
+        <div>Each employee logs in using their <strong>Employee ID</strong> and the <strong>Password</strong> you set here. They can change their password after first login. The admin account added in the next step is separate.</div></div>`;
+  }
+
+  // ── STEP 12: ADMIN ACCOUNT ───────────────────────────────────
   else if (s.id === 'admin') {
     title = 'Create the admin account';
     desc  = 'This will be the super-admin who can manage the entire system.';
@@ -1441,6 +1571,7 @@ function renderWizardStep() {
   if (s.id === 'holidays')   renderWizHolList();
   if (s.id === 'slabs')      renderWizSlabs();
   if (s.id === 'carryforward') renderWizCF();
+  if (s.id === 'employees')  renderWizEmpList();
   if (s.id === 'compoff')    updateCOCalc();
   if (s.id === 'permissions') updatePermCalcWiz();
 }
@@ -1592,6 +1723,42 @@ function addSlab() {
 
 function delSlab(i) { CFG.slabs.splice(i,1); renderWizSlabs(); }
 
+// Employee roster in wizard
+function renderWizEmpList() {
+  const el = document.getElementById('wEmpList');
+  if (!el) return;
+  const depts = ['Engineering','HR','Finance','Operations','Product','Sales','Administration','Management'];
+  const roles  = ['Employee','Manager','HR Admin','Team Lead','Director'];
+  el.innerHTML = CFG.employees.map((e,i) => `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 110px 110px auto;gap:6px;align-items:center;padding:8px 8px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);animation:ltIn 0.2s ease">
+      <input class="fi fi-sm" value="${e.name}" placeholder="Full name" oninput="CFG.employees[${i}].name=this.value">
+      <input class="fi fi-sm" value="${e.empId}" placeholder="EMP002" oninput="CFG.employees[${i}].empId=this.value.toUpperCase();this.value=this.value.toUpperCase()">
+      <select class="fs fs-sm" onchange="CFG.employees[${i}].dept=this.value">
+        ${depts.map(d=>`<option ${e.dept===d?'selected':''}>${d}</option>`).join('')}
+      </select>
+      <select class="fs fs-sm" onchange="CFG.employees[${i}].role=this.value">
+        ${roles.map(r=>`<option ${e.role===r?'selected':''}>${r}</option>`).join('')}
+      </select>
+      <input class="fi fi-sm" type="password" value="${e.password}" placeholder="Password" oninput="CFG.employees[${i}].password=this.value">
+      <button class="lt-del" onclick="delEmp(${i})">✕</button>
+    </div>`).join('');
+  const lbl = document.getElementById('empCountLbl');
+  if (lbl) lbl.textContent = CFG.employees.length;
+}
+
+function addEmpRow() {
+  const nextId = 'EMP' + String(CFG.employees.length + 2).padStart(3,'0');
+  CFG.employees.push({ name:'', empId:nextId, dept:'Engineering', role:'Employee', password:'', loginEnabled:true, color: randColor() });
+  renderWizEmpList();
+}
+
+function delEmp(i) { CFG.employees.splice(i,1); renderWizEmpList(); }
+
+function randColor() {
+  const cols = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0D9488'];
+  return cols[Math.floor(Math.random()*cols.length)];
+}
+
 // Carry-forward table in wizard
 function renderWizCF() {
   const el = document.getElementById('wCFTbody');
@@ -1701,6 +1868,13 @@ function wizNext() {
     CFG.permExcessMode        = document.getElementById('wPermExcessMode')?.value             || 'leave';
     CFG.permNextMonthMaxDeduct= parseFloat(document.getElementById('wPermNextMonthMax')?.value) || 1;
   }
+  if (s.id === 'employees') {
+    // Employees are live-edited directly into CFG.employees — just validate
+    CFG.employees = CFG.employees.filter(e => e.name.trim() && e.empId.trim());
+    // Each employee must have a password
+    const noPass = CFG.employees.find(e => !e.password.trim());
+    if (noPass) { toast('Please set a password for '+noPass.name,'err'); return; }
+  }
   if (s.id === 'admin') {
     CFG.adminName  = document.getElementById('wAdminName')?.value  || CFG.adminName;
     CFG.adminEmail = document.getElementById('wAdminEmail')?.value || CFG.adminEmail;
@@ -1710,6 +1884,7 @@ function wizNext() {
     const p2 = document.getElementById('wAdminPass2')?.value;
     if (!CFG.adminName.trim())  { toast('Please enter admin name','err'); return; }
     if (p1 && p1 !== p2)        { toast('Passwords do not match','err'); return; }
+    if (p1) CFG.adminPass = p1;
   }
 
   saveConfig();
@@ -1726,20 +1901,22 @@ function wizBack() {
 
 function launch() {
   CFG.isConfigured = true;
+  // Set a default admin password if not yet set
+  if (!CFG.adminPass) CFG.adminPass = 'admin123';
   saveConfig();
   applyTheme();
   document.getElementById('setupWizard').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'block';
-  document.title = CFG.appName;
-  bootstrapApp();
-  toast(`Welcome to ${CFG.appName}! 🎉`, 'ok');
+  showLoginScreen();
+  toast('Setup complete! Please log in to get started 🎉', 'ok');
 }
 
 function reconfigure() {
   CFG.isConfigured = false;
+  CURRENT_USER = null;
   saveConfig();
-  document.getElementById('mainApp').style.display   = 'none';
-  document.getElementById('setupWizard').style.display = 'flex';
+  document.getElementById('mainApp').style.display    = 'none';
+  document.getElementById('loginScreen').style.display= 'none';
+  document.getElementById('setupWizard').style.display= 'flex';
   wizStep = 0;
   renderWizardStep();
 }
@@ -1777,6 +1954,8 @@ function bootstrapApp() {
   renderApplyHolidays();
   renderTeamCal();
   renderApplyPolicySummary();
+  renderSettEmpTable();
+  initPunchUI();
   startClock();
   goPage('dashboard', document.querySelector('.sb-item.active'));
 }
@@ -1864,11 +2043,18 @@ function renderAttendanceTb() {
 function renderApprovals() {
   const el = document.getElementById('apvCards');
   if (!el) return;
-  const pending=[
-    {name:'Anjali Mehta',id:'EMP003',dept:'Engineering',type:'CL',from:'14 Mar',to:'16 Mar',days:3,reason:'Personal'},
-    {name:'Ravi Shankar', id:'EMP007',dept:'Finance',     type:'PL',from:'20 Mar',to:'22 Mar',days:3,reason:'Vacation'},
-    {name:'Pooja Singh',  id:'EMP012',dept:'HR',          type:'SL',from:'13 Mar',to:'13 Mar',days:1,reason:'Medical'},
-  ];
+  // Use real employees if available, else show empty state
+  const empPool = CFG.employees.length > 0
+    ? CFG.employees.slice(0,3).map((e,i) => ({
+        name: e.name||'Employee', id: e.empId||'EMP00'+(i+2),
+        dept: e.dept||'General',
+        type: CFG.leaveTypes[i%CFG.leaveTypes.length]?.short||'CL',
+        from:'14 Mar', to: i===0?'16 Mar':i===1?'22 Mar':'13 Mar',
+        days: i===0?3:i===1?3:1, reason: ['Personal','Vacation','Medical'][i]
+      }))
+    : [];
+  if (!el) return;
+  const pending = empPool;
   el.innerHTML = pending.map((a,i)=>`
     <div class="acard" id="ac${i}">
       <div class="acard-head">
@@ -1915,24 +2101,30 @@ function rejectLv(i) {
 function renderTeam() {
   const el=document.getElementById('empGrid');
   if(!el)return;
-  const members=[
-    {name:'Priya Sharma', dept:'Product',     col:'#2563EB',st:'app'},
-    {name:'Rahul Verma',  dept:'Finance',     col:'#7C3AED',st:'app'},
-    {name:'Sneha Nair',   dept:'Engineering', col:'#059669',st:'wfh'},
-    {name:'Arjun Patel',  dept:'Operations',  col:'#DC2626',st:'rej'},
-    {name:'Divya Reddy',  dept:'HR',          col:'#DB2777',st:'app'},
-    {name:'Kiran Kumar',  dept:'Engineering', col:'#0891B2',st:'app'},
-    {name:'Meena Iyer',   dept:'Product',     col:'#D97706',st:'app'},
-    {name:'Suresh Babu',  dept:'Engineering', col:'#7C3AED',st:'wfh'},
-    {name:'Asha Pillai',  dept:'Finance',     col:'#059669',st:'app'},
+  // Build list from real employees + admin
+  const allEmps = [
+    { name: CFG.adminName, dept: 'Administration', role:'HR Admin', color: CFG.brandColor, empId: CFG.adminId, loginEnabled: true },
+    ...CFG.employees
   ];
-  const SB={app:`<span class="badge app">Present</span>`,wfh:`<span class="badge wfh">WFH</span>`,rej:`<span class="badge rej">Absent</span>`};
-  el.innerHTML=members.map(m=>`
-    <div class="emp-card">
-      <div class="emp-av" style="background:${m.col}">${initials(m.name)}</div>
-      <div style="flex:1"><div class="emp-name">${m.name}</div><div class="emp-dept">${m.dept}</div></div>
-      ${SB[m.st]}
-    </div>`).join('');
+  if (allEmps.length === 0) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">No employees added yet. Go to Settings → Employees to add team members.</div>';
+    return;
+  }
+  const statusCycle = ['app','app','app','wfh','rej'];
+  el.innerHTML = allEmps.map((m,i) => {
+    const st = statusCycle[i % statusCycle.length];
+    const SB = {app:`<span class="badge app">Present</span>`,wfh:`<span class="badge wfh">WFH</span>`,rej:`<span class="badge rej">Absent</span>`};
+    const col = m.color || CFG.brandColor;
+    return `<div class="emp-card" onclick="openEmpDetail(${i})">
+      <div class="emp-av" style="background:${col}">${initials(m.name)}</div>
+      <div style="flex:1">
+        <div class="emp-name">${m.name||'—'}</div>
+        <div class="emp-dept">${m.dept||''} ${m.role?'· '+m.role:''}</div>
+        <div style="font-size:10px;color:var(--light)">${m.empId||''}</div>
+      </div>
+      ${SB[st]}
+    </div>`;
+  }).join('');
 }
 
 function renderHolidays() {
@@ -2071,11 +2263,16 @@ function renderApplyHolidays() {
 function renderTeamCal() {
   const el=document.getElementById('teamCalCont');
   if(!el)return;
-  el.innerHTML=[
-    {name:'Anjali Mehta',type:'CL',dates:'14–16 Mar',st:'pen'},
-    {name:'Ravi Shankar', type:'PL',dates:'20–22 Mar',st:'pen'},
-    {name:'Pooja Singh',  type:'SL',dates:'13 Mar',   st:'app'},
-  ].map(e=>`
+  const empPool = CFG.employees.length > 0
+    ? CFG.employees.slice(0,3).map((e,i)=>({
+        name:e.name||'Employee',
+        type:CFG.leaveTypes[i%CFG.leaveTypes.length]?.short||'CL',
+        dates:['14–16 Mar','20–22 Mar','13 Mar'][i],
+        st:i===2?'app':'pen'
+      }))
+    : [];
+  if(!empPool.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No employee leave on calendar yet.</div>';return;}
+  el.innerHTML=empPool.map(e=>`
     <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:8px">
       <div class="ua" style="background:var(--brand)">${initials(e.name)}</div>
       <div style="flex:1"><div style="font-size:13px;font-weight:500">${e.name}</div><div style="font-size:12px;color:var(--muted)">${e.type} · ${e.dates}</div></div>
@@ -2108,10 +2305,124 @@ function openM(id)  { document.getElementById(id).classList.add('open'); }
 function closeM(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.moverlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 
+// ── Punch state for currently logged-in employee ──
+// punchState: 'out' | 'in' | 'break'
+function getPunchState() {
+  const key = 'punch_' + (CURRENT_USER?.empId || 'admin');
+  return JSON.parse(localStorage.getItem(key) || '{"state":"out","punchIn":null,"punchOut":null,"breakStart":null,"logs":[]}');
+}
+function savePunchState(ps) {
+  const key = 'punch_' + (CURRENT_USER?.empId || 'admin');
+  localStorage.setItem(key, JSON.stringify(ps));
+}
+
 function punch(type) {
-  const txt=document.getElementById('punchTxt');
-  if(type==='out'){ toast('Punched out. Have a great evening! 🌙','ok'); if(txt) txt.textContent='Punched Out at '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
-  else toast('Break started ☕','wrn');
+  const ps   = getPunchState();
+  const now  = new Date();
+  const timeStr = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+  if (type === 'in') {
+    ps.state    = 'in';
+    ps.punchIn  = now.toISOString();
+    ps.punchOut = null;
+    ps.logs.push({ action:'Punch In', time: now.toISOString() });
+    savePunchState(ps);
+    updatePunchUI(ps);
+    toast('Punched in at ' + timeStr + ' 🟢','ok');
+  }
+  else if (type === 'out') {
+    if (ps.state === 'break') {
+      toast('Please end your break before punching out','wrn');
+      return;
+    }
+    ps.state    = 'out';
+    ps.punchOut = now.toISOString();
+    ps.logs.push({ action:'Punch Out', time: now.toISOString() });
+    savePunchState(ps);
+    updatePunchUI(ps);
+    toast('Punched out at ' + timeStr + '. Have a great evening! 🌙','ok');
+  }
+  else if (type === 'brk') {
+    if (ps.state !== 'in') { toast('You must be punched in to take a break','wrn'); return; }
+    ps.state      = 'break';
+    ps.breakStart = now.toISOString();
+    ps.logs.push({ action:'Break Start', time: now.toISOString() });
+    savePunchState(ps);
+    updatePunchUI(ps);
+    toast('Break started at ' + timeStr + ' ☕','wrn');
+  }
+  else if (type === 'resume') {
+    ps.state      = 'in';
+    ps.breakStart = null;
+    ps.logs.push({ action:'Break End', time: now.toISOString() });
+    savePunchState(ps);
+    updatePunchUI(ps);
+    toast('Break ended. Welcome back! ▶️','ok');
+  }
+}
+
+function updatePunchUI(ps) {
+  const txt     = document.getElementById('punchTxt');
+  const btnArea = document.getElementById('punchBtns');
+  const dot     = document.querySelector('.pdot');
+  const punchIn  = ps.punchIn  ? new Date(ps.punchIn) : null;
+  const timeStr  = t => new Date(t).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+  if (txt) {
+    if      (ps.state === 'in')    txt.textContent = 'Punched In at ' + timeStr(ps.punchIn);
+    else if (ps.state === 'break') txt.textContent = 'On Break since ' + timeStr(ps.breakStart);
+    else if (ps.state === 'out' && ps.punchOut) txt.textContent = 'Punched Out at ' + timeStr(ps.punchOut);
+    else                           txt.textContent = 'Not Punched In';
+  }
+  if (dot) dot.style.background = ps.state==='in'?'#4ade80':ps.state==='break'?'#fbbf24':'#f87171';
+
+  if (btnArea) {
+    if (ps.state === 'out') {
+      btnArea.innerHTML = `<button class="pbtn brk" onclick="punch('in')">Punch In 🟢</button>`;
+    } else if (ps.state === 'in') {
+      btnArea.innerHTML = `
+        <button class="pbtn out" onclick="punch('out')">Punch Out 🚪</button>
+        <button class="pbtn brk" onclick="punch('brk')">Break ☕</button>`;
+    } else if (ps.state === 'break') {
+      btnArea.innerHTML = `
+        <button class="pbtn brk" onclick="punch('resume')">Resume ▶️</button>
+        <button class="pbtn out" onclick="punch('out')">Punch Out 🚪</button>`;
+    }
+  }
+
+  // Refresh today's log in attendance page
+  renderTodayLog(ps);
+}
+
+function renderTodayLog(ps) {
+  const el = document.getElementById('todayLogList');
+  if (!el || !ps.logs) return;
+  const icons = {'Punch In':'🟢','Punch Out':'🚪','Break Start':'☕','Break End':'▶️'};
+  const colors = {'Punch In':'var(--green-bg)','Punch Out':'var(--bg)','Break Start':'var(--amber-bg)','Break End':'var(--green-bg)'};
+  const borders = {'Punch In':'var(--green)','Punch Out':'var(--border)','Break Start':'var(--amber)','Break End':'var(--green)'};
+  if (!ps.logs.length) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">No activity recorded today. Punch in to start.</div>';
+    return;
+  }
+  el.innerHTML = ps.logs.map(l => `
+    <div style="display:flex;align-items:center;gap:14px;padding:12px;background:${colors[l.action]||'var(--bg)'};border-radius:8px;border-left:4px solid ${borders[l.action]||'var(--border)'}">
+      <span style="font-size:18px">${icons[l.action]||'⏺️'}</span>
+      <div><div style="font-weight:600;font-size:13px">${l.action}</div></div>
+      <div style="margin-left:auto;font-family:'Syne';font-weight:800;font-size:16px">${new Date(l.time).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>`).join('');
+}
+
+function initPunchUI() {
+  const ps = getPunchState();
+  // Reset logs if it's a new day
+  const today = new Date().toDateString();
+  const lastLog = ps.logs && ps.logs.length ? new Date(ps.logs[ps.logs.length-1].time).toDateString() : null;
+  if (lastLog && lastLog !== today) {
+    ps.logs = [];
+    if (ps.state !== 'out') { ps.state = 'out'; ps.punchIn = null; ps.punchOut = null; ps.breakStart = null; }
+    savePunchState(ps);
+  }
+  updatePunchUI(ps);
 }
 
 function liveUpdateName() {
@@ -2145,6 +2456,8 @@ function startClock() {
   tick(); setInterval(tick,1000);
   const d=document.getElementById('liveDate');
   if(d) d.textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const td = document.getElementById('todayLogDate');
+  if(td) td.textContent=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
 }
 
 function toast(msg, type='') {
@@ -2157,9 +2470,221 @@ function toast(msg, type='') {
 }
 
 // ================================================================
-//  SECTION 9 — INIT
+//  SECTION 9 — LOGIN / SESSION / EMPLOYEE MANAGEMENT
+// ================================================================
+
+// Currently logged-in user
+let CURRENT_USER = null;
+
+function doLogin() {
+  const empId = document.getElementById('loginEmpId')?.value.trim().toUpperCase();
+  const pass  = document.getElementById('loginPassword')?.value;
+  const errEl = document.getElementById('loginError');
+  if (!empId || !pass) { if(errEl){errEl.style.display='block';errEl.textContent='✕ Please enter Employee ID and password.';} return; }
+
+  // Check admin
+  if (empId === (CFG.adminId||'EMP001').toUpperCase() && pass === (CFG.adminPass||'admin123')) {
+    CURRENT_USER = { name:CFG.adminName, empId:CFG.adminId, role:'HR Admin', dept:'Administration', color:CFG.brandColor, isAdmin:true };
+    startSession();
+    return;
+  }
+  // Check employees
+  const emp = CFG.employees.find(e => e.empId.toUpperCase() === empId && e.password === pass && e.loginEnabled !== false);
+  if (emp) {
+    CURRENT_USER = { ...emp, isAdmin: emp.role==='HR Admin' };
+    startSession();
+    return;
+  }
+  if(errEl){ errEl.style.display='block'; errEl.textContent='✕ Invalid Employee ID or Password'; }
+}
+
+function togglePwVis() {
+  const inp = document.getElementById('loginPassword');
+  const btn = document.getElementById('pwVisBtn');
+  if (!inp) return;
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  if(btn) btn.textContent = inp.type==='password' ? '👁️' : '🙈';
+}
+
+function startSession() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display     = 'block';
+  // Update sidebar user info
+  document.getElementById('appUserAv').textContent    = initials(CURRENT_USER.name);
+  document.getElementById('appUserName').textContent  = CURRENT_USER.name;
+  document.getElementById('appUserRole').textContent  = CURRENT_USER.role || 'Employee';
+  // Hide admin-only nav items if not admin
+  const adminItems = document.querySelectorAll('.admin-only');
+  adminItems.forEach(el => { el.style.display = CURRENT_USER.isAdmin ? '' : 'none'; });
+  initPunchUI();
+  bootstrapApp();
+  toast('Welcome back, ' + CURRENT_USER.name.split(' ')[0] + '! 👋','ok');
+  // Update today log title
+  const tl = document.getElementById('todayLogTitle');
+  const td = document.getElementById('todayLogDate');
+  if(tl) tl.textContent = "Today's Log — " + CURRENT_USER.name;
+  if(td) td.textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function doLogout() {
+  CURRENT_USER = null;
+  document.getElementById('mainApp').style.display     = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  // Clear login form
+  const eid = document.getElementById('loginEmpId');
+  const epw = document.getElementById('loginPassword');
+  const err = document.getElementById('loginError');
+  if(eid) eid.value=''; if(epw) epw.value=''; if(err) err.style.display='none';
+}
+
+function showLoginScreen() {
+  applyTheme();
+  // Update login screen branding
+  const li = document.getElementById('loginIcon');
+  const la = document.getElementById('loginAppName');
+  const lc = document.getElementById('loginCoName');
+  if(li) li.textContent = CFG.appIcon;
+  if(la) la.textContent = CFG.appName;
+  if(lc) lc.textContent = CFG.companyName;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.title = CFG.appName + ' — Login';
+}
+
+// ── Employee modal ──
+function openAddEmpModal(idx) {
+  const isEdit = idx !== undefined;
+  document.getElementById('mEmpTitle').textContent = isEdit ? 'Edit Employee' : 'Add Employee';
+  document.getElementById('mEmpIdx').value = isEdit ? idx : -1;
+  const e = isEdit ? CFG.employees[idx] : {};
+  document.getElementById('mEmpName').value   = e.name    || '';
+  document.getElementById('mEmpId').value     = e.empId   || ('EMP' + String(CFG.employees.length+2).padStart(3,'0'));
+  document.getElementById('mEmpDesig').value  = e.desig   || '';
+  document.getElementById('mEmpEmail').value  = e.email   || '';
+  document.getElementById('mEmpMobile').value = e.mobile  || '';
+  document.getElementById('mEmpPass').value   = '';
+  document.getElementById('mEmpPass2').value  = '';
+  document.getElementById('mEmpDOJ').value    = e.doj     || '';
+  const deptSel = document.getElementById('mEmpDept');
+  const roleSel = document.getElementById('mEmpRole');
+  if(deptSel) deptSel.value = e.dept || 'Engineering';
+  if(roleSel) roleSel.value = e.role || 'Employee';
+  const tog = document.getElementById('mEmpLoginTog');
+  if(tog) { tog.classList.remove('on'); if(e.loginEnabled !== false) tog.classList.add('on'); }
+  openM('mEmp');
+}
+
+function saveEmpModal() {
+  const idx   = parseInt(document.getElementById('mEmpIdx').value);
+  const name  = document.getElementById('mEmpName').value.trim();
+  const empId = document.getElementById('mEmpId').value.trim().toUpperCase();
+  const pass  = document.getElementById('mEmpPass').value;
+  const pass2 = document.getElementById('mEmpPass2').value;
+  if (!name)  { toast('Please enter employee name','err'); return; }
+  if (!empId) { toast('Please enter Employee ID','err'); return; }
+  if (idx < 0 && !pass) { toast('Please set a password','err'); return; }
+  if (pass && pass !== pass2) { toast('Passwords do not match','err'); return; }
+  // Check duplicate empId
+  const dup = CFG.employees.findIndex((e,i) => e.empId.toUpperCase()===empId && i!==idx);
+  if (dup>=0) { toast('Employee ID '+empId+' already exists','err'); return; }
+
+  const emp = {
+    name, empId,
+    dept:         document.getElementById('mEmpDept').value,
+    role:         document.getElementById('mEmpRole').value,
+    desig:        document.getElementById('mEmpDesig').value,
+    email:        document.getElementById('mEmpEmail').value,
+    mobile:       document.getElementById('mEmpMobile').value,
+    doj:          document.getElementById('mEmpDOJ').value,
+    loginEnabled: document.getElementById('mEmpLoginTog').classList.contains('on'),
+    color:        idx >= 0 ? (CFG.employees[idx].color || randColor()) : randColor(),
+    password:     pass || (idx>=0 ? CFG.employees[idx].password : ''),
+  };
+
+  if (idx >= 0) CFG.employees[idx] = emp;
+  else          CFG.employees.push(emp);
+
+  saveConfig();
+  closeM('mEmp');
+  renderSettEmpTable();
+  renderTeam();
+  toast(idx>=0 ? emp.name+' updated ✓' : emp.name+' added ✓', 'ok');
+}
+
+function deleteEmpFromSettings(idx) {
+  if (!confirm('Remove '+CFG.employees[idx].name+' from the system?')) return;
+  CFG.employees.splice(idx, 1);
+  saveConfig();
+  renderSettEmpTable();
+  renderTeam();
+  toast('Employee removed','wrn');
+}
+
+function toggleEmpLogin(idx) {
+  CFG.employees[idx].loginEnabled = !CFG.employees[idx].loginEnabled;
+  saveConfig();
+  renderSettEmpTable();
+  toast(CFG.employees[idx].name + (CFG.employees[idx].loginEnabled ? ' login enabled':'  login disabled'), CFG.employees[idx].loginEnabled?'ok':'wrn');
+}
+
+function openEmpDetail(idx) {
+  // idx 0 = admin, rest are CFG.employees
+  if (idx === 0) { toast('Admin account — manage via Settings → General','wrn'); return; }
+  openAddEmpModal(idx - 1);
+}
+
+function renderSettEmpTable() {
+  const el = document.getElementById('settEmpTbody');
+  if (!el) return;
+  // Combine admin + employees
+  const allEmps = [
+    { name:CFG.adminName, empId:CFG.adminId||'EMP001', dept:'Administration', role:'HR Admin', loginEnabled:true, isAdmin:true },
+    ...CFG.employees
+  ];
+  if (allEmps.length === 1) {
+    el.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No employees added yet. Click "+ Add Employee" to get started.</td></tr>';
+    return;
+  }
+  const ps_cache = {};
+  el.innerHTML = allEmps.map((e,i) => {
+    const pkey = 'punch_'+e.empId;
+    const ps = JSON.parse(localStorage.getItem(pkey)||'{"state":"out"}');
+    const stateLabel = ps.state==='in'?'<span class="badge app">● Punched In</span>':ps.state==='break'?'<span class="badge pen">☕ On Break</span>':'<span class="badge neu">○ Out</span>';
+    const loginBadge = e.loginEnabled!==false ? '<span class="badge app">Enabled</span>' : '<span class="badge rej">Disabled</span>';
+    if (e.isAdmin) {
+      return `<tr>
+        <td><div style="font-weight:600">${e.name}</div><div style="font-size:11px;color:var(--light)">${e.empId}</div></td>
+        <td>${e.empId}</td><td>${e.dept}</td>
+        <td><span class="badge wfh">${e.role}</span></td>
+        <td>${loginBadge}</td><td>${stateLabel}</td>
+        <td><span style="font-size:12px;color:var(--muted)">Admin Account</span></td>
+      </tr>`;
+    }
+    const ri = i-1;
+    return `<tr>
+      <td><div style="font-weight:600">${e.name||'—'}</div><div style="font-size:11px;color:var(--light)">${e.empId}</div></td>
+      <td>${e.empId}</td><td>${e.dept||'—'}</td>
+      <td><span class="badge neu">${e.role||'Employee'}</span></td>
+      <td><button onclick="toggleEmpLogin(${ri})" style="border:none;background:none;cursor:pointer;padding:0">${loginBadge}</button></td>
+      <td>${stateLabel}</td>
+      <td>
+        <button class="aact apv" onclick="openAddEmpModal(${ri})" style="margin-right:4px">✏️ Edit</button>
+        <button class="aact rej" onclick="deleteEmpFromSettings(${ri})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ================================================================
+//  SECTION 10 — INIT
 // ================================================================
 window.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  if (CFG.isConfigured) {
+    showLoginScreen();
+  } else {
+    renderWizardStep();
+  }
+});
   applyTheme();
   if (CFG.isConfigured) {
     document.getElementById('setupWizard').style.display = 'none';
