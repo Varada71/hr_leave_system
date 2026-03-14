@@ -920,6 +920,8 @@ const DEFAULT_CONFIG = {
   permExcessFrom:     'cl',
   permWorkHrsDay:     8,
   permCFEnabled:      false,
+  permExcessMode:     'leave',
+  permNextMonthMaxDeduct: 1,
 
   // ── Approval workflow ──
   approvalLevels:     1,
@@ -1320,20 +1322,48 @@ function renderWizardStep() {
               <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermCount" value="${CFG.permMaxCount}" min="1" max="30"><span class="fi-unit">times</span></div>
             </div>
           </div>
-          <div class="sec-lbl">Excess Permission → Leave Deduction</div>
+          <div class="sec-lbl">Excess Permission → Deduction Rules</div>
           <div class="info-box red"><div class="ib-icon">⚠️</div>
-            <div><strong>Your Policy:</strong> Any permissions above the permissible limit are treated as <strong>Leave</strong> and deducted from the Leave Balance.</div></div>
-          <div class="fg-row">
-            <div class="fg"><label class="fl">Deduct Excess From</label>
-              <select class="fs" id="wPermFrom">
-                ${CFG.leaveTypes.map(lt=>`<option value="${lt.short}" ${CFG.permExcessFrom===lt.short?'selected':''}>${lt.name} (${lt.short})</option>`).join('')}
-                <option value="LWP" ${CFG.permExcessFrom==='LWP'?'selected':''}>LWP (Loss of Pay)</option>
-              </select>
-            </div>
-            <div class="fg"><label class="fl">Working Hours Per Day</label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermWrkHrs" value="${CFG.permWorkHrsDay}" min="4" max="12" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hours</span></div>
+            <div><strong>Your Policy:</strong> Any permissions above the permissible limit can be deducted from the Leave Balance <strong>or</strong> adjusted against the next month's permission balance.</div></div>
+
+          <div class="fg">
+            <label class="fl">How to Handle Excess Permission?</label>
+            <select class="fs" id="wPermExcessMode" onchange="togglePermExcessMode(this.value)">
+              <option value="leave"      ${CFG.permExcessMode==='leave'      ?'selected':''}>Deduct from Leave Balance (CL / LWP)</option>
+              <option value="next_month" ${CFG.permExcessMode==='next_month' ?'selected':''}>Reduce from Next Month's Permission Balance</option>
+              <option value="both"       ${CFG.permExcessMode==='both'       ?'selected':''}>Next Month first — then Leave Balance if still excess</option>
+            </select>
+            <div class="hint info">💡 "Next Month" option carries the excess as a debt — the employee's next month permission limit is reduced by the excess hours taken.</div>
+          </div>
+
+          <div id="permLeaveDeductSection" style="${CFG.permExcessMode==='next_month'?'display:none':''}">
+            <div class="fg-row">
+              <div class="fg"><label class="fl">Deduct Excess From Leave Type</label>
+                <select class="fs" id="wPermFrom">
+                  ${CFG.leaveTypes.map(lt=>`<option value="${lt.short}" ${CFG.permExcessFrom===lt.short?'selected':''}>${lt.name} (${lt.short})</option>`).join('')}
+                  <option value="LWP" ${CFG.permExcessFrom==='LWP'?'selected':''}>LWP (Loss of Pay)</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Working Hours Per Day</label>
+                <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermWrkHrs" value="${CFG.permWorkHrsDay}" min="4" max="12" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hours</span></div>
+              </div>
             </div>
           </div>
+
+          <div id="permNextMonthSection" style="${CFG.permExcessMode==='leave'?'display:none':''}">
+            <div class="fg-row">
+              <div class="fg"><label class="fl">Max Excess Hours Carried to Next Month</label>
+                <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermNextMonthMax" value="${CFG.permNextMonthMaxDeduct}" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div>
+                <div class="hint">If excess exceeds this limit, the remaining is deducted from Leave Balance. Set high (e.g. 8) to always use next month first.</div>
+              </div>
+              <div class="fg"><label class="fl">Working Hours Per Day</label>
+                <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermWrkHrs" value="${CFG.permWorkHrsDay}" min="4" max="12" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hours</span></div>
+              </div>
+            </div>
+            <div class="info-box amber"><div class="ib-icon">📋</div>
+              <div><strong>Example:</strong> Employee is allowed <strong>${CFG.permMonthlyHours}h</strong>/month. They take <strong>${CFG.permMonthlyHours+1}h</strong> in March → <strong>1h excess</strong> is carried as debt. In April, their available permission is reduced to <strong>${CFG.permMonthlyHours-1}h</strong> for that month.</div></div>
+          </div>
+
           <div class="info-box blue" id="permCalcBoxWiz"><div class="ib-icon">🧮</div><div id="permCalcTxtWiz">Loading…</div></div>
         </div>
       </div>`;
@@ -1383,6 +1413,7 @@ function renderWizardStep() {
         <div class="cs-item"><div class="cs-label">CF Encashment</div><div class="cs-val">${CFG.cfEncashAllowed ? 'Allowed' : 'Not Allowed'}</div></div>
         <div class="cs-item"><div class="cs-label">Comp-Off Min Hours</div><div class="cs-val">${coNote}</div></div>
         <div class="cs-item"><div class="cs-label">Permission Limit</div><div class="cs-val">${permNote}</div></div>
+        <div class="cs-item"><div class="cs-label">Excess Permission</div><div class="cs-val">${CFG.permissionEnabled?(CFG.permExcessMode==='leave'?'→ Deduct from '+CFG.permExcessFrom:CFG.permExcessMode==='next_month'?'→ Reduce next month balance':'→ Next month, then '+CFG.permExcessFrom):'N/A'}</div></div>
         <div class="cs-item"><div class="cs-label">Admin</div><div class="cs-val">${CFG.adminName}</div></div>
       </div>
       <div class="info-box blue" style="margin-top:14px"><div class="ib-icon">💡</div>
@@ -1590,6 +1621,25 @@ function updateCOCalc() {
     • Employee works <strong>${min+2}h</strong> extra → <strong>1 Comp-Off day</strong> (partial beyond threshold doesn't stack)`;
 }
 
+// Toggle visibility of leave-deduction vs next-month sections
+function togglePermExcessMode(val) {
+  const leaveSection     = document.getElementById('permLeaveDeductSection');
+  const nextMonthSection = document.getElementById('permNextMonthSection');
+  if (!leaveSection || !nextMonthSection) return;
+  if (val === 'leave') {
+    leaveSection.style.display     = '';
+    nextMonthSection.style.display = 'none';
+  } else if (val === 'next_month') {
+    leaveSection.style.display     = 'none';
+    nextMonthSection.style.display = '';
+  } else { // 'both'
+    leaveSection.style.display     = '';
+    nextMonthSection.style.display = '';
+  }
+  CFG.permExcessMode = val;
+  updatePermCalcWiz();
+}
+
 // Permission live calc
 function updatePermCalcWiz() {
   const mh  = parseFloat(document.getElementById('wPermHrs')?.value    || CFG.permMonthlyHours);
@@ -1646,8 +1696,10 @@ function wizNext() {
     CFG.permMinDuration  = parseInt(document.getElementById('wPermMin')?.value)      || 30;
     CFG.permMaxSingle    = parseInt(document.getElementById('wPermMax')?.value)      || 120;
     CFG.permMaxCount     = parseInt(document.getElementById('wPermCount')?.value)    || 4;
-    CFG.permExcessFrom   = document.getElementById('wPermFrom')?.value               || 'CL';
-    CFG.permWorkHrsDay   = parseFloat(document.getElementById('wPermWrkHrs')?.value) || 8;
+    CFG.permExcessFrom        = document.getElementById('wPermFrom')?.value                   || 'CL';
+    CFG.permWorkHrsDay        = parseFloat(document.getElementById('wPermWrkHrs')?.value)     || 8;
+    CFG.permExcessMode        = document.getElementById('wPermExcessMode')?.value             || 'leave';
+    CFG.permNextMonthMaxDeduct= parseFloat(document.getElementById('wPermNextMonthMax')?.value) || 1;
   }
   if (s.id === 'admin') {
     CFG.adminName  = document.getElementById('wAdminName')?.value  || CFG.adminName;
@@ -1947,7 +1999,15 @@ function renderSettingsPolicySummary() {
     {ico:'📊', bg:'var(--purple-bg)',   title:'Service Slabs',      val: CFG.slabsEnabled ? CFG.slabs.length+' tiers' : 'Disabled',      desc:'Entitlement increases with service years'},
     {ico:'💸', bg:'var(--red-bg)',      title:'Leave Encashment',   val: CFG.cfEncashAllowed ? 'Allowed' : 'Not Allowed',                  desc:'Encashment of unused leave balance'},
     {ico:'⏱️', bg:'var(--green-bg)',    title:'Comp-Off Min Hours', val: CFG.enableCompOff ? '≥ '+CFG.compoffMinHours+'h required' : 'Disabled', desc:'Threshold for Comp-Off eligibility'},
-    {ico:'🚪', bg:'var(--amber-bg)',    title:'Monthly Permission', val: CFG.permissionEnabled ? CFG.permMonthlyHours+'h/month limit' : 'Disabled', desc:'Excess deducted from '+CFG.permExcessFrom+' balance'},
+    {ico:'🚪', bg:'var(--amber-bg)',    title:'Monthly Permission',
+      val: CFG.permissionEnabled ? CFG.permMonthlyHours+'h/month limit' : 'Disabled',
+      desc: CFG.permissionEnabled
+        ? (CFG.permExcessMode==='leave'
+            ? 'Excess deducted from '+CFG.permExcessFrom+' leave balance'
+            : CFG.permExcessMode==='next_month'
+            ? 'Excess reduced from next month permission (max '+CFG.permNextMonthMaxDeduct+'h debt)'
+            : 'Excess: next month first (max '+CFG.permNextMonthMaxDeduct+'h), then '+CFG.permExcessFrom+' balance')
+        : 'Permission policy disabled'},
     {ico:'🔄', bg:'var(--teal-bg)',     title:'Sandwich Rule',      val: CFG.sandwichRule ? 'Enabled' : 'Disabled',                        desc:'Weekends between leaves count as leave'},
   ];
   el.innerHTML = items.map(item=>`
@@ -1965,7 +2025,9 @@ function renderApplyPolicySummary() {
     <div style="font-size:12px;color:var(--muted);line-height:1.8">
       <div>📅 Probation: <strong>${CFG.probationEnabled ? CFG.probationDays+'d' : 'None'}</strong></div>
       <div>⏱️ Comp-Off: <strong>${CFG.enableCompOff ? '≥'+CFG.compoffMinHours+'h min' : 'Disabled'}</strong></div>
-      <div>🚪 Permission: <strong>${CFG.permissionEnabled ? CFG.permMonthlyHours+'h/month' : 'Disabled'}</strong></div>
+      <div>🚪 Permission: <strong>${CFG.permissionEnabled
+        ? CFG.permMonthlyHours+'h/month — excess → '+(CFG.permExcessMode==='leave'?CFG.permExcessFrom:CFG.permExcessMode==='next_month'?'next month':'next month + '+CFG.permExcessFrom)
+        : 'Disabled'}</strong></div>
       <div>🔄 Carry Fwd: <strong>${CFG.leaveTypes.filter(l=>l.carryFwd).map(l=>l.short+'≤'+l.maxCF+'d').join(', ')||'None'}</strong></div>
     </div>`;
 }
