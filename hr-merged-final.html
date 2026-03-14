@@ -564,7 +564,7 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
      SETUP WIZARD  (shown on first run)
 ================================================================ -->
 <!-- LOGIN SCREEN -->
-<div id="loginScreen" style="display:none;min-height:100vh;background:var(--sidebar-bg);position:relative;overflow:hidden">
+<div id="loginScreen" style="display:none;min-height:100vh;background:var(--sidebar-bg);position:relative;overflow:hidden;flex-direction:column">
   <div style="position:absolute;inset:0;background:radial-gradient(ellipse 600px 400px at 20% 20%,rgba(37,99,235,0.28),transparent 70%),radial-gradient(ellipse 400px 400px at 80% 80%,rgba(245,158,11,0.12),transparent 70%);pointer-events:none"></div>
   <div style="position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
     <div style="background:white;border-radius:18px;width:420px;max-width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.3);overflow:hidden;animation:panelIn 0.35s ease">
@@ -599,7 +599,7 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
   </div>
 </div>
 
-<div id="setupWizard">
+<div id="setupWizard" style="display:none">
   <div class="wizard-sidebar">
     <div class="wizard-logo-area">
       <div class="wizard-logo-mark">⚙️</div>
@@ -2809,6 +2809,9 @@ function doLogout() {
 
 function showLoginScreen() {
   applyTheme();
+  // Hide all other screens
+  document.getElementById('setupWizard').style.display = 'none';
+  document.getElementById('mainApp').style.display     = 'none';
   // Update login screen branding
   const li = document.getElementById('loginIcon');
   const la = document.getElementById('loginAppName');
@@ -3230,15 +3233,10 @@ window.addEventListener('DOMContentLoaded', () => {
   if (CFG.isConfigured) {
     showLoginScreen();
   } else {
-    renderWizardStep();
-  }
-});
-  applyTheme();
-  if (CFG.isConfigured) {
-    document.getElementById('setupWizard').style.display = 'none';
-    document.getElementById('mainApp').style.display     = 'block';
-    bootstrapApp();
-  } else {
+    // Show wizard, hide everything else
+    document.getElementById('setupWizard').style.display  = 'flex';
+    document.getElementById('loginScreen').style.display  = 'none';
+    document.getElementById('mainApp').style.display      = 'none';
     renderWizardStep();
   }
 });
