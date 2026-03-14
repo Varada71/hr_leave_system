@@ -569,7 +569,7 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
   <div style="position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
     <div style="background:white;border-radius:18px;width:420px;max-width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.3);overflow:hidden;animation:panelIn 0.35s ease">
       <div style="background:var(--brand);padding:28px 32px 24px;text-align:center">
-        <div id="loginIcon" style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px">🏢</div>
+        <div id="loginIcon" style="width:64px;height:64px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;overflow:hidden">🏢</div>
         <div id="loginAppName" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:white;margin-bottom:3px">HR Portal</div>
         <div id="loginCoName"  style="font-size:12px;color:rgba(255,255,255,0.6)">Your Company</div>
       </div>
@@ -624,7 +624,7 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
   <nav class="sidebar">
     <div class="sb-header">
       <div class="sb-brand">
-        <div class="sb-icon" id="sbIcon">🏢</div>
+        <div class="sb-icon" id="sbIcon" style="overflow:hidden;padding:0">🏢</div>
         <div>
           <div class="sb-name" id="sbAppName">HR Portal</div>
           <div class="sb-co"   id="sbCoName">Your Company</div>
@@ -1172,6 +1172,7 @@ const DEFAULT_CONFIG = {
   adminDesig: 'HR Manager',
   adminPass:   'admin123',
 
+  companyLogo: '',   // base64 data URL of uploaded company logo
   isConfigured: false,
   // ── Employees (added during wizard Step 11 or via Settings) ──
   employees: [],
@@ -1319,6 +1320,22 @@ function renderWizardStep() {
         </div>
         <div class="fg"><label class="fl">Total Employees</label>
           <input class="fi" id="wEmpCount" type="number" placeholder="e.g. 50" value="${CFG.empCount||''}">
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Company Logo</label>
+        <div style="display:flex;align-items:flex-start;gap:16px">
+          <div id="wLogoPreview" style="width:80px;height:80px;border-radius:var(--radius-sm);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--bg);flex-shrink:0;overflow:hidden">
+            ${CFG.companyLogo ? '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain">' : '🏢'}
+          </div>
+          <div style="flex:1">
+            <label style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:var(--brand-light);color:var(--brand);border:1.5px dashed var(--brand-mid);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s" onmouseover="this.style.background='var(--brand)';this.style.color='white'" onmouseout="this.style.background='var(--brand-light)';this.style.color='var(--brand)'">
+              📁 Upload Logo
+              <input type="file" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+            </label>
+            <div class="hint" style="margin-top:8px">PNG, JPG or SVG. Recommended: square, at least 128×128px. Shown in the login screen and sidebar.</div>
+            ${CFG.companyLogo ? '<button onclick="CFG.companyLogo=\'\';document.getElementById(\'wLogoPreview\').innerHTML=\'🏢\';toast(\'Logo removed\',\'wrn\')" style="margin-top:8px;padding:5px 12px;background:var(--red-bg);color:var(--red);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✕ Remove Logo</button>' : ''}
+          </div>
         </div>
       </div>`;
   }
@@ -1599,14 +1616,10 @@ function renderWizardStep() {
           </div>
 
           <div id="permNextMonthSection" style="${CFG.permExcessMode==='leave'?'display:none':''}">
-            <div class="fg-row">
-              <div class="fg"><label class="fl">Max Excess Hours Carried to Next Month</label>
-                <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermNextMonthMax" value="${CFG.permNextMonthMaxDeduct}" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div>
-                <div class="hint">If excess exceeds this limit, the remaining is deducted from Leave Balance. Set high (e.g. 8) to always use next month first.</div>
-              </div>
-              <div class="fg"><label class="fl">Working Hours Per Day</label>
-                <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermWrkHrs" value="${CFG.permWorkHrsDay}" min="4" max="12" step="0.5" oninput="updatePermCalcWiz()"><span class="fi-unit">hours</span></div>
-              </div>
+            <div class="fg">
+              <label class="fl">Max Excess Hours Carried to Next Month</label>
+              <div class="fi-unit-wrap"><input class="fi" type="number" id="wPermNextMonthMax" value="${CFG.permNextMonthMaxDeduct}" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div>
+              <div class="hint">If excess exceeds this limit, the remaining is deducted from Leave Balance. Set high (e.g. 8) to always use next month first.</div>
             </div>
             <div class="info-box amber"><div class="ib-icon">📋</div>
               <div><strong>Example:</strong> Employee is allowed <strong>${CFG.permMonthlyHours}h</strong>/month. They take <strong>${CFG.permMonthlyHours+1}h</strong> in March → <strong>1h excess</strong> is carried as debt. In April, their available permission is reduced to <strong>${CFG.permMonthlyHours-1}h</strong> for that month.</div></div>
@@ -1664,7 +1677,7 @@ function renderWizardStep() {
     body = `
       <div class="success-icon">✨</div>
       <div class="config-summary">
-        <div class="cs-item"><div class="cs-label">App Name</div><div class="cs-val">${CFG.appIcon} ${CFG.appName}</div></div>
+        <div class="cs-item"><div class="cs-label">App Name</div><div class="cs-val">${CFG.companyLogo?'<img src="'+CFG.companyLogo+'" style="width:20px;height:20px;object-fit:contain;border-radius:4px;vertical-align:middle">':CFG.appIcon} ${CFG.appName}</div></div>
         <div class="cs-item"><div class="cs-label">Company</div><div class="cs-val">${CFG.companyName}</div></div>
         <div class="cs-item"><div class="cs-label">Country / State</div><div class="cs-val">${CFG.country} • ${CFG.state}</div></div>
         <div class="cs-item"><div class="cs-label">Financial Year</div><div class="cs-val">${CFG.fy==='apr'?'April – March':CFG.fy==='jan'?'Jan – Dec':'July – June'}</div></div>
@@ -1746,6 +1759,37 @@ function pickColor(hex, swatchEl) {
   if (cc) cc.value = hex;
   applyTheme();
   renderLivePreview();
+}
+
+function handleLogoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { toast('Logo must be under 2MB','err'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    CFG.companyLogo = e.target.result;
+    const preview = document.getElementById('wLogoPreview');
+    if (preview) preview.innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain">';
+    // Also update login screen logo if visible
+    updateLogoEverywhere();
+    toast('Logo uploaded ✓','ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateLogoEverywhere() {
+  // Login screen logo
+  const loginLogo = document.getElementById('loginLogoImg');
+  const loginIcon = document.getElementById('loginIcon');
+  if (CFG.companyLogo) {
+    if (loginLogo) loginLogo.src = CFG.companyLogo;
+    if (loginIcon) loginIcon.innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain;border-radius:10px">';
+  } else {
+    if (loginIcon) loginIcon.textContent = CFG.appIcon || '🏢';
+  }
+  // Sidebar logo
+  const sbLogo = document.getElementById('sbLogoImg');
+  if (CFG.companyLogo && sbLogo) sbLogo.src = CFG.companyLogo;
 }
 
 function applyTheme() {
@@ -1997,17 +2041,13 @@ function renderWizEmpList() {
 }
 
 function addEmpRow() {
+  // Open the add modal pre-filled with a suggested Employee No.
   const nextId = 'WT/' + new Date().getFullYear() + '/EMP' + String(CFG.employees.length + 2).padStart(3,'0');
-  CFG.employees.push({
-    name:'', empId:nextId, dept:'Engineering', role:'Employee',
-    desig:'', dob:'', doj:'', fatherName:'', motherName:'',
-    maritalStatus:'Un-Married', marriageDate:'', spouseName:'', spouseDob:'',
-    children:[], qualification:'', experience:'',
-    contact1:'', contact2:'', workEmail:'',
-    password:'', loginEnabled:true, color: randColor()
-  });
-  renderWizEmpList();
+  // Temporarily push a blank record so modal idx works
+  _addingFromWizard = true;
+  openAddEmpModal(undefined, nextId);
 }
+let _addingFromWizard = false;
 
 function addChild(empIdx) {
   if (!CFG.employees[empIdx].children) CFG.employees[empIdx].children = [];
@@ -2195,7 +2235,11 @@ function reconfigure() {
 function bootstrapApp() {
   document.getElementById('sbAppName').textContent   = CFG.appName;
   document.getElementById('sbCoName').textContent    = CFG.companyName;
-  document.getElementById('sbIcon').textContent      = CFG.appIcon;
+  if (CFG.companyLogo) {
+    document.getElementById('sbIcon').innerHTML = '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain;border-radius:8px">';
+  } else {
+    document.getElementById('sbIcon').textContent = CFG.appIcon;
+  }
   document.title = CFG.appName;
   document.getElementById('appUserAv').textContent   = initials(CFG.adminName);
   document.getElementById('appUserName').textContent = CFG.adminName;
@@ -2821,6 +2865,7 @@ function showLoginScreen() {
   if(lc) lc.textContent = CFG.companyName;
   document.getElementById('loginScreen').style.display = 'flex';
   document.title = CFG.appName + ' — Login';
+  updateLogoEverywhere();
 }
 
 // ── Employee modal ──
@@ -2868,15 +2913,15 @@ function renderModalChildren() {
     </div>`).join('');
 }
 
-function openAddEmpModal(idx) {
-  const isEdit = idx !== undefined;
+function openAddEmpModal(idx, prefilledId) {
+  const isEdit = idx !== undefined && idx >= 0;
   document.getElementById('mEmpTitle').textContent = isEdit ? 'Edit Employee' : 'Add Employee';
   document.getElementById('mEmpIdx').value = isEdit ? idx : -1;
   const e = isEdit ? CFG.employees[idx] : {};
   _modalChildren = isEdit ? JSON.parse(JSON.stringify(e.children||[])) : [];
 
   document.getElementById('mEmpName').value       = e.name        || '';
-  document.getElementById('mEmpId').value         = e.empId       || ('WT/'+new Date().getFullYear()+'/EMP'+String(CFG.employees.length+2).padStart(3,'0'));
+  document.getElementById('mEmpId').value         = e.empId       || prefilledId || ('WT/'+new Date().getFullYear()+'/EMP'+String(CFG.employees.length+2).padStart(3,'0'));
   document.getElementById('mEmpDOB').value        = e.dob         || '';
   document.getElementById('mEmpDOJ').value        = e.doj         || '';
   document.getElementById('mEmpDesig').value      = e.desig       || '';
@@ -2953,6 +2998,10 @@ function saveEmpModal() {
   closeM('mEmp');
   renderSettEmpTable();
   renderTeam();
+  // If called from wizard step, refresh the wizard list too
+  const wizList = document.getElementById('wEmpList');
+  if (wizList) renderWizEmpList();
+  _addingFromWizard = false;
   toast(idx>=0 ? emp.name+' updated ✓' : emp.name+' added ✓', 'ok');
 }
 
@@ -3242,4 +3291,41 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
-</html>
+</html>// Employee roster in wizard — clean summary list, edit via modal
+function renderWizEmpList() {
+  const el = document.getElementById('wEmpList');
+  if (!el) return;
+
+  if (!CFG.employees.length) {
+    el.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px;background:var(--bg);border-radius:var(--radius-sm);border:1.5px dashed var(--border)">No employees added yet. Click ＋ Add Employee above to add team members.</div>';
+    const lbl = document.getElementById('empCountLbl');
+    if (lbl) lbl.textContent = 0;
+    return;
+  }
+
+  const colors = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0D9488'];
+  el.innerHTML = CFG.employees.map((e, i) => {
+    const col = e.color || colors[i % colors.length];
+    const initl = (e.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const hasLogin = e.loginEnabled !== false;
+    const hasDOB   = e.dob ? '🎂' : '';
+    const hasDOJ   = e.doj ? '📅' : '';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:white;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:all 0.15s" onclick="openAddEmpModal('+i+')" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'">'
+      + '<div style="width:36px;height:36px;border-radius:9px;background:'+col+';display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;flex-shrink:0">'+initl+'</div>'
+      + '<div style="flex:1">'
+      +   '<div style="font-size:13px;font-weight:600">'+(e.name||'Unnamed')+'</div>'
+      +   '<div style="font-size:11px;color:var(--muted)">'+(e.empId||'')+(e.dept?' · '+e.dept:'')+(e.desig?' · '+e.desig:'')+'</div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:6px">'
+      +   (hasDOB ? '<span title="Birthday set" style="font-size:13px">🎂</span>' : '')
+      +   (hasDOJ ? '<span title="DOJ set" style="font-size:13px">📅</span>' : '')
+      +   '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:'+(hasLogin?'var(--green-bg)':'var(--red-bg)')+';color:'+(hasLogin?'var(--green)':'var(--red)')+'">'+( hasLogin?'Login ✓':'Login ✗')+'</span>'
+      +   '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--brand-light);color:var(--brand)">✏️ Edit</span>'
+      +   '<button class="lt-del" onclick="event.stopPropagation();delEmp('+i+')" title="Remove">✕</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  const lbl = document.getElementById('empCountLbl');
+  if (lbl) lbl.textContent = CFG.employees.length;
+}
