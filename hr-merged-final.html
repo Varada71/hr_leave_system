@@ -943,30 +943,21 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
 
 <!-- ── Add / Edit Employee Modal ── -->
 <div class="moverlay" id="mEmp">
-  <div class="modal" style="width:660px;max-height:90vh;overflow-y:auto">
+  <div class="modal" style="width:620px;max-height:90vh;overflow-y:auto">
     <div class="mtitle" style="position:sticky;top:0;background:white;z-index:5;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:16px">
       <span id="mEmpTitle">Add Employee</span>
-      <button class="mclose" onclick="closeM('mEmp')">✕</button>
+      <button class="mclose" onclick="closeM('mEmp')">&#x2715;</button>
     </div>
     <input type="hidden" id="mEmpIdx" value="-1">
 
     <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px">Employee Details</div>
     <div class="fg-row">
+      <div class="fg"><label class="fl">Employee ID <span class="req">*</span></label><input class="fi" id="mEmpId" placeholder="WT/2024/EMP001" oninput="this.value=this.value.toUpperCase()"></div>
       <div class="fg"><label class="fl">Employee Name <span class="req">*</span></label><input class="fi" id="mEmpName" placeholder="e.g. Priya Sharma"></div>
-      <div class="fg"><label class="fl">Employee No. <span class="req">*</span></label><input class="fi" id="mEmpId" placeholder="WT/2024/EMP001" oninput="this.value=this.value.toUpperCase()"></div>
     </div>
     <div class="fg-row">
-      <div class="fg"><label class="fl">Employee Login ID</label><input class="fi" id="mEmpWorkEmail" type="email" placeholder="name@gmail.com or work email"></div>
-      <div class="fg"><label class="fl">Role / Access Level</label>
-        <select class="fs" id="mEmpRole">
-          <option value="Employee">Employee</option><option value="Manager">Manager</option>
-          <option value="Team Lead">Team Lead</option><option value="HR Admin">HR Admin</option><option value="Director">Director</option>
-        </select>
-      </div>
-    </div>
-    <div class="fg-row">
-      <div class="fg"><label class="fl">DOB (Date of Birth)</label><input class="fi" type="date" id="mEmpDOB"></div>
-      <div class="fg"><label class="fl">DOJ (Date of Joining)</label><input class="fi" type="date" id="mEmpDOJ"></div>
+      <div class="fg"><label class="fl">Date of Birth</label><input class="fi" type="date" id="mEmpDOB"></div>
+      <div class="fg"><label class="fl">Date of Joining</label><input class="fi" type="date" id="mEmpDOJ"></div>
     </div>
     <div class="fg-row">
       <div class="fg"><label class="fl">Department</label>
@@ -974,7 +965,12 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
           <option>Engineering</option><option>HR</option><option>Finance</option><option>Operations</option><option>Product</option><option>Sales</option><option>Administration</option><option>Management</option><option>Other</option>
         </select>
       </div>
-      <div class="fg"><label class="fl">Designation</label><input class="fi" id="mEmpDesig" placeholder="e.g. Software Engineer"></div>
+      <div class="fg"><label class="fl">Role / Access Level</label>
+        <select class="fs" id="mEmpRole">
+          <option value="Employee">Employee</option><option value="Manager">Manager</option>
+          <option value="Team Lead">Team Lead</option><option value="HR Admin">HR Admin</option><option value="Director">Director</option>
+        </select>
+      </div>
     </div>
 
     <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Family Details</div>
@@ -988,28 +984,42 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
           <option>Un-Married</option><option>Married</option><option>Divorced</option><option>Widowed</option>
         </select>
       </div>
-      <div class="fg" id="mEmpMarriageDateWrap"><label class="fl">Marriage Date</label><input class="fi" type="date" id="mEmpMarriageDate"></div>
+      <div class="fg" id="mEmpMarriageDateWrap" style="display:none"><label class="fl">Marriage Date</label><input class="fi" type="date" id="mEmpMarriageDate"></div>
     </div>
-    <div class="fg-row" id="mEmpSpouseWrap">
-      <div class="fg"><label class="fl">Spouse Name</label><input class="fi" id="mEmpSpouse" placeholder="Spouse's full name"></div>
-      <div class="fg"><label class="fl">Spouse Date of Birth</label><input class="fi" type="date" id="mEmpSpouseDob"></div>
+    <div id="mEmpSpouseWrap" style="display:none">
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Spouse Name</label><input class="fi" id="mEmpSpouse" placeholder="Spouse's full name"></div>
+        <div class="fg"><label class="fl">Spouse's Date of Birth</label><input class="fi" type="date" id="mEmpSpouseDob"></div>
+      </div>
     </div>
 
-    <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Children</div>
-      <button class="add-lt-btn" style="padding:4px 12px;font-size:12px" onclick="addChildModal()">＋ Add Child</button>
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Children's Details</div>
+    <div class="fg-row" style="margin-bottom:10px">
+      <div class="fg"><label class="fl">Number of Children</label>
+        <input class="fi" type="number" id="mEmpChildCount" min="0" max="10" value="0" oninput="updateChildFields(this.value)" placeholder="0">
+      </div>
+      <div class="fg"></div>
     </div>
-    <div id="mEmpChildrenList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+    <div id="mEmpChildrenList"></div>
 
-    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Contact & Education</div>
-    <div class="fg-row">
-      <div class="fg"><label class="fl">Contact 1 (Self)</label><input class="fi" id="mEmpMobile" placeholder="Mobile number"></div>
-      <div class="fg"><label class="fl">Contact 2 (Parents / Spouse)</label><input class="fi" id="mEmpContact2" placeholder="Parent / Spouse number"></div>
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Education &amp; Experience</div>
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;background:var(--bg);margin-bottom:14px">
+      <div class="fg-row">
+        <div class="fg"><label class="fl">Course / Qualification</label><input class="fi" id="mEmpCourse" placeholder="e.g. B.E., MCA, MBA"></div>
+        <div class="fg"><label class="fl">Year of Passing</label><input class="fi" type="number" id="mEmpYearPass" placeholder="e.g. 2018" min="1980" max="2030"></div>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">College / University Name</label><input class="fi" id="mEmpCollege" placeholder="e.g. Anna University, Chennai"></div>
     </div>
-    <div class="fg-row">
-      <div class="fg"><label class="fl">Educational Qualification</label><input class="fi" id="mEmpQual" placeholder="e.g. B.E., MCA, MBA"></div>
-      <div class="fg"><label class="fl">Professional Experience (yrs)</label><input class="fi" type="number" id="mEmpExp" placeholder="e.g. 5"></div>
+    <div class="fg"><label class="fl">Experience (Number of Years)</label>
+      <div class="fi-unit-wrap"><input class="fi" type="number" id="mEmpExp" placeholder="e.g. 5" min="0" max="60"><span class="fi-unit">years</span></div>
     </div>
+
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Contact Details</div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Mobile Phone Number</label><input class="fi" id="mEmpMobile" placeholder="10-digit mobile number"></div>
+      <div class="fg"><label class="fl">Emergency Contact Number</label><input class="fi" id="mEmpContact2" placeholder="Parent / Spouse number"></div>
+    </div>
+    <div class="fg"><label class="fl">Email ID</label><input class="fi" id="mEmpEmail" type="email" placeholder="personal or work email"></div>
 
     <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 10px">Login Credentials</div>
     <div class="fg-row">
@@ -1293,409 +1303,339 @@ function buildPermBody() {
 }
 function renderWizardStep() {
   renderWizardSidebar();
-  const panel = document.getElementById('wizardPanel');
-  const s = STEPS[wizStep];
-  let body = '', title = '', desc = '';
+  var panel = document.getElementById('wizardPanel');
+  var s     = STEPS[wizStep];
+  var title = '', desc = '', body = '';
 
-  // ── STEP 1: APP IDENTITY ──────────────────────────────────────
+  // ── STEP 1: APP IDENTITY ─────────────────────────────────────
   if (s.id === 'identity') {
     title = 'Give your app an identity';
-    desc  = 'Your employees will see this name and branding every day. Make it yours.';
-    const sw = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0F172A'];
-    var _swHtml = sw.map(function(col){
-      return '<div class="cp-swatch '+(CFG.brandColor===col?'selected':'')
-        +'" style="background:'+col+'" onclick="pickColor(\''+col+'\',this)"></div>';
+    desc  = 'Your employees will see this name and branding every day.';
+    var swatches = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0F172A'];
+    var swHtml = swatches.map(function(col) {
+      return '<div class="cp-swatch ' + (CFG.brandColor===col?'selected':'') + '" style="background:' + col + '" onclick="pickColor(\'' + col + '\',this)"></div>';
     }).join('');
-    body = `
-      <div class="fg-row">
-        <div class="fg"><label class="fl">App Name <span class="req">*</span></label>
-          <input class="fi" id="wAppName" placeholder="e.g. LeaveDesk, PeopleHR" value="${CFG.appName}">
-          <div class="hint">Shown in browser tab, sidebar, and login page</div>
-        </div>
-        <div class="fg"><label class="fl">App Icon (emoji)</label>
-          <input class="fi" id="wAppIcon" value="${CFG.appIcon}" maxlength="2" style="font-size:22px">
-        </div>
-      </div>
-      <div class="fg"><label class="fl">Tagline</label>
-        <input class="fi" id="wTagline" placeholder="Leave & Attendance for modern teams" value="${CFG.tagline||''}">
-      </div>
-      <div class="fg"><label class="fl">Brand Color</label>
-        <div class="color-picker-row">
-          ${_swHtml}
-          <div class="custom-color-wrap">
-            <input type="color" class="color-input" id="wCustomColor" value="${CFG.brandColor}" oninput="pickColor(this.value,null)">
-            <span style="font-size:12px;color:var(--muted)">Custom</span>
-          </div>
-        </div>
-      </div>
-      <div class="fg"><label class="fl">Live Preview</label>
-        <div class="preview-card" id="livePreview"></div>
-      </div>`;
+    body =
+      '<div class="fg-row">' +
+        '<div class="fg"><label class="fl">App Name <span class="req">*</span></label>' +
+          '<input class="fi" id="wAppName" placeholder="e.g. LeaveDesk, PeopleHR" value="' + CFG.appName + '">' +
+          '<div class="hint">Shown in browser tab and sidebar</div></div>' +
+        '<div class="fg"><label class="fl">App Icon (emoji)</label>' +
+          '<input class="fi" id="wAppIcon" value="' + CFG.appIcon + '" maxlength="2" style="font-size:22px"></div>' +
+      '</div>' +
+      '<div class="fg"><label class="fl">Tagline</label>' +
+        '<input class="fi" id="wTagline" placeholder="Leave & Attendance for modern teams" value="' + (CFG.tagline||'') + '"></div>' +
+      '<div class="fg"><label class="fl">Brand Color</label>' +
+        '<div class="color-picker-row">' + swHtml +
+          '<div class="custom-color-wrap">' +
+            '<input type="color" class="color-input" id="wCustomColor" value="' + CFG.brandColor + '" oninput="pickColor(this.value,null)">' +
+            '<span style="font-size:12px;color:var(--muted)">Custom</span>' +
+          '</div></div></div>' +
+      '<div class="fg"><label class="fl">Live Preview</label><div class="preview-card" id="livePreview"></div></div>';
   }
 
   // ── STEP 2: COMPANY INFO ─────────────────────────────────────
   else if (s.id === 'company') {
     title = 'Tell us about your company';
-    // Pre-compute select options to avoid nested template literals
-    var _indOpts  = ['IT / Software','BPO / KPO','Manufacturing','BFSI / Finance','Healthcare','Retail / E-Commerce','Education','Government / PSU','Startup','Other'].map(function(x){return '<option'+(CFG.industry===x?' selected':'')+'>'+x+'</option>';}).join('');
-    var _cntOpts  = ['India','UAE','USA','UK','Singapore','Australia','Canada','Other'].map(function(x){return '<option'+(CFG.country===x?' selected':'')+'>'+x+'</option>';}).join('');
-    var _stOpts   = ['Maharashtra','Karnataka','Tamil Nadu','Delhi NCR','Telangana','Gujarat','West Bengal','Kerala','Rajasthan','Punjab','Other'].map(function(x){return '<option'+(CFG.state===x?' selected':'')+'>'+x+'</option>';}).join('');
-    var _fyOpts   = '<option value="apr"'+(CFG.fy==='apr'?' selected':'')+'>April - March (India)</option><option value="jan"'+(CFG.fy==='jan'?' selected':'')+'>January - December</option><option value="jul"'+(CFG.fy==='jul'?' selected':'')+'>July - June</option>';
-    var _wkOpts   = '<option value="both"'+(CFG.weekend==='both'?' selected':'')+'>Sat &amp; Sun Off</option><option value="alt"'+(CFG.weekend==='alt'?' selected':'')+'>Alt Saturday Off</option><option value="sun"'+(CFG.weekend==='sun'?' selected':'')+'>Sunday Only</option><option value="none"'+(CFG.weekend==='none'?' selected':'')+'>No Fixed Weekend</option>';
-    var _payOpts  = ['Monthly (1st-31st)','Monthly (26th-25th)','Bi-weekly','Weekly'].map(function(x){return '<option>'+x+'</option>';}).join('');
-
-    desc  = 'Configures region-specific holidays, compliance defaults, and financial year.';
-    body = `
-      <div class="fg-row">
-        <div class="fg"><label class="fl">Organisation Name <span class="req">*</span></label>
-          <input class="fi" id="wCoName" placeholder="e.g. Acme Technologies Pvt Ltd" value="${CFG.companyName}">
-        </div>
-        <div class="fg"><label class="fl">Industry</label>
-          <select class="fs" id="wIndustry">
-            ${['IT / Software','BPO / KPO','Manufacturing','BFSI / Finance','Healthcare','Retail / E-Commerce','Education','Government / PSU','Startup','Other'].map(i=>`<option ${CFG.industry===i?'selected':''}>${i}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="fg-row">
-        <div class="fg"><label class="fl">Country</label>
-          <select class="fs" id="wCountry">
-            ${['India 🇮🇳','UAE 🇦🇪','USA 🇺🇸','UK 🇬🇧','Singapore 🇸🇬','Australia 🇦🇺','Canada 🇨🇦','Other'].map(c=>`<option ${CFG.country===c?'selected':''}>${c}</option>`).join('')}
-          </select>
-        </div>
-        <div class="fg"><label class="fl">State / Region</label>
-          <select class="fs" id="wState">
-            ${['Maharashtra','Karnataka','Tamil Nadu','Delhi NCR','Telangana','Gujarat','West Bengal','Kerala','Rajasthan','Punjab','Other'].map(st=>`<option ${CFG.state===st?'selected':''}>${st}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="fg-row">
-        <div class="fg"><label class="fl">Financial Year</label>
-          <select class="fs" id="wFY">
-            ${_fyOpts}
-          </select>
-        </div>
-        <div class="fg"><label class="fl">Weekend Policy</label>
-          <select class="fs" id="wWeekend">
-            <option value="both" ${CFG.weekend==='both'?'selected':''}>Sat & Sun Off</option>
-            <option value="alt"  ${CFG.weekend==='alt'?'selected':''}>Alt Saturday Off</option>
-            <option value="sun"  ${CFG.weekend==='sun'?'selected':''}>Sunday Only</option>
-            <option value="none" ${CFG.weekend==='none'?'selected':''}>No Fixed Weekend</option>
-          </select>
-        </div>
-      </div>
-      <div class="fg-row">
-        <div class="fg"><label class="fl">Payroll Cycle</label>
-          <select class="fs">${_payOpts}</select>
-        </div>
-        <div class="fg"><label class="fl">Total Employees</label>
-          <input class="fi" id="wEmpCount" type="number" placeholder="e.g. 50" value="${CFG.empCount||''}">
-        </div>
-      </div>
-      <div class="fg">
-        <label class="fl">Company Logo</label>
-        <div style="display:flex;align-items:flex-start;gap:14px">
-          <div id="wLogoPreview" style="width:72px;height:72px;border-radius:var(--radius-sm);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--bg);flex-shrink:0;overflow:hidden">
-            ${CFG.companyLogo ? '<img src="'+CFG.companyLogo+'" style="width:100%;height:100%;object-fit:contain">' : '&#x1F3E2;'}
-          </div>
-          <div style="flex:1">
-            <label style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:var(--brand-light);color:var(--brand);border:1.5px dashed var(--brand-mid);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer">
-              &#x1F4C1; Upload Logo
-              <input type="file" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
-            </label>
-            <div class="hint" style="margin-top:8px">PNG, JPG or SVG. Square image recommended (128x128px min). Appears on login screen and sidebar.</div>
-          </div>
-        </div>
-      </div>`;
+    desc  = 'Configures region defaults, financial year and weekend policy.';
+    var indList  = ['IT / Software','BPO / KPO','Manufacturing','BFSI / Finance','Healthcare','Retail / E-Commerce','Education','Government / PSU','Startup','Other'];
+    var cntList  = ['India','UAE','USA','UK','Singapore','Australia','Canada','Other'];
+    var stList   = ['Maharashtra','Karnataka','Tamil Nadu','Delhi NCR','Telangana','Gujarat','West Bengal','Kerala','Rajasthan','Punjab','Other'];
+    var payList  = ['Monthly (1st-31st)','Monthly (26th-25th)','Bi-weekly','Weekly'];
+    var mkOpts = function(list, cur) { return list.map(function(x){ return '<option' + (cur===x?' selected':'') + '>' + x + '</option>'; }).join(''); };
+    var fyOpts  = '<option value="apr"' + (CFG.fy==='apr'?' selected':'') + '>April - March (India)</option><option value="jan"' + (CFG.fy==='jan'?' selected':'') + '>January - December</option><option value="jul"' + (CFG.fy==='jul'?' selected':'') + '>July - June</option>';
+    var wkOpts  = '<option value="both"' + (CFG.weekend==='both'?' selected':'') + '>Sat &amp; Sun Off</option><option value="alt"' + (CFG.weekend==='alt'?' selected':'') + '>Alt Saturday Off</option><option value="sun"' + (CFG.weekend==='sun'?' selected':'') + '>Sunday Only</option><option value="none"' + (CFG.weekend==='none'?' selected':'') + '>No Fixed Weekend</option>';
+    body =
+      '<div class="fg-row">' +
+        '<div class="fg"><label class="fl">Organisation Name <span class="req">*</span></label><input class="fi" id="wCoName" placeholder="Acme Technologies Pvt Ltd" value="' + CFG.companyName + '"></div>' +
+        '<div class="fg"><label class="fl">Industry</label><select class="fs" id="wIndustry">' + mkOpts(indList, CFG.industry) + '</select></div>' +
+      '</div>' +
+      '<div class="fg-row">' +
+        '<div class="fg"><label class="fl">Country</label><select class="fs" id="wCountry">' + mkOpts(cntList, CFG.country) + '</select></div>' +
+        '<div class="fg"><label class="fl">State / Region</label><select class="fs" id="wState">' + mkOpts(stList, CFG.state) + '</select></div>' +
+      '</div>' +
+      '<div class="fg-row">' +
+        '<div class="fg"><label class="fl">Financial Year</label><select class="fs" id="wFY">' + fyOpts + '</select></div>' +
+        '<div class="fg"><label class="fl">Weekend Policy</label><select class="fs" id="wWeekend">' + wkOpts + '</select></div>' +
+      '</div>' +
+      '<div class="fg-row">' +
+        '<div class="fg"><label class="fl">Payroll Cycle</label><select class="fs">' + mkOpts(payList,'') + '</select></div>' +
+        '<div class="fg"><label class="fl">Total Employees</label><input class="fi" id="wEmpCount" type="number" placeholder="e.g. 50" value="' + (CFG.empCount||'') + '"></div>' +
+      '</div>' +
+      '<div class="fg"><label class="fl">Company Logo</label>' +
+        '<div style="display:flex;align-items:flex-start;gap:14px">' +
+          '<div id="wLogoPreview" style="width:72px;height:72px;border-radius:var(--radius-sm);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--bg);flex-shrink:0;overflow:hidden">' +
+            (CFG.companyLogo ? '<img src="' + CFG.companyLogo + '" style="width:100%;height:100%;object-fit:contain">' : '&#x1F3E2;') +
+          '</div>' +
+          '<div style="flex:1">' +
+            '<label style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:var(--brand-light);color:var(--brand);border:1.5px dashed var(--brand-mid);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer">' +
+              '&#x1F4C1; Upload Logo<input type="file" accept="image/*" style="display:none" onchange="handleLogoUpload(this)"></label>' +
+            '<div class="hint" style="margin-top:8px">PNG or JPG. Square image recommended. Appears on login screen and sidebar.</div>' +
+          '</div>' +
+        '</div></div>';
   }
 
   // ── STEP 3: LEAVE TYPES ──────────────────────────────────────
   else if (s.id === 'leavetypes') {
     title = 'Configure leave types';
-    desc  = 'Define every leave type your company offers. Set entitlements, carry-forward, and encashment rules.';
-    body = `
-      <div class="lt-header"><span>Leave Type Name</span><span>Short</span><span>Days/yr</span><span>CF?</span><span></span></div>
-      <div class="lt-list" id="wLtList"></div>
-      <button class="add-lt-btn" onclick="addLeaveType()">＋ Add Leave Type</button>
-      <div class="info-box blue" style="margin-top:12px"><div class="ib-icon">💡</div>
-        <div><strong>Indian defaults included.</strong> CL (Casual), PL/EL (Privilege/Earned), SL (Sick), ML (Maternity 90 days), CO (Comp-Off). Detailed rules (slab entitlement, CF limits, comp-off hours) are configured in the next steps.</div></div>`;
+    desc  = 'Define every leave type your company offers.';
+    body =
+      '<div class="lt-header"><span>Leave Type Name</span><span>Short</span><span>Days/yr</span><span>CF?</span><span></span></div>' +
+      '<div class="lt-list" id="wLtList"></div>' +
+      '<button class="add-lt-btn" onclick="addLeaveType()">&#xFF0B; Add Leave Type</button>' +
+      '<div style="margin-top:12px;padding:10px 14px;background:var(--brand-light);border-radius:8px;font-size:12px;color:var(--brand)">' +
+        '&#x1F4A1; <strong>Indian defaults included.</strong> CL (Casual), PL (Privilege), SL (Sick), ML (Maternity), CO (Comp-Off).' +
+      '</div>';
   }
 
   // ── STEP 4: HOLIDAYS ─────────────────────────────────────────
   else if (s.id === 'holidays') {
     title = 'Set up your holiday calendar';
-    desc  = 'Add national holidays, optional holidays, and company-specific off days for this year.';
-    body = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:12px;color:var(--muted)">${CFG.holidays.length} holidays configured</div>
-        <button class="add-lt-btn" onclick="addHoliday()">＋ Add Holiday</button>
-      </div>
-      <div style="display:grid;grid-template-columns:120px 1fr 110px auto;gap:8px;padding:0 10px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--light)"><span>Date</span><span>Name</span><span>Type</span><span></span></div>
-      <div class="hol-list" id="wHolList"></div>
-      <div class="info-box amber"><div class="ib-icon">⚡</div>
-        <div>Pre-loaded with major Indian national holidays. Add optional/restricted holidays for your state.</div></div>`;
+    desc  = 'Add national holidays, optional holidays, and company off days.';
+    body =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+        '<div style="font-size:12px;color:var(--muted)">' + CFG.holidays.length + ' holidays configured</div>' +
+        '<button class="add-lt-btn" onclick="addHoliday()">&#xFF0B; Add Holiday</button>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:120px 1fr 110px auto;gap:8px;padding:0 10px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--light)">' +
+        '<span>Date</span><span>Name</span><span>Type</span><span></span>' +
+      '</div>' +
+      '<div class="hol-list" id="wHolList"></div>' +
+      '<div style="margin-top:10px;padding:10px 14px;background:var(--amber-bg);border-radius:8px;font-size:12px;color:var(--amber)">' +
+        '&#x26A1; Pre-loaded with major Indian national holidays.' +
+      '</div>';
   }
 
   // ── STEP 5: GENERAL POLICIES ─────────────────────────────────
   else if (s.id === 'policies') {
     title = 'Configure general policies';
-    desc  = 'Enable or disable features and set basic leave application rules.';
-    body = `
-      <div class="toggle-group">
-        <div class="toggle-row ${CFG.enableWFH?'on':''}">
-          <div><div class="toggle-label">Work From Home (WFH)</div><div class="toggle-desc">Employees can apply for WFH days</div></div>
-          <button class="toggle ${CFG.enableWFH?'on':''}" id="togWFH" onclick="tog('togWFH','enableWFH')"></button>
-        </div>
-        <div class="toggle-row ${CFG.enableOD?'on':''}">
-          <div><div class="toggle-label">On Duty (OD)</div><div class="toggle-desc">Field visit / client duty marking</div></div>
-          <button class="toggle ${CFG.enableOD?'on':''}" id="togOD" onclick="tog('togOD','enableOD')"></button>
-        </div>
-        <div class="toggle-row ${CFG.enableCompOff?'on':''}">
-          <div><div class="toggle-label">Compensatory Off (Comp-Off)</div><div class="toggle-desc">Comp-off for weekend / holiday work — detailed rules in Step 9</div></div>
-          <button class="toggle ${CFG.enableCompOff?'on':''}" id="togCO" onclick="tog('togCO','enableCompOff')"></button>
-        </div>
-        <div class="toggle-row ${CFG.enableHalfDay?'on':''}">
-          <div><div class="toggle-label">Half-Day Leave</div><div class="toggle-desc">Allow applying for first-half or second-half leaves</div></div>
-          <button class="toggle ${CFG.enableHalfDay?'on':''}" id="togHD" onclick="tog('togHD','enableHalfDay')"></button>
-        </div>
-        <div class="toggle-row ${CFG.sandwichRule?'on':''}">
-          <div><div class="toggle-label">Sandwich Rule</div><div class="toggle-desc">Weekends/holidays between leave days are counted as leave</div></div>
-          <button class="toggle ${CFG.sandwichRule?'on':''}" id="togSW" onclick="tog('togSW','sandwichRule')"></button>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-label">Manager Approval Required</div><div class="toggle-desc">All leave applications need manager sign-off</div></div>
-          <button class="toggle on"></button>
-        </div>
-      </div>
-      <div class="fg-row" style="margin-top:16px">
-        <div class="fg"><label class="fl">Min Notice Period (days)</label>
-          <input class="fi" type="number" value="${CFG.noticePeriodDays}" min="0" max="30" id="wNotice">
-        </div>
-        <div class="fg"><label class="fl">Max Consecutive Leave Days</label>
-          <input class="fi" type="number" value="${CFG.maxLeavesAtOnce}" min="1" max="180" id="wMaxLeave">
-        </div>
-      </div>`;
+    desc  = 'Enable or disable features and set basic leave rules.';
+    var tog = function(id, key, val) {
+      return '<div class="toggle-row ' + (val?'on':'') + '">' +
+        '<div><div class="toggle-label">' + id + '</div></div>' +
+        '<button class="toggle ' + (val?'on':'') + '" onclick="tog(\'' + key + 'Tog\',\'' + key + '\')"></button></div>';
+    };
+    body =
+      '<div class="toggle-group">' +
+        '<div class="toggle-row ' + (CFG.enableWFH?'on':'') + '"><div><div class="toggle-label">Work From Home (WFH)</div><div class="toggle-desc">Employees can apply for WFH days</div></div><button class="toggle ' + (CFG.enableWFH?'on':'') + '" id="togWFH" onclick="tog(\'togWFH\',\'enableWFH\')"></button></div>' +
+        '<div class="toggle-row ' + (CFG.enableOD?'on':'') + '"><div><div class="toggle-label">On Duty (OD)</div><div class="toggle-desc">Field visit / client duty marking</div></div><button class="toggle ' + (CFG.enableOD?'on':'') + '" id="togOD" onclick="tog(\'togOD\',\'enableOD\')"></button></div>' +
+        '<div class="toggle-row ' + (CFG.enableCompOff?'on':'') + '"><div><div class="toggle-label">Compensatory Off (Comp-Off)</div><div class="toggle-desc">Comp-off for weekend / holiday work</div></div><button class="toggle ' + (CFG.enableCompOff?'on':'') + '" id="togCO" onclick="tog(\'togCO\',\'enableCompOff\')"></button></div>' +
+        '<div class="toggle-row ' + (CFG.enableHalfDay?'on':'') + '"><div><div class="toggle-label">Half-Day Leave</div><div class="toggle-desc">Allow applying for first-half or second-half leaves</div></div><button class="toggle ' + (CFG.enableHalfDay?'on':'') + '" id="togHD" onclick="tog(\'togHD\',\'enableHalfDay\')"></button></div>' +
+        '<div class="toggle-row ' + (CFG.sandwichRule?'on':'') + '"><div><div class="toggle-label">Sandwich Rule</div><div class="toggle-desc">Weekends between leaves counted as leave</div></div><button class="toggle ' + (CFG.sandwichRule?'on':'') + '" id="togSW" onclick="tog(\'togSW\',\'sandwichRule\')"></button></div>' +
+        '<div class="toggle-row on"><div><div class="toggle-label">Manager Approval Required</div><div class="toggle-desc">All leave applications need manager sign-off</div></div><button class="toggle on"></button></div>' +
+      '</div>' +
+      '<div class="fg-row" style="margin-top:16px">' +
+        '<div class="fg"><label class="fl">Min Notice Period (days)</label><input class="fi" type="number" value="' + CFG.noticePeriodDays + '" min="0" max="30" id="wNotice"></div>' +
+        '<div class="fg"><label class="fl">Max Consecutive Leave Days</label><input class="fi" type="number" value="' + CFG.maxLeavesAtOnce + '" min="1" max="180" id="wMaxLeave"></div>' +
+      '</div>';
   }
 
   // ── STEP 6: ELIGIBILITY RULES ────────────────────────────────
   else if (s.id === 'eligibility') {
     title = 'Leave eligibility rules';
-    desc  = 'Define when a new employee becomes eligible to avail leave after their Date of Joining (DOJ).';
-    body = `
-      <div class="toggle-group">
-        <div class="toggle-row ${CFG.probationEnabled?'on':''}" id="tr-prob">
-          <div><div class="toggle-label">Enforce Waiting Period from DOJ</div><div class="toggle-desc">New employees must complete a minimum number of days before applying leave</div></div>
-          <button class="toggle ${CFG.probationEnabled?'on':''}" id="togProb" onclick="togWiz('togProb','probationEnabled','tr-prob');toggleCondWiz('cond-prob')"></button>
-        </div>
-      </div>
-      <div class="cond-section ${CFG.probationEnabled?'open':''}" id="cond-prob">
-        <div style="padding-top:14px">
-          <div class="fg-row">
-            <div class="fg"><label class="fl">Waiting Period (days from DOJ)</label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wProbDays" value="${CFG.probationDays}" min="0" max="365"><span class="fi-unit">days</span></div>
-              <div class="hint">e.g. 90 days = eligible after completing 3 months of service</div>
-            </div>
-            <div class="fg"><label class="fl">If Leave Applied Before This Period</label>
-              <select class="fs" id="wProbAction">
-                <option value="reject" ${CFG.probationAction==='reject'?'selected':''}>Auto-reject the application</option>
-                <option value="lwp"    ${CFG.probationAction==='lwp'?'selected':''}>Allow but mark as LWP</option>
-                <option value="block"  ${CFG.probationAction==='block'?'selected':''}>Block submission entirely</option>
-                <option value="mgr"    ${CFG.probationAction==='mgr'?'selected':''}>Manager override only</option>
-              </select>
-            </div>
-          </div>
-          <div class="toggle-group">
-            <div class="toggle-row ${CFG.slExemptProbation?'on':''}" id="tr-slexempt">
-              <div><div class="toggle-label">Sick Leave Exempt from Waiting Period</div><div class="toggle-desc">SL can be availed from Day 1 regardless of probation</div></div>
-              <button class="toggle ${CFG.slExemptProbation?'on':''}" id="togSLEx" onclick="togWiz('togSLEx','slExemptProbation','tr-slexempt')"></button>
-            </div>
-            <div class="toggle-row ${CFG.accrueInProbation?'on':''}" id="tr-accrue">
-              <div><div class="toggle-label">Accrue Leave During Probation</div><div class="toggle-desc">Leave days accumulate during probation but cannot be used until eligible</div></div>
-              <button class="toggle ${CFG.accrueInProbation?'on':''}" id="togAccrue" onclick="togWiz('togAccrue','accrueInProbation','tr-accrue')"></button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="info-box amber" style="margin-top:14px"><div class="ib-icon">⚠️</div>
-        <div>Leave applied before the waiting period is complete will be handled as per the rule selected above.</div></div>`;
+    desc  = 'Define when a new employee becomes eligible to avail leave after their Date of Joining.';
+    var probOn = CFG.probationEnabled ? 'on' : '';
+    var condOpen = CFG.probationEnabled ? 'open' : '';
+    var probActOpts =
+      '<option value="reject"' + (CFG.probationAction==='reject'?' selected':'') + '>Auto-reject the application</option>' +
+      '<option value="lwp"'    + (CFG.probationAction==='lwp'   ?' selected':'') + '>Allow but mark as LWP</option>' +
+      '<option value="block"'  + (CFG.probationAction==='block' ?' selected':'') + '>Block submission entirely</option>' +
+      '<option value="mgr"'    + (CFG.probationAction==='mgr'   ?' selected':'') + '>Manager override only</option>';
+    body =
+      '<div class="toggle-group">' +
+        '<div class="toggle-row ' + probOn + '" id="tr-prob">' +
+          '<div><div class="toggle-label">Enforce Waiting Period from DOJ</div>' +
+          '<div class="toggle-desc">New employees must complete a minimum period before applying leave</div></div>' +
+          '<button class="toggle ' + probOn + '" id="togProb" onclick="togWiz(\'togProb\',\'probationEnabled\',\'tr-prob\');toggleCondWiz(\'cond-prob\')"></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cond-section ' + condOpen + '" id="cond-prob"><div style="padding-top:14px">' +
+        '<div class="fg-row">' +
+          '<div class="fg"><label class="fl">Waiting Period (days from DOJ)</label>' +
+            '<div class="fi-unit-wrap"><input class="fi" type="number" id="wProbDays" value="' + CFG.probationDays + '" min="0" max="365"><span class="fi-unit">days</span></div></div>' +
+          '<div class="fg"><label class="fl">If Leave Applied Before This Period</label><select class="fs" id="wProbAction">' + probActOpts + '</select></div>' +
+        '</div>' +
+        '<div class="toggle-group">' +
+          '<div class="toggle-row ' + (CFG.slExemptProbation?'on':'') + '" id="tr-slexempt">' +
+            '<div><div class="toggle-label">Sick Leave Exempt from Waiting Period</div><div class="toggle-desc">SL can be availed from Day 1</div></div>' +
+            '<button class="toggle ' + (CFG.slExemptProbation?'on':'') + '" id="togSLEx" onclick="togWiz(\'togSLEx\',\'slExemptProbation\',\'tr-slexempt\')"></button>' +
+          '</div>' +
+          '<div class="toggle-row ' + (CFG.accrueInProbation?'on':'') + '" id="tr-accrue">' +
+            '<div><div class="toggle-label">Accrue Leave During Probation</div><div class="toggle-desc">Days accumulate but cannot be used until eligible</div></div>' +
+            '<button class="toggle ' + (CFG.accrueInProbation?'on':'') + '" id="togAccrue" onclick="togWiz(\'togAccrue\',\'accrueInProbation\',\'tr-accrue\')"></button>' +
+          '</div>' +
+        '</div>' +
+      '</div></div>';
   }
 
   // ── STEP 7: SERVICE SLABS ────────────────────────────────────
   else if (s.id === 'slabs') {
     title = 'Service-based leave slabs';
-    desc  = 'Entitlement increases with years of service. Example: 0–5 yrs → 12 days; 5–10 yrs → 15 days; 10+ yrs → 18 days.';
-    body = `
-      <div class="toggle-group">
-        <div class="toggle-row ${CFG.slabsEnabled?'on':''}" id="tr-slabs">
-          <div><div class="toggle-label">Enable Service-Based Slabs</div><div class="toggle-desc">Leave entitlement increases with completed years of service from DOJ</div></div>
-          <button class="toggle ${CFG.slabsEnabled?'on':''}" id="togSlabs" onclick="togWiz('togSlabs','slabsEnabled','tr-slabs');toggleCondWiz('cond-slabs')"></button>
-        </div>
-      </div>
-      <div class="cond-section ${CFG.slabsEnabled?'open':''}" id="cond-slabs">
-        <div style="padding-top:14px">
-          <div class="info-box blue"><div class="ib-icon">📌</div>
-            <div>These slabs apply to all leave types equally. The Days/yr value in each slab overrides the base entitlement for that service tier.</div></div>
-          <table class="slab-tbl" id="wSlabTable">
-            <thead><tr><th>From (completed years)</th><th>To (years)</th><th>Days Entitled / yr</th><th></th></tr></thead>
-            <tbody id="wSlabTbody"></tbody>
-          </table>
-          <button class="add-lt-btn" onclick="addSlab()">＋ Add Slab Tier</button>
-          <div class="fg-row" style="margin-top:14px">
-            <div class="fg"><label class="fl">New Slab Takes Effect</label>
-              <select class="fs" id="wSlabTransition">
-                <option value="next_fy"    ${CFG.slabTransition==='next_fy'?'selected':''}>Start of next financial year</option>
-                <option value="immediate"  ${CFG.slabTransition==='immediate'?'selected':''}>Immediately on anniversary</option>
-                <option value="next_month" ${CFG.slabTransition==='next_month'?'selected':''}>Start of next month</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>`;
+    desc  = 'Entitlement increases with years of service. Example: 0-5 yrs = 12 days; 5-10 yrs = 15 days.';
+    var slabOn   = CFG.slabsEnabled ? 'on' : '';
+    var slabOpen = CFG.slabsEnabled ? 'open' : '';
+    var transOpts =
+      '<option value="next_fy"'    + (CFG.slabTransition==='next_fy'   ?' selected':'') + '>Start of next financial year</option>' +
+      '<option value="immediate"'  + (CFG.slabTransition==='immediate' ?' selected':'') + '>Immediately on anniversary</option>' +
+      '<option value="next_month"' + (CFG.slabTransition==='next_month'?' selected':'') + '>Start of next month</option>';
+    body =
+      '<div class="toggle-group">' +
+        '<div class="toggle-row ' + slabOn + '" id="tr-slabs">' +
+          '<div><div class="toggle-label">Enable Service-Based Slabs</div><div class="toggle-desc">Leave entitlement increases with years of service</div></div>' +
+          '<button class="toggle ' + slabOn + '" id="togSlabs" onclick="togWiz(\'togSlabs\',\'slabsEnabled\',\'tr-slabs\');toggleCondWiz(\'cond-slabs\')"></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cond-section ' + slabOpen + '" id="cond-slabs"><div style="padding-top:14px">' +
+        '<div class="info-box blue"><div class="ib-icon">&#x1F4CC;</div><div>These slabs apply to all leave types. The Days/yr value overrides the base entitlement for that service tier.</div></div>' +
+        '<table class="slab-tbl" id="wSlabTable">' +
+          '<thead><tr><th>From (completed years)</th><th>To (years)</th><th>Days Entitled / yr</th><th></th></tr></thead>' +
+          '<tbody id="wSlabTbody"></tbody>' +
+        '</table>' +
+        '<button class="add-lt-btn" onclick="addSlab()">&#xFF0B; Add Slab Tier</button>' +
+        '<div class="fg-row" style="margin-top:14px">' +
+          '<div class="fg"><label class="fl">New Slab Takes Effect</label><select class="fs" id="wSlabTransition">' + transOpts + '</select></div>' +
+          '<div class="fg"><label class="fl">Min Notice Period (days)</label><div class="fi-unit-wrap"><input class="fi" type="number" id="wNotice" value="' + CFG.noticePeriodDays + '" min="0" max="30"><span class="fi-unit">days</span></div></div>' +
+        '</div>' +
+      '</div></div>';
   }
 
   // ── STEP 8: CARRY FORWARD ────────────────────────────────────
   else if (s.id === 'carryforward') {
     title = 'Carry forward & encashment rules';
     desc  = 'Limit unused leave carry-forward. Any balance above the limit lapses at year end.';
-    body = `
-      <div class="info-box amber"><div class="ib-icon">⚠️</div>
-        <div><strong>Your Policy:</strong> Carry forward is limited to a fixed number of days. Any balance exceeding the limit will <strong>lapse</strong> at year end.</div></div>
-      <table class="cf-tbl" id="wCFTable">
-        <thead><tr><th>Leave Type</th><th>Allow CF?</th><th>Max CF Days</th><th>CF Expiry (months)</th><th>Excess Balance</th></tr></thead>
-        <tbody id="wCFTbody"></tbody>
-      </table>
-      <div class="divider"></div>
-      <div class="toggle-group">
-        <div class="toggle-row ${CFG.cfEncashAllowed?'on':''}" id="tr-encash">
-          <div><div class="toggle-label">Allow Leave Encashment</div><div class="toggle-desc">Employees can encash unused leave balance for monetary compensation</div></div>
-          <button class="toggle ${CFG.cfEncashAllowed?'on':''}" id="togEncash" onclick="togWiz('togEncash','cfEncashAllowed','tr-encash')"></button>
-        </div>
-      </div>
-      <div class="info-box purple" style="margin-top:12px"><div class="ib-icon">🔒</div>
-        <div>If your policy states <strong>encashment is not allowed</strong>, keep this toggle <strong>OFF</strong>. All unused leave beyond the carry-forward limit will simply lapse.</div></div>`;
+    var encOn = CFG.cfEncashAllowed ? 'on' : '';
+    body =
+      '<div class="info-box amber"><div class="ib-icon">&#x26A0;&#xFE0F;</div>' +
+        '<div><strong>Your Policy:</strong> Carry forward is limited to a fixed number of days. Balance above the limit lapses at year end.</div>' +
+      '</div>' +
+      '<table class="cf-tbl" id="wCFTable">' +
+        '<thead><tr><th>Leave Type</th><th>Allow CF?</th><th>Max CF Days</th><th>CF Expiry (months)</th><th>Excess Balance</th></tr></thead>' +
+        '<tbody id="wCFTbody"></tbody>' +
+      '</table>' +
+      '<div class="divider"></div>' +
+      '<div class="toggle-group">' +
+        '<div class="toggle-row ' + encOn + '" id="tr-encash">' +
+          '<div><div class="toggle-label">Allow Leave Encashment</div><div class="toggle-desc">Employees can encash unused leave balance</div></div>' +
+          '<button class="toggle ' + encOn + '" id="togEncash" onclick="togWiz(\'togEncash\',\'cfEncashAllowed\',\'tr-encash\')"></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="info-box purple" style="margin-top:12px"><div class="ib-icon">&#x1F512;</div>' +
+        '<div>If encashment is not allowed, keep this toggle OFF. Unused leave beyond carry-forward limit will lapse.</div>' +
+      '</div>';
   }
 
   // ── STEP 9: COMP-OFF RULES ───────────────────────────────────
   else if (s.id === 'compoff') {
     title = 'Compensatory off (Comp-Off) rules';
-    desc  = 'Set the minimum extra hours required to earn Comp-Off. Hours below the threshold are completely ignored. Reporting Manager approval is mandatory.';
-    body = `
-      <div class="toggle-group">
-        <div class="toggle-row ${CFG.enableCompOff?'on':''}" id="tr-co">
-          <div><div class="toggle-label">Enable Comp-Off</div><div class="toggle-desc">Employees working extra hours on holidays/weekends earn compensatory off</div></div>
-          <button class="toggle ${CFG.enableCompOff?'on':''}" id="togCORule" onclick="togWiz('togCORule','enableCompOff','tr-co');toggleCondWiz('cond-co')"></button>
-        </div>
-      </div>
-      <div class="cond-section ${CFG.enableCompOff?'open':''}" id="cond-co">
-        <div style="padding-top:14px">
-          <div class="fg-row">
-            <div class="fg"><label class="fl">Min Hours for 1 Full Comp-Off Day <span class="req">*</span></label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wCOMin" value="${CFG.compoffMinHours}" min="1" max="12" step="0.5" oninput="updateCOCalc()"><span class="fi-unit">hours</span></div>
-              <div class="hint warn">⚠️ Any extra hours <strong>below this are completely ignored</strong> and not accumulated</div>
-            </div>
-            <div class="fg"><label class="fl">Min Hours for Half-Day Comp-Off</label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wCOHalf" value="${CFG.compoffHalfHours}" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div>
-              <div class="hint">Set 0 to disable half-day comp-off</div>
-            </div>
-          </div>
-          <div class="info-box amber" id="coCalcBox"><div class="ib-icon">📌</div>
-            <div id="coCalcTxt">Loading example…</div></div>
-          <div class="fg-row">
-            <div class="fg"><label class="fl">Comp-Off Expiry</label>
-              <div class="fi-unit-wrap"><input class="fi" type="number" id="wCOExpiry" value="${CFG.compoffExpiry}" min="1" max="365"><span class="fi-unit">days</span></div>
-              <div class="hint">Unused comp-off lapses after this many days from date earned</div>
-            </div>
-            <div class="fg"><label class="fl">Partial Hours Across Multiple Days</label>
-              <select class="fs" id="wCOAccum">
-                <option value="false" ${!CFG.compoffAccumulate?'selected':''}>No — each day checked independently</option>
-                <option value="true"  ${CFG.compoffAccumulate?'selected':''}>Yes — accumulate across days</option>
-              </select>
-              <div class="hint">No: 3h+3h on two days = 0 comp-off. Yes: 6h total = 1 comp-off.</div>
-            </div>
-          </div>
-          <div class="toggle-group" style="margin-top:8px">
-            <div class="toggle-row on">
-              <div><div class="toggle-label">Reporting Manager Approval Mandatory</div><div class="toggle-desc">Comp-Off credited only after Reporting Manager explicitly approves</div></div>
-              <button class="toggle on"></button>
-            </div>
-          </div>
-          <div class="info-box purple" style="margin-top:10px"><div class="ib-icon">✅</div>
-            <div><strong>Your Policy:</strong> Comp-Off is <strong>strictly</strong> subject to Reporting Manager approval. The system auto-rejects if the manager does not act within the deadline.</div></div>
-        </div>
-      </div>`;
+    desc  = 'Set the minimum extra hours required to earn Comp-Off. Hours below the threshold are ignored.';
+    var coOn   = CFG.enableCompOff ? 'on' : '';
+    var coOpen = CFG.enableCompOff ? 'open' : '';
+    var accumOpts =
+      '<option value="false"' + (!CFG.compoffAccumulate?' selected':'') + '>No - each day checked independently</option>' +
+      '<option value="true"'  + (CFG.compoffAccumulate ?' selected':'') + '>Yes - accumulate across days</option>';
+    body =
+      '<div class="toggle-group">' +
+        '<div class="toggle-row ' + coOn + '" id="tr-co">' +
+          '<div><div class="toggle-label">Enable Comp-Off</div><div class="toggle-desc">Employees working extra hours earn compensatory off</div></div>' +
+          '<button class="toggle ' + coOn + '" id="togCORule" onclick="togWiz(\'togCORule\',\'enableCompOff\',\'tr-co\');toggleCondWiz(\'cond-co\')"></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cond-section ' + coOpen + '" id="cond-co"><div style="padding-top:14px">' +
+        '<div class="fg-row">' +
+          '<div class="fg"><label class="fl">Min Hours for 1 Full Comp-Off Day <span class="req">*</span></label>' +
+            '<div class="fi-unit-wrap"><input class="fi" type="number" id="wCOMin" value="' + CFG.compoffMinHours + '" min="1" max="12" step="0.5" oninput="updateCOCalc()"><span class="fi-unit">hours</span></div>' +
+            '<div class="hint warn">Any extra hours below this are completely ignored</div></div>' +
+          '<div class="fg"><label class="fl">Min Hours for Half-Day Comp-Off</label>' +
+            '<div class="fi-unit-wrap"><input class="fi" type="number" id="wCOHalf" value="' + CFG.compoffHalfHours + '" min="0.5" max="8" step="0.5"><span class="fi-unit">hours</span></div></div>' +
+        '</div>' +
+        '<div class="info-box amber" id="coCalcBox"><div class="ib-icon">&#x1F4CC;</div><div id="coCalcTxt">Loading...</div></div>' +
+        '<div class="fg-row">' +
+          '<div class="fg"><label class="fl">Comp-Off Expiry</label>' +
+            '<div class="fi-unit-wrap"><input class="fi" type="number" id="wCOExpiry" value="' + CFG.compoffExpiry + '" min="1" max="365"><span class="fi-unit">days</span></div></div>' +
+          '<div class="fg"><label class="fl">Partial Hours Across Multiple Days</label>' +
+            '<select class="fs" id="wCOAccum">' + accumOpts + '</select></div>' +
+        '</div>' +
+        '<div class="toggle-group">' +
+          '<div class="toggle-row on"><div><div class="toggle-label">Reporting Manager Approval Mandatory</div><div class="toggle-desc">Comp-Off credited only after Reporting Manager approves</div></div><button class="toggle on"></button></div>' +
+        '</div>' +
+      '</div></div>';
   }
 
   // ── STEP 10: PERMISSION POLICY ───────────────────────────────
   else if (s.id === 'permissions') {
     title = 'Permission policy';
-    desc  = "Configure the monthly permission hour limit. Excess is deducted from leave balance or next month's limit.";
+    desc  = 'Configure the monthly permission hour limit. Excess is deducted from leave balance or next month.';
     body  = buildPermBody();
   }
 
-    else if (s.id === 'employees') {
+  // ── STEP 11: ADD EMPLOYEES ───────────────────────────────────
+  else if (s.id === 'employees') {
     title = 'Add your employees';
-    desc  = 'Add employees who will use this system. You can add/edit more from Settings anytime.';
+    desc  = 'Add employees who will use this system. Click + Add Employee to enter details. You can add more anytime from Settings.';
     body  =
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
         '<div style="font-size:13px;color:var(--muted)"><strong id="empCountLbl">' + CFG.employees.length + '</strong> employee(s) added</div>' +
-        '<button class="add-lt-btn" onclick="addEmpRow()">＋ Add Employee</button>' +
+        '<button class="add-lt-btn" onclick="addEmpRow()">&#xFF0B; Add Employee</button>' +
       '</div>' +
-      '<div id="wEmpList" style="display:flex;flex-direction:column;gap:10px;max-height:360px;overflow-y:auto;margin-bottom:12px"></div>' +
-      '<div class="info-box blue"><div class="ib-icon">&#128273;</div>' +
-        '<div>Each employee logs in with their <strong>Employee ID + Password</strong>. Birthdays, anniversaries and work anniversaries trigger <strong>personalised greetings</strong> on login.</div>' +
+      '<div id="wEmpList" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;margin-bottom:12px"></div>' +
+      '<div class="info-box blue"><div class="ib-icon">&#x1F511;</div>' +
+        '<div>Each employee logs in with their <strong>Employee ID + Password</strong>. Birthdays and anniversaries trigger personalised greeting messages on login.</div>' +
       '</div>';
   }
 
   // ── STEP 12: ADMIN ACCOUNT ───────────────────────────────────
   else if (s.id === 'admin') {
     title = 'Create the admin account';
-    var _adDepts = ['HR','Administration','Management','IT','Finance'].map(function(d){return '<option>'+d+'</option>';}).join('');
-
     desc  = 'This will be the super-admin who can manage the entire system.';
-    body = `
-      <div class="fg-row">
-        <div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="wAdminName" placeholder="e.g. Priya Sharma" value="${CFG.adminName}"></div>
-        <div class="fg"><label class="fl">Employee ID</label><input class="fi" id="wAdminId" placeholder="e.g. EMP001" value="${CFG.adminId||'EMP001'}"></div>
-      </div>
-      <div class="fg-row">
-        <div class="fg"><label class="fl">Email <span class="req">*</span></label><input class="fi" id="wAdminEmail" type="email" placeholder="admin@company.com" value="${CFG.adminEmail}"></div>
-        <div class="fg"><label class="fl">Department</label><select class="fs" id="wAdminDept">${_adDepts}</select></div>
-      </div>
-      <div class="fg-row">
-        <div class="fg"><label class="fl">Password</label><input class="fi" type="password" placeholder="Min 8 characters" id="wAdminPass"></div>
-        <div class="fg"><label class="fl">Confirm Password</label><input class="fi" type="password" placeholder="Repeat password" id="wAdminPass2"></div>
-      </div>
-      <div class="fg"><label class="fl">Designation</label>
-        <input class="fi" id="wAdminDesig" placeholder="e.g. HR Manager, Head of People" value="${CFG.adminDesig||'HR Manager'}">
-      </div>
-      <div class="info-box green"><div class="ib-icon">🔐</div><div>You can add more admins, managers, and employees after setup is complete.</div></div>`;
+    var depts = ['HR','Administration','Management','IT','Finance'];
+    var deptOpts = depts.map(function(d){ return '<option>' + d + '</option>'; }).join('');
+    body =
+      '<div class="fg-row">' +
+        '<div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="wAdminName" placeholder="e.g. Priya Sharma" value="' + CFG.adminName + '"></div>' +
+        '<div class="fg"><label class="fl">Employee ID</label><input class="fi" id="wAdminId" placeholder="e.g. EMP001" value="' + (CFG.adminId||'EMP001') + '"></div>' +
+      '</div>' +
+      '<div class="fg-row">' +
+        '<div class="fg"><label class="fl">Email <span class="req">*</span></label><input class="fi" id="wAdminEmail" type="email" placeholder="admin@company.com" value="' + CFG.adminEmail + '"></div>' +
+        '<div class="fg"><label class="fl">Department</label><select class="fs" id="wAdminDept">' + deptOpts + '</select></div>' +
+      '</div>' +
+      '<div class="fg-row">' +
+        '<div class="fg"><label class="fl">Password</label><input class="fi" type="password" placeholder="Min 8 characters" id="wAdminPass"></div>' +
+        '<div class="fg"><label class="fl">Confirm Password</label><input class="fi" type="password" placeholder="Repeat password" id="wAdminPass2"></div>' +
+      '</div>' +
+      '<div class="fg"><label class="fl">Designation</label><input class="fi" id="wAdminDesig" placeholder="e.g. HR Manager" value="' + (CFG.adminDesig||'HR Manager') + '"></div>' +
+      '<div style="padding:12px 14px;background:var(--green-bg);border-radius:8px;font-size:13px;color:var(--green)">' +
+        '&#x1F510; You can add more admins, managers, and employees after setup.' +
+      '</div>';
   }
 
-  // ── STEP 12: REVIEW & LAUNCH ─────────────────────────────────
+  // ── STEP 13: REVIEW & LAUNCH ─────────────────────────────────
   else if (s.id === 'preview') {
-    const slabNote = CFG.slabsEnabled ? `${CFG.slabs.length} tiers` : 'Disabled';
-    const permNote = CFG.permissionEnabled ? `${CFG.permMonthlyHours}h/month limit` : 'Disabled';
-    const coNote   = CFG.enableCompOff ? `≥ ${CFG.compoffMinHours}h threshold` : 'Disabled';
-    title = 'Ready to launch! 🚀';
-    desc  = 'Here\'s a summary of your full configuration. Review and hit Launch to start using your HR system.';
-    body = `
-      <div class="success-icon">✨</div>
-      <div class="config-summary">
-        <div class="cs-item"><div class="cs-label">App Name</div><div class="cs-val">${CFG.appIcon} ${CFG.appName}</div></div>
-        <div class="cs-item"><div class="cs-label">Company</div><div class="cs-val">${CFG.companyName}</div></div>
-        <div class="cs-item"><div class="cs-label">Country / State</div><div class="cs-val">${CFG.country} • ${CFG.state}</div></div>
-        <div class="cs-item"><div class="cs-label">Financial Year</div><div class="cs-val">${CFG.fy==='apr'?'April – March':CFG.fy==='jan'?'Jan – Dec':'July – June'}</div></div>
-        <div class="cs-item"><div class="cs-label">Leave Types</div><div class="cs-val">${CFG.leaveTypes.length} types</div></div>
-        <div class="cs-item"><div class="cs-label">Holidays</div><div class="cs-val">${CFG.holidays.length} configured</div></div>
-        <div class="cs-item"><div class="cs-label">Probation Period</div><div class="cs-val">${CFG.probationEnabled ? CFG.probationDays+' days' : 'None'}</div></div>
-        <div class="cs-item"><div class="cs-label">Service Slabs</div><div class="cs-val">${slabNote}</div></div>
-        <div class="cs-item"><div class="cs-label">CF Encashment</div><div class="cs-val">${CFG.cfEncashAllowed ? 'Allowed' : 'Not Allowed'}</div></div>
-        <div class="cs-item"><div class="cs-label">Comp-Off Min Hours</div><div class="cs-val">${coNote}</div></div>
-        <div class="cs-item"><div class="cs-label">Permission Limit</div><div class="cs-val">${permNote}</div></div>
-        <div class="cs-item"><div class="cs-label">Excess Permission</div><div class="cs-val">${CFG.permissionEnabled?(CFG.permExcessMode==='leave'?'→ Deduct from '+CFG.permExcessFrom:CFG.permExcessMode==='next_month'?'→ Reduce next month balance':'→ Next month, then '+CFG.permExcessFrom):'N/A'}</div></div>
-        <div class="cs-item"><div class="cs-label">Admin</div><div class="cs-val">${CFG.adminName}</div></div>
-      </div>
-      <div class="info-box blue" style="margin-top:14px"><div class="ib-icon">💡</div>
-        <div>You can change any setting later from the <strong>Settings</strong> page without losing data.</div></div>`;
+    title = 'Ready to launch!';
+    desc  = 'Review your configuration and hit Launch to start using your HR system.';
+    var fyLabel   = CFG.fy==='apr' ? 'April - March' : CFG.fy==='jan' ? 'Jan - Dec' : 'July - June';
+    var slabLabel = CFG.slabsEnabled ? (CFG.slabs.length + ' tiers') : 'Disabled';
+    var permLabel = CFG.permissionEnabled ? (CFG.permMonthlyHours + 'h/month') : 'Disabled';
+    var coLabel   = CFG.enableCompOff ? ('>=' + CFG.compoffMinHours + 'h min') : 'Disabled';
+    var featList  = [CFG.enableWFH&&'WFH', CFG.enableOD&&'OD', CFG.enableCompOff&&'Comp-Off'].filter(Boolean).join(' / ');
+    body =
+      '<div class="success-icon">&#x2728;</div>' +
+      '<div class="config-summary">' +
+        '<div class="cs-item"><div class="cs-label">App Name</div><div class="cs-val">' + CFG.appIcon + ' ' + CFG.appName + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Company</div><div class="cs-val">' + CFG.companyName + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Country / State</div><div class="cs-val">' + CFG.country + ' &bull; ' + CFG.state + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Financial Year</div><div class="cs-val">' + fyLabel + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Leave Types</div><div class="cs-val">' + CFG.leaveTypes.length + ' types</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Holidays</div><div class="cs-val">' + CFG.holidays.length + ' configured</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Probation Period</div><div class="cs-val">' + (CFG.probationEnabled ? CFG.probationDays+'d from DOJ' : 'None') + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Service Slabs</div><div class="cs-val">' + slabLabel + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">CF Encashment</div><div class="cs-val">' + (CFG.cfEncashAllowed ? 'Allowed' : 'Not Allowed') + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Comp-Off Min Hours</div><div class="cs-val">' + coLabel + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Permission Limit</div><div class="cs-val">' + permLabel + '</div></div>' +
+        '<div class="cs-item"><div class="cs-label">Employees Added</div><div class="cs-val">' + CFG.employees.length + ' + 1 admin</div></div>' +
+      '</div>' +
+      '<div style="margin-top:14px;padding:12px 14px;background:var(--brand-light);border-radius:8px;font-size:13px;color:var(--brand)">' +
+        '&#x1F4A1; You can change any setting later from the <strong>Settings</strong> page.' +
+      '</div>';
   }
 
   // ── RENDER PANEL ─────────────────────────────────────────────
@@ -1704,25 +1644,28 @@ function renderWizardStep() {
     : '<span></span>';
   var _nb = wizStep < STEPS.length - 1
     ? '<button class="btn btn-primary btn-big" onclick="wizNext()">Continue &rarr;</button>'
-    : '<button class="btn btn-primary btn-big" onclick="launch()" style="background:var(--green)">Launch</button>';
+    : '<button class="btn btn-primary btn-big" onclick="launch()" style="background:var(--green)">Launch My HR System</button>';
+
   panel.innerHTML =
-    '<div class="wp-header">'+
-    '<div class="wp-step-tag">Step '+(wizStep+1)+' of '+STEPS.length+' &mdash; '+s.icon+' '+s.label+'</div>'+
-    '<div class="wp-title">'+title+'</div>'+
-    '<div class="wp-desc">'+desc+'</div></div>'+
-    '<div class="wp-body">'+body+'</div>'+
-    '<div class="wp-footer">'+_bb+_nb+'</div>';
+    '<div class="wp-header">' +
+      '<div class="wp-step-tag">Step ' + (wizStep+1) + ' of ' + STEPS.length + ' &mdash; ' + s.icon + ' ' + s.label + '</div>' +
+      '<div class="wp-title">'  + title + '</div>' +
+      '<div class="wp-desc">'   + desc  + '</div>' +
+    '</div>' +
+    '<div class="wp-body">'   + body  + '</div>' +
+    '<div class="wp-footer">' + _bb   + _nb   + '</div>';
 
   // Post-render hooks
-  if (s.id === 'identity')   { renderLivePreview(); document.getElementById('wAppName')?.addEventListener('input', renderLivePreview); }
-  if (s.id === 'leavetypes') renderWizLtList();
-  if (s.id === 'holidays')   renderWizHolList();
-  if (s.id === 'slabs')      renderWizSlabs();
+  if (s.id === 'identity')     { renderLivePreview(); document.getElementById('wAppName') && document.getElementById('wAppName').addEventListener('input', renderLivePreview); }
+  if (s.id === 'leavetypes')   renderWizLtList();
+  if (s.id === 'holidays')     renderWizHolList();
+  if (s.id === 'slabs')        renderWizSlabs();
   if (s.id === 'carryforward') renderWizCF();
-  if (s.id === 'employees')  renderWizEmpList();
-  if (s.id === 'compoff')    updateCOCalc();
-  if (s.id === 'permissions') updatePermCalcWiz();
+  if (s.id === 'employees')    renderWizEmpList();
+  if (s.id === 'compoff')      updateCOCalc();
+  if (s.id === 'permissions')  updatePermCalcWiz();
 }
+
 
 // ================================================================
 //  SECTION 5 — WIZARD HELPERS (live preview, toggles, lists)
@@ -1898,68 +1841,49 @@ function addSlab() {
 
 function delSlab(i) { CFG.slabs.splice(i,1); renderWizSlabs(); }
 
-// Employee roster in wizard - zero backticks, pure string concat
+// Employee roster in wizard - ZERO backticks
 function renderWizEmpList() {
   var el = document.getElementById('wEmpList');
   if (!el) return;
   var lbl = document.getElementById('empCountLbl');
-
+  if (lbl) lbl.textContent = CFG.employees.length;
   if (!CFG.employees.length) {
     el.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px;background:var(--bg);border-radius:var(--radius-sm);border:1.5px dashed var(--border)">No employees added yet. Click + Add Employee above.</div>';
-    if (lbl) lbl.textContent = 0;
     return;
   }
-
   var colours = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0D9488'];
   var rows = '';
-  CFG.employees.forEach(function(e, i) {
+  for (var i = 0; i < CFG.employees.length; i++) {
+    var e     = CFG.employees[i];
     var col   = e.color || colours[i % colours.length];
-    var inits = (e.name || '?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+    var parts = (e.name || '?').split(' ');
+    var inits = parts.map(function(w){ return w[0] || ''; }).join('').toUpperCase().slice(0,2);
     var login = e.loginEnabled !== false;
-    var loginBadge = login
-      ? '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--green-bg);color:var(--green)">Login &#10003;</span>'
-      : '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--red-bg);color:var(--red)">Login &#10007;</span>';
     rows +=
       '<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:white;border-radius:var(--radius-sm);border:1px solid var(--border)">' +
         '<div style="width:36px;height:36px;border-radius:9px;background:' + col + ';display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;flex-shrink:0">' + inits + '</div>' +
         '<div style="flex:1">' +
           '<div style="font-size:13px;font-weight:600">' + (e.name || 'Unnamed') + '</div>' +
-          '<div style="font-size:11px;color:var(--muted)">' + (e.empId||'') + (e.dept?' &middot; '+e.dept:'') + (e.desig?' &middot; '+e.desig:'') + '</div>' +
+          '<div style="font-size:11px;color:var(--muted)">' + (e.empId||'') + (e.dept ? ' &middot; ' + e.dept : '') + '</div>' +
         '</div>' +
-        loginBadge +
-        '<button onclick="openAddEmpModal(' + i + ')" style="padding:4px 10px;background:var(--brand-light);color:var(--brand);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">&#9998; Edit</button>' +
-        '<button class="lt-del" onclick="delEmp(' + i + ')">&#10005;</button>' +
+        '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:' + (login?'var(--green-bg)':'var(--red-bg)') + ';color:' + (login?'var(--green)':'var(--red)') + '">' + (login?'Login OK':'No Login') + '</span>' +
+        '<button onclick="openAddEmpModal(' + i + ')" style="padding:4px 10px;background:var(--brand-light);color:var(--brand);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Edit</button>' +
+        '<button class="lt-del" onclick="delEmp(' + i + ')">&#x2715;</button>' +
       '</div>';
-  });
-
+  }
   el.innerHTML = rows;
-  if (lbl) lbl.textContent = CFG.employees.length;
 }
+
 function addEmpRow() {
-  const nextId = 'WT/' + new Date().getFullYear() + '/EMP' + String(CFG.employees.length + 2).padStart(3,'0');
-  CFG.employees.push({
-    name:'', empId:nextId, dept:'Engineering', role:'Employee',
-    desig:'', dob:'', doj:'', fatherName:'', motherName:'',
-    maritalStatus:'Un-Married', marriageDate:'', spouseName:'', spouseDob:'',
-    children:[], qualification:'', experience:'',
-    contact1:'', contact2:'', workEmail:'',
-    password:'', loginEnabled:true, color: randColor()
-  });
+  var nextId = 'WT/' + new Date().getFullYear() + '/EMP' + String(CFG.employees.length + 2).padStart(3,'0');
+  openAddEmpModal(undefined, nextId);
+}
+
+function delEmp(i) {
+  CFG.employees.splice(i, 1);
   renderWizEmpList();
 }
 
-function addChild(empIdx) {
-  if (!CFG.employees[empIdx].children) CFG.employees[empIdx].children = [];
-  CFG.employees[empIdx].children.push({ name:'', gender:'Female', dob:'', studying:'yes' });
-  renderWizEmpList();
-}
-
-function delChild(empIdx, childIdx) {
-  CFG.employees[empIdx].children.splice(childIdx, 1);
-  renderWizEmpList();
-}
-
-function delEmp(i) { CFG.employees.splice(i,1); renderWizEmpList(); }
 
 function randColor() {
   const cols = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2','#0D9488'];
@@ -2852,41 +2776,53 @@ function openAddEmpModal(idx) {
 }
 
 function saveEmpModal() {
-  const idx   = parseInt(document.getElementById('mEmpIdx').value);
-  const name  = document.getElementById('mEmpName').value.trim();
-  const empId = document.getElementById('mEmpId').value.trim().toUpperCase();
-  const pass  = document.getElementById('mEmpPass').value;
-  const pass2 = document.getElementById('mEmpPass2').value;
+  var idx   = parseInt(document.getElementById('mEmpIdx').value);
+  var name  = document.getElementById('mEmpName').value.trim();
+  var empId = document.getElementById('mEmpId').value.trim().toUpperCase();
+  var pass  = document.getElementById('mEmpPass').value;
+  var pass2 = document.getElementById('mEmpPass2').value;
   if (!name)  { toast('Please enter employee name','err'); return; }
   if (!empId) { toast('Please enter Employee ID','err'); return; }
   if (idx < 0 && !pass) { toast('Please set a login password','err'); return; }
   if (pass && pass !== pass2) { toast('Passwords do not match','err'); return; }
-  const dup = CFG.employees.findIndex((e,i) => e.empId.toUpperCase()===empId && i!==idx);
-  if (dup>=0) { toast('Employee No. '+empId+' already exists','err'); return; }
+  var dup = CFG.employees.findIndex(function(e,i){ return e.empId.toUpperCase()===empId && i!==idx; });
+  if (dup >= 0) { toast('Employee ID '+empId+' already exists','err'); return; }
 
-  const marital = document.getElementById('mEmpMarital').value;
-  const emp = {
-    name, empId,
-    dob:          document.getElementById('mEmpDOB').value,
-    doj:          document.getElementById('mEmpDOJ').value,
-    dept:         document.getElementById('mEmpDept').value,
-    role:         document.getElementById('mEmpRole').value,
-    desig:        document.getElementById('mEmpDesig').value,
-    workEmail:    document.getElementById('mEmpWorkEmail').value,
-    fatherName:   document.getElementById('mEmpFather').value,
-    motherName:   document.getElementById('mEmpMother').value,
-    maritalStatus:marital,
-    marriageDate: marital==='Married' ? document.getElementById('mEmpMarriageDate').value : '',
-    spouseName:   marital==='Married' ? document.getElementById('mEmpSpouse').value : '',
-    spouseDob:    marital==='Married' ? document.getElementById('mEmpSpouseDob').value : '',
-    children:     JSON.parse(JSON.stringify(_modalChildren)),
-    qualification:document.getElementById('mEmpQual').value,
-    experience:   document.getElementById('mEmpExp').value,
-    contact1:     document.getElementById('mEmpMobile').value,
-    contact2:     document.getElementById('mEmpContact2').value,
-    loginEnabled: document.getElementById('mEmpLoginTog').classList.contains('on'),
-    color:        idx >= 0 ? (CFG.employees[idx].color || randColor()) : randColor(),
-    password:     pass || (idx>=0 ? CFG.employees[idx].password : ''),
+  var marital = document.getElementById('mEmpMarital').value;
+
+  // Collect children
+  var childCount = parseInt(document.getElementById('mEmpChildCount').value) || 0;
+  var children = [];
+  for (var ci = 0; ci < childCount; ci++) {
+    var cdob  = document.getElementById('mChildDOB_'+ci);
+    var cstud = document.getElementById('mChildStudy_'+ci);
+    children.push({ index: ci+1, dob: cdob?cdob.value:'', studying: cstud?cstud.value:'yes' });
+  }
+
+  var emp = {
+    name:          name,
+    empId:         empId,
+    dob:           document.getElementById('mEmpDOB').value,
+    doj:           document.getElementById('mEmpDOJ').value,
+    dept:          document.getElementById('mEmpDept').value,
+    role:          document.getElementById('mEmpRole').value,
+    fatherName:    document.getElementById('mEmpFather').value,
+    motherName:    document.getElementById('mEmpMother').value,
+    maritalStatus: marital,
+    marriageDate:  marital==='Married' ? document.getElementById('mEmpMarriageDate').value : '',
+    spouseName:    marital==='Married' ? document.getElementById('mEmpSpouse').value : '',
+    spouseDob:     marital==='Married' ? document.getElementById('mEmpSpouseDob').value : '',
+    children:      children,
+    course:        document.getElementById('mEmpCourse').value,
+    yearOfPassing: document.getElementById('mEmpYearPass').value,
+    college:       document.getElementById('mEmpCollege').value,
+    experience:    document.getElementById('mEmpExp').value,
+    contact1:      document.getElementById('mEmpMobile').value,
+    contact2:      document.getElementById('mEmpContact2').value,
+    email:         document.getElementById('mEmpEmail').value,
+    loginEnabled:  document.getElementById('mEmpLoginTog').classList.contains('on'),
+    color:         idx >= 0 ? (CFG.employees[idx].color || randColor()) : randColor(),
+    password:      pass || (idx>=0 ? CFG.employees[idx].password : ''),
   };
 
   if (idx >= 0) CFG.employees[idx] = emp;
@@ -2896,8 +2832,36 @@ function saveEmpModal() {
   closeM('mEmp');
   renderSettEmpTable();
   renderTeam();
-  toast(idx>=0 ? emp.name+' updated ✓' : emp.name+' added ✓', 'ok');
+  var wizList = document.getElementById('wEmpList');
+  if (wizList) renderWizEmpList();
+  toast(idx>=0 ? emp.name+' updated' : emp.name+' added', 'ok');
 }
+
+function updateChildFields(count) {
+  count = parseInt(count) || 0;
+  var el = document.getElementById('mEmpChildrenList');
+  if (!el) return;
+  if (count === 0) { el.innerHTML = ''; return; }
+  var html = '';
+  for (var i = 0; i < count; i++) {
+    html +=
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:8px">' +
+        '<div>' +
+          '<label class="fl">Child ' + (i+1) + ' - Date of Birth</label>' +
+          '<input class="fi fi-sm" type="date" id="mChildDOB_' + i + '">' +
+        '</div>' +
+        '<div>' +
+          '<label class="fl">Studying?</label>' +
+          '<select class="fs fs-sm" id="mChildStudy_' + i + '">' +
+            '<option value="yes">Yes - Currently Studying</option>' +
+            '<option value="no">No - Not Studying</option>' +
+          '</select>' +
+        '</div>' +
+      '</div>';
+  }
+  el.innerHTML = html;
+}
+
 
 function deleteEmpFromSettings(idx) {
   if (!confirm('Remove '+CFG.employees[idx].name+' from the system?')) return;
@@ -3184,4 +3148,60 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
-</html>
+</html>function openAddEmpModal(idx, prefilledId) {
+  var isEdit = idx !== undefined && idx >= 0;
+  document.getElementById('mEmpTitle').textContent = isEdit ? 'Edit Employee' : 'Add Employee';
+  document.getElementById('mEmpIdx').value = isEdit ? idx : -1;
+  var e = isEdit ? CFG.employees[idx] : {};
+
+  document.getElementById('mEmpId').value         = e.empId        || prefilledId || ('WT/'+new Date().getFullYear()+'/EMP'+String(CFG.employees.length+2).padStart(3,'0'));
+  document.getElementById('mEmpName').value        = e.name         || '';
+  document.getElementById('mEmpDOB').value         = e.dob          || '';
+  document.getElementById('mEmpDOJ').value         = e.doj          || '';
+  document.getElementById('mEmpFather').value      = e.fatherName   || '';
+  document.getElementById('mEmpMother').value      = e.motherName   || '';
+  document.getElementById('mEmpCourse').value      = e.course       || '';
+  document.getElementById('mEmpYearPass').value    = e.yearOfPassing|| '';
+  document.getElementById('mEmpCollege').value     = e.college      || '';
+  document.getElementById('mEmpExp').value         = e.experience   || '';
+  document.getElementById('mEmpMobile').value      = e.contact1     || '';
+  document.getElementById('mEmpContact2').value    = e.contact2     || '';
+  document.getElementById('mEmpEmail').value       = e.email        || '';
+  document.getElementById('mEmpPass').value        = '';
+  document.getElementById('mEmpPass2').value       = '';
+
+  var deptSel = document.getElementById('mEmpDept');
+  var roleSel = document.getElementById('mEmpRole');
+  var marSel  = document.getElementById('mEmpMarital');
+  if (deptSel) deptSel.value = e.dept          || 'Engineering';
+  if (roleSel) roleSel.value = e.role          || 'Employee';
+  if (marSel)  marSel.value  = e.maritalStatus || 'Un-Married';
+  toggleSpouseFields(e.maritalStatus || 'Un-Married');
+
+  // Set marriage/spouse fields
+  if (e.marriageDate) { var md = document.getElementById('mEmpMarriageDate'); if(md) md.value = e.marriageDate; }
+  if (e.spouseName)   { var sn = document.getElementById('mEmpSpouse');        if(sn) sn.value = e.spouseName; }
+  if (e.spouseDob)    { var sd = document.getElementById('mEmpSpouseDob');     if(sd) sd.value = e.spouseDob; }
+
+  // Children
+  var childCount = (e.children || []).length;
+  var cc = document.getElementById('mEmpChildCount');
+  if (cc) cc.value = childCount;
+  updateChildFields(childCount);
+  if (childCount > 0) {
+    setTimeout(function() {
+      (e.children || []).forEach(function(child, ci) {
+        var cdob  = document.getElementById('mChildDOB_'+ci);
+        var cstud = document.getElementById('mChildStudy_'+ci);
+        if (cdob  && child.dob)      cdob.value  = child.dob;
+        if (cstud && child.studying) cstud.value = child.studying;
+      });
+    }, 50);
+  }
+
+  var tog = document.getElementById('mEmpLoginTog');
+  if (tog) { tog.classList.remove('on'); if (e.loginEnabled !== false) tog.classList.add('on'); }
+  openM('mEmp');
+}
+
+
