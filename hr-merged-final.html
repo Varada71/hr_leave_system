@@ -1954,74 +1954,73 @@ function updatePermCalcWiz() {
 //  SECTION 6 — WIZARD NAVIGATION (collect + validate per step)
 // ================================================================
 function wizNext() {
-  const s = STEPS[wizStep];
+  var s = STEPS[wizStep];
 
   if (s.id === 'identity') {
-    CFG.appName    = document.getElementById('wAppName')?.value || CFG.appName;
-    CFG.appIcon    = document.getElementById('wAppIcon')?.value || CFG.appIcon;
-    CFG.tagline    = document.getElementById('wTagline')?.value || '';
+    CFG.appName = document.getElementById('wAppName') ? document.getElementById('wAppName').value || CFG.appName : CFG.appName;
+    CFG.appIcon = document.getElementById('wAppIcon') ? document.getElementById('wAppIcon').value || CFG.appIcon : CFG.appIcon;
+    CFG.tagline = document.getElementById('wTagline') ? document.getElementById('wTagline').value || '' : '';
     if (!CFG.appName.trim()) { toast('Please enter an app name','err'); return; }
   }
-  if (s.id === 'company') {
-    CFG.companyName = document.getElementById('wCoName')?.value     || CFG.companyName;
-    CFG.fy          = document.getElementById('wFY')?.value         || CFG.fy;
-    CFG.weekend     = document.getElementById('wWeekend')?.value    || CFG.weekend;
-    CFG.state       = document.getElementById('wState')?.value      || CFG.state;
-    CFG.country     = document.getElementById('wCountry')?.value    || CFG.country;
-    CFG.industry    = document.getElementById('wIndustry')?.value;
-    CFG.empCount    = parseInt(document.getElementById('wEmpCount')?.value) || 0;
+  else if (s.id === 'company') {
+    CFG.companyName = document.getElementById('wCoName')    ? (document.getElementById('wCoName').value    || CFG.companyName) : CFG.companyName;
+    CFG.fy          = document.getElementById('wFY')        ? (document.getElementById('wFY').value        || CFG.fy)          : CFG.fy;
+    CFG.weekend     = document.getElementById('wWeekend')   ? (document.getElementById('wWeekend').value   || CFG.weekend)     : CFG.weekend;
+    CFG.state       = document.getElementById('wState')     ? (document.getElementById('wState').value     || CFG.state)       : CFG.state;
+    CFG.country     = document.getElementById('wCountry')   ? (document.getElementById('wCountry').value   || CFG.country)     : CFG.country;
+    CFG.industry    = document.getElementById('wIndustry')  ? document.getElementById('wIndustry').value   : CFG.industry;
+    CFG.empCount    = document.getElementById('wEmpCount')  ? (parseInt(document.getElementById('wEmpCount').value) || 0) : CFG.empCount;
     if (!CFG.companyName.trim()) { toast('Please enter company name','err'); return; }
   }
-  if (s.id === 'policies') {
-    CFG.noticePeriodDays = parseInt(document.getElementById('wNotice')?.value)   || 1;
-    CFG.maxLeavesAtOnce  = parseInt(document.getElementById('wMaxLeave')?.value) || 10;
+  else if (s.id === 'policies') {
+    CFG.noticePeriodDays = document.getElementById('wNotice')   ? (parseInt(document.getElementById('wNotice').value)   || 1)  : CFG.noticePeriodDays;
+    CFG.maxLeavesAtOnce  = document.getElementById('wMaxLeave') ? (parseInt(document.getElementById('wMaxLeave').value) || 10) : CFG.maxLeavesAtOnce;
   }
-  if (s.id === 'eligibility') {
-    CFG.probationDays   = parseInt(document.getElementById('wProbDays')?.value)    || 90;
-    CFG.probationAction = document.getElementById('wProbAction')?.value            || 'reject';
+  else if (s.id === 'eligibility') {
+    CFG.probationDays   = document.getElementById('wProbDays')   ? (parseInt(document.getElementById('wProbDays').value)   || 90)     : CFG.probationDays;
+    CFG.probationAction = document.getElementById('wProbAction') ? (document.getElementById('wProbAction').value           || 'reject') : CFG.probationAction;
   }
-  if (s.id === 'slabs') {
-    CFG.slabTransition = document.getElementById('wSlabTransition')?.value || 'next_fy';
+  else if (s.id === 'slabs') {
+    CFG.slabTransition = document.getElementById('wSlabTransition') ? (document.getElementById('wSlabTransition').value || 'next_fy') : CFG.slabTransition;
   }
-  if (s.id === 'compoff') {
-    CFG.compoffMinHours  = parseFloat(document.getElementById('wCOMin')?.value)    || 4;
-    CFG.compoffHalfHours = parseFloat(document.getElementById('wCOHalf')?.value)   || 2;
-    CFG.compoffExpiry    = parseInt(document.getElementById('wCOExpiry')?.value)   || 30;
-    CFG.compoffAccumulate = document.getElementById('wCOAccum')?.value === 'true';
+  else if (s.id === 'compoff') {
+    CFG.compoffMinHours   = document.getElementById('wCOMin')    ? (parseFloat(document.getElementById('wCOMin').value)    || 4)  : CFG.compoffMinHours;
+    CFG.compoffHalfHours  = document.getElementById('wCOHalf')   ? (parseFloat(document.getElementById('wCOHalf').value)   || 2)  : CFG.compoffHalfHours;
+    CFG.compoffExpiry     = document.getElementById('wCOExpiry') ? (parseInt(document.getElementById('wCOExpiry').value)   || 30) : CFG.compoffExpiry;
+    CFG.compoffAccumulate = document.getElementById('wCOAccum')  ? document.getElementById('wCOAccum').value === 'true'    : CFG.compoffAccumulate;
   }
-  if (s.id === 'permissions') {
-    CFG.permMonthlyHours = parseFloat(document.getElementById('wPermHrs')?.value)    || 2;
-    CFG.permMinDuration  = parseInt(document.getElementById('wPermMin')?.value)      || 30;
-    CFG.permMaxSingle    = parseInt(document.getElementById('wPermMax')?.value)      || 120;
-    CFG.permMaxCount     = parseInt(document.getElementById('wPermCount')?.value)    || 4;
-    CFG.permExcessFrom        = document.getElementById('wPermFrom')?.value                   || 'CL';
-    CFG.permWorkHrsDay        = parseFloat(document.getElementById('wPermWrkHrs')?.value)     || 8;
-    CFG.permExcessMode        = document.getElementById('wPermExcessMode')?.value             || 'leave';
-    CFG.permNextMonthMaxDeduct= parseFloat(document.getElementById('wPermNextMonthMax')?.value) || 1;
+  else if (s.id === 'permissions') {
+    CFG.permMonthlyHours       = document.getElementById('wPermHrs')          ? (parseFloat(document.getElementById('wPermHrs').value)           || 2)   : CFG.permMonthlyHours;
+    CFG.permMinDuration        = document.getElementById('wPermMin')          ? (parseInt(document.getElementById('wPermMin').value)             || 30)  : CFG.permMinDuration;
+    CFG.permMaxSingle          = document.getElementById('wPermMax')          ? (parseInt(document.getElementById('wPermMax').value)             || 120) : CFG.permMaxSingle;
+    CFG.permMaxCount           = document.getElementById('wPermCount')        ? (parseInt(document.getElementById('wPermCount').value)           || 4)   : CFG.permMaxCount;
+    CFG.permExcessFrom         = document.getElementById('wPermFrom')         ? (document.getElementById('wPermFrom').value                      || 'CL'): CFG.permExcessFrom;
+    CFG.permWorkHrsDay         = document.getElementById('wPermWrkHrs')       ? (parseFloat(document.getElementById('wPermWrkHrs').value)        || 8)   : CFG.permWorkHrsDay;
+    CFG.permExcessMode         = document.getElementById('wPermExcessMode')   ? (document.getElementById('wPermExcessMode').value                || 'leave'): CFG.permExcessMode;
+    CFG.permNextMonthMaxDeduct = document.getElementById('wPermNextMonthMax') ? (parseFloat(document.getElementById('wPermNextMonthMax').value)  || 1)   : CFG.permNextMonthMaxDeduct;
   }
-  if (s.id === 'employees') {
-    // Employees are live-edited directly into CFG.employees — just validate
-    CFG.employees = CFG.employees.filter(e => e.name.trim() && e.empId.trim());
-    // Each employee must have a password
-    const noPass = CFG.employees.find(e => !e.password.trim());
-    if (noPass) { toast('Please set a password for '+noPass.name,'err'); return; }
+  else if (s.id === 'employees') {
+    // No validation required - employees added via modal, can be empty
   }
-  if (s.id === 'admin') {
-    CFG.adminName  = document.getElementById('wAdminName')?.value  || CFG.adminName;
-    CFG.adminEmail = document.getElementById('wAdminEmail')?.value || CFG.adminEmail;
-    CFG.adminId    = document.getElementById('wAdminId')?.value    || 'EMP001';
-    CFG.adminDesig = document.getElementById('wAdminDesig')?.value || '';
-    const p1 = document.getElementById('wAdminPass')?.value;
-    const p2 = document.getElementById('wAdminPass2')?.value;
-    if (!CFG.adminName.trim())  { toast('Please enter admin name','err'); return; }
-    if (p1 && p1 !== p2)        { toast('Passwords do not match','err'); return; }
+  else if (s.id === 'admin') {
+    CFG.adminName  = document.getElementById('wAdminName')  ? (document.getElementById('wAdminName').value  || CFG.adminName)  : CFG.adminName;
+    CFG.adminEmail = document.getElementById('wAdminEmail') ? (document.getElementById('wAdminEmail').value || CFG.adminEmail) : CFG.adminEmail;
+    CFG.adminId    = document.getElementById('wAdminId')    ? (document.getElementById('wAdminId').value    || 'EMP001')       : CFG.adminId;
+    CFG.adminDesig = document.getElementById('wAdminDesig') ? (document.getElementById('wAdminDesig').value || '')             : CFG.adminDesig;
+    var p1 = document.getElementById('wAdminPass')  ? document.getElementById('wAdminPass').value  : '';
+    var p2 = document.getElementById('wAdminPass2') ? document.getElementById('wAdminPass2').value : '';
+    if (!CFG.adminName.trim()) { toast('Please enter admin name','err'); return; }
+    if (p1 && p1 !== p2)       { toast('Passwords do not match','err'); return; }
     if (p1) CFG.adminPass = p1;
   }
 
   saveConfig();
-  wizStep = Math.min(wizStep+1, STEPS.length-1);
+  wizStep = Math.min(wizStep + 1, STEPS.length - 1);
   renderWizardStep();
-  document.querySelector('.wizard-panel')?.scrollTo(0,0);
+
+  // Scroll the wp-body back to top (it's the scrollable element, not the panel)
+  var wpBody = document.querySelector('.wp-body');
+  if (wpBody) wpBody.scrollTop = 0;
 }
 
 function wizBack() {
