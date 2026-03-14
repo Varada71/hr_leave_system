@@ -174,17 +174,18 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; cursor: pointer;
 }
-.fs-sm { font-size: 12px; padding: 7px 28px 7px 9px; }
-.fi-sm  { font-size: 12px; padding: 7px 9px; }
+.fs-sm { font-size: 13px; padding: 9px 30px 9px 11px; }
+.fi-sm  { font-size: 14px; padding: 9px 11px; }
 .fta { resize: vertical; min-height: 78px; }
 .hint { font-size: 11px; color: var(--light); margin-top: 5px; line-height: 1.5; }
 .hint.warn { color: var(--amber); }
 .hint.info { color: var(--brand); }
 
-/* Unit input wrapper */
+/* Unit input wrapper — number fields with days/hours/minutes label */
 .fi-unit-wrap { position: relative; display: flex; align-items: center; }
-.fi-unit-wrap .fi { padding-right: 58px; }
-.fi-unit { position: absolute; right: 11px; font-size: 11px; font-weight: 600; color: var(--light); pointer-events: none; white-space: nowrap; }
+.fi-unit-wrap .fi { padding-right: 70px; font-size: 16px; font-weight: 600; color: var(--text); }
+.fi-unit-wrap .fi-sm { padding-right: 70px; font-size: 15px; font-weight: 600; color: var(--text); }
+.fi-unit { position: absolute; right: 11px; font-size: 12px; font-weight: 700; color: var(--muted); pointer-events: none; white-space: nowrap; background: var(--bg); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
 
 /* ================================================================
    SECTION E — BUTTONS
@@ -1545,9 +1546,9 @@ function renderWizSlabs() {
   if (!el) return;
   el.innerHTML = CFG.slabs.map((s,i) => `
     <tr class="slab-row">
-      <td><div class="fi-unit-wrap"><input class="fi fi-sm" type="number" value="${s.fromYrs}" min="0" max="99" oninput="CFG.slabs[${i}].fromYrs=+this.value" style="max-width:90px"><span class="fi-unit">yrs</span></div></td>
-      <td><div class="fi-unit-wrap"><input class="fi fi-sm" type="number" value="${s.toYrs===999?'':s.toYrs}" placeholder="∞" min="1" max="999" oninput="CFG.slabs[${i}].toYrs=this.value===''?999:+this.value" style="max-width:90px"><span class="fi-unit">yrs</span></div></td>
-      <td><div class="fi-unit-wrap"><input class="fi fi-sm" type="number" value="${s.days}" min="0" max="365" oninput="CFG.slabs[${i}].days=+this.value" style="max-width:90px"><span class="fi-unit">days</span></div></td>
+      <td><div class="fi-unit-wrap"><input class="fi" type="number" value="${s.fromYrs}" min="0" max="99" oninput="CFG.slabs[${i}].fromYrs=+this.value" style="max-width:130px"><span class="fi-unit">yrs</span></div></td>
+      <td><div class="fi-unit-wrap"><input class="fi" type="number" value="${s.toYrs===999?'':s.toYrs}" placeholder="∞" min="1" max="999" oninput="CFG.slabs[${i}].toYrs=this.value===''?999:+this.value" style="max-width:130px"><span class="fi-unit">yrs</span></div></td>
+      <td><div class="fi-unit-wrap"><input class="fi" type="number" value="${s.days}" min="0" max="365" oninput="CFG.slabs[${i}].days=+this.value" style="max-width:130px"><span class="fi-unit">days</span></div></td>
       <td><button class="del-btn" onclick="delSlab(${i})">✕</button></td>
     </tr>`).join('');
 }
@@ -1571,8 +1572,8 @@ function renderWizCF() {
     return `<tr>
       <td><span class="badge brand">${lt.short}</span> ${lt.name}</td>
       <td style="text-align:center"><button class="tog ${lt.carryFwd?'on':''}" onclick="this.classList.toggle('on');"></button></td>
-      <td><div class="fi-unit-wrap"><input class="fi fi-sm" type="number" value="${cfv}" min="0" max="365" oninput="CFG.leaveTypes[${CFG.leaveTypes.indexOf(lt)}].maxCF=+this.value" style="max-width:80px"><span class="fi-unit">days</span></div></td>
-      <td><div class="fi-unit-wrap"><input class="fi fi-sm" type="number" value="${d.exp}" min="0" max="60" style="max-width:80px"><span class="fi-unit">months</span></div></td>
+      <td><div class="fi-unit-wrap"><input class="fi" type="number" value="${cfv}" min="0" max="365" oninput="CFG.leaveTypes[${CFG.leaveTypes.indexOf(lt)}].maxCF=+this.value" style="max-width:130px"><span class="fi-unit">days</span></div></td>
+      <td><div class="fi-unit-wrap"><input class="fi" type="number" value="${d.exp}" min="0" max="60" style="max-width:130px"><span class="fi-unit">months</span></div></td>
       <td><select class="fs fs-sm"><option>Lapse</option><option>Encash</option><option>Convert to LWP</option></select></td>
     </tr>`;
   }).join('');
