@@ -1058,6 +1058,64 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
 
       </div>
 
+
+      <!-- ADMIN DASHBOARD -->
+      <div class="pv" id="pv-admindash">
+
+        <!-- Org stats row -->
+        <div class="sg mb20" id="adminStatRow"></div>
+
+        <!-- Attendance monitor + quick actions -->
+        <div class="g2 mb20">
+          <div class="card">
+            <div class="ch">
+              <span class="ct">&#x1F4CA; Live Attendance Today</span>
+              <span id="adminAttDate" style="font-size:12px;color:var(--muted)"></span>
+            </div>
+            <div class="cb" id="adminAttMonitor" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">&#x26A1; Quick Actions</span></div>
+            <div class="cb" style="display:flex;flex-direction:column;gap:10px">
+              <button onclick="openAddEmpModal(undefined)" class="btn btn-primary" style="justify-content:flex-start;gap:10px;padding:12px 16px">
+                <span style="font-size:18px">&#x1F9D1;&#x200D;&#x1F4BC;</span>
+                <div style="text-align:left"><div style="font-weight:700">Add New Employee</div><div style="font-size:11px;font-weight:400;opacity:0.8">Onboard a new team member</div></div>
+              </button>
+              <button onclick="goPage('settings',document.querySelector('[onclick*=settings]'))" class="btn" style="background:var(--brand-light);color:var(--brand);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid var(--brand-mid)">
+                <span style="font-size:18px">&#x2699;&#xFE0F;</span>
+                <div style="text-align:left"><div style="font-weight:700">Manage Policies</div><div style="font-size:11px;font-weight:400;opacity:0.8">Leave rules, permissions, slabs</div></div>
+              </button>
+              <button onclick="goPage('approvals',document.querySelector('[onclick*=approvals]'))" class="btn" style="background:var(--green-bg);color:var(--green);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid var(--green)">
+                <span style="font-size:18px">&#x2705;</span>
+                <div style="text-align:left"><div style="font-weight:700">Pending Approvals</div><div style="font-size:11px;font-weight:400;opacity:0.8">Review leave requests</div></div>
+              </button>
+              <button onclick="goPage('reports',document.querySelector('[onclick*=reports]'))" class="btn" style="background:var(--amber-bg);color:var(--amber);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid #FDE68A">
+                <span style="font-size:18px">&#x1F4C8;</span>
+                <div style="text-align:left"><div style="font-weight:700">Generate Reports</div><div style="font-size:11px;font-weight:400;opacity:0.8">Attendance, leave, OT reports</div></div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending leave + employee overview -->
+        <div class="g2">
+          <div class="card">
+            <div class="ch">
+              <span class="ct">&#x1F4CB; Pending Leave Requests</span>
+              <button onclick="goPage('approvals',document.querySelector('[onclick*=approvals]'))" class="tb-btn" style="font-size:12px">View All</button>
+            </div>
+            <div class="cb" id="adminPendingLeaves" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="ch">
+              <span class="ct">&#x1F465; Employee Overview</span>
+              <button onclick="goPage('employees',document.querySelector('[onclick*=employees]'))" class="tb-btn" style="font-size:12px">Manage</button>
+            </div>
+            <div class="cb" id="adminEmpOverview" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /mainApp -->
@@ -3397,72 +3455,89 @@ function delChildModal(ci) {
 }
 
 function renderModalChildren() {
-  const el = document.getElementById('mEmpChildrenList');
+  var el = document.getElementById('mEmpChildrenList');
   if (!el) return;
   if (!_modalChildren.length) {
     el.innerHTML = '<div style="font-size:12px;color:var(--light);padding:6px 0">No children added.</div>';
     return;
   }
-  el.innerHTML = _modalChildren.map((c,ci) => `
-    <div style="display:grid;grid-template-columns:1fr 90px 130px 100px auto;gap:6px;align-items:center;padding:7px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
-      <input class="fi fi-sm" value="${c.name||''}" placeholder="Child's name" oninput="_modalChildren[${ci}].name=this.value">
-      <select class="fs fs-sm" onchange="_modalChildren[${ci}].gender=this.value">
-        <option ${c.gender==='Male'?'selected':''}>Male</option>
-        <option ${c.gender==='Female'?'selected':''}>Female</option>
-      </select>
-      <input class="fi fi-sm" type="date" value="${c.dob||''}" oninput="_modalChildren[${ci}].dob=this.value">
-      <select class="fs fs-sm" onchange="_modalChildren[${ci}].studying=this.value">
-        <option value="yes" ${c.studying==='yes'?'selected':''}>Studying</option>
-        <option value="no"  ${c.studying==='no'?'selected':''}>Not studying</option>
-      </select>
-      <button class="lt-del" onclick="delChildModal(${ci})">✕</button>
-    </div>`).join('');
+  var html = '';
+  for (var ci = 0; ci < _modalChildren.length; ci++) {
+    var ch = _modalChildren[ci];
+    html +=
+      '<div style="display:grid;grid-template-columns:1fr 90px 130px 100px auto;gap:6px;align-items:center;padding:7px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border);margin-bottom:4px">' +
+        '<input class="fi fi-sm" value="' + (ch.name||'') + '" placeholder="Child name" oninput="_modalChildren[' + ci + '].name=this.value">' +
+        '<select class="fs fs-sm" onchange="_modalChildren[' + ci + '].gender=this.value">' +
+          '<option' + (ch.gender==='Male'?' selected':'') + '>Male</option>' +
+          '<option' + (ch.gender==='Female'?' selected':'') + '>Female</option>' +
+        '</select>' +
+        '<input class="fi fi-sm" type="date" value="' + (ch.dob||'') + '" oninput="_modalChildren[' + ci + '].dob=this.value">' +
+        '<select class="fs fs-sm" onchange="_modalChildren[' + ci + '].studying=this.value">' +
+          '<option value="yes"' + (ch.studying==='yes'?' selected':'') + '>Studying</option>' +
+          '<option value="no"'  + (ch.studying==='no' ?' selected':'') + '>Not studying</option>' +
+        '</select>' +
+        '<button class="lt-del" onclick="delChildModal(' + ci + ')">&#x2715;</button>' +
+      '</div>';
+  }
+  el.innerHTML = html;
 }
 
 function openAddEmpModal(idx) {
-  const isEdit = idx !== undefined;
-  document.getElementById('mEmpTitle').textContent = isEdit ? 'Edit Employee' : 'Add Employee';
-  document.getElementById('mEmpIdx').value = isEdit ? idx : -1;
-  const e = isEdit ? CFG.employees[idx] : {};
+  var isEdit = (idx !== undefined && idx !== null && idx >= 0);
+  var el = document.getElementById('mEmpTitle');
+  if (el) el.textContent = isEdit ? 'Edit Employee' : 'Add Employee';
+  var idxEl = document.getElementById('mEmpIdx');
+  if (idxEl) idxEl.value = isEdit ? idx : -1;
+  var e = isEdit ? (CFG.employees[idx] || {}) : {};
   _modalChildren = isEdit ? JSON.parse(JSON.stringify(e.children||[])) : [];
 
-  document.getElementById('mEmpName').value       = e.name        || '';
-  document.getElementById('mEmpId').value         = e.empId       || ('WT/'+new Date().getFullYear()+'/EMP'+String(CFG.employees.length+2).padStart(3,'0'));
-  document.getElementById('mEmpDOB').value        = e.dob         || '';
-  document.getElementById('mEmpDOJ').value        = e.doj         || '';
-  document.getElementById('mEmpDesig').value      = e.desig       || '';
-  document.getElementById('mEmpWorkEmail').value  = e.workEmail   || '';
-  document.getElementById('mEmpFather').value     = e.fatherName  || '';
-  document.getElementById('mEmpMother').value     = e.motherName  || '';
-  document.getElementById('mEmpMarriageDate').value= e.marriageDate|| '';
-  document.getElementById('mEmpSpouse').value     = e.spouseName  || '';
-  document.getElementById('mEmpSpouseDob').value  = e.spouseDob   || '';
-  document.getElementById('mEmpMobile').value     = e.contact1    || '';
-  document.getElementById('mEmpContact2').value   = e.contact2    || '';
-  document.getElementById('mEmpQual').value       = e.qualification|| '';
-  document.getElementById('mEmpExp').value        = e.experience  || '';
-  document.getElementById('mEmpDOL').value         = e.dol          || '';
-  document.getElementById('mEmpMgrId').value       = e.managerId    || '';
-  document.getElementById('mEmpDesig').value       = e.desig        || '';
-  document.getElementById('mEmpPass').value        = '';
-  document.getElementById('mEmpPass2').value       = '';
+  function setVal(id, val) {
+    var el2 = document.getElementById(id);
+    if (el2) el2.value = val || '';
+  }
+
+  var nextId = 'WT/' + new Date().getFullYear() + '/EMP' + String((CFG.employees||[]).length + 2).padStart(3,'0');
+  setVal('mEmpId',          e.empId        || nextId);
+  setVal('mEmpName',        e.name);
+  setVal('mEmpDOB',         e.dob);
+  setVal('mEmpDOJ',         e.doj);
+  setVal('mEmpDOL',         e.dol);
+  setVal('mEmpDesig',       e.desig);
+  setVal('mEmpMgrId',       e.managerId);
+  setVal('mEmpFather',      e.fatherName);
+  setVal('mEmpMother',      e.motherName);
+  setVal('mEmpMarriageDate',e.marriageDate);
+  setVal('mEmpSpouse',      e.spouseName);
+  setVal('mEmpSpouseDob',   e.spouseDob);
+  setVal('mEmpMobile',      e.contact1);
+  setVal('mEmpContact2',    e.contact2);
+  setVal('mEmpEmail',       e.email);
+  setVal('mEmpCourse',      e.course);
+  setVal('mEmpYearPass',    e.yearOfPassing);
+  setVal('mEmpCollege',     e.college);
+  setVal('mEmpExp',         e.experience);
+  setVal('mEmpPass',        '');
+  setVal('mEmpPass2',       '');
 
   var statusSel = document.getElementById('mEmpStatus');
   if (statusSel) statusSel.value = e.employmentStatus || 'active';
-  updateMgrPreview(e.managerId || '');
 
-  const deptSel   = document.getElementById('mEmpDept');
-  const roleSel   = document.getElementById('mEmpRole');
-  const marSel    = document.getElementById('mEmpMarital');
-  if(deptSel) deptSel.value = e.dept          || 'Engineering';
-  if(roleSel) roleSel.value = e.role          || 'Employee';
-  if(marSel)  marSel.value  = e.maritalStatus || 'Un-Married';
+  var deptSel = document.getElementById('mEmpDept');
+  var roleSel = document.getElementById('mEmpRole');
+  var marSel  = document.getElementById('mEmpMarital');
+  var childCt = document.getElementById('mEmpChildCount');
+  if (deptSel) deptSel.value = e.dept          || 'Engineering';
+  if (roleSel) roleSel.value = e.role          || 'Employee';
+  if (marSel)  marSel.value  = e.maritalStatus || 'Un-Married';
+  if (childCt) childCt.value = (e.children||[]).length || 0;
 
   toggleSpouseFields(e.maritalStatus || 'Un-Married');
+  updateMgrPreview(e.managerId || '');
+  updateChildFields((e.children||[]).length || 0);
   renderModalChildren();
 
-  const tog = document.getElementById('mEmpLoginTog');
-  if(tog) { tog.classList.remove('on'); if(e.loginEnabled !== false) tog.classList.add('on'); }
+  var tog = document.getElementById('mEmpLoginTog');
+  if (tog) { tog.classList.remove('on'); if (e.loginEnabled !== false) tog.classList.add('on'); }
   openM('mEmp');
 }
 
@@ -3843,60 +3918,4 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
-</html<!-- ADMIN DASHBOARD -->
-      <div class="pv" id="pv-admindash">
-
-        <!-- Org stats row -->
-        <div class="sg mb20" id="adminStatRow"></div>
-
-        <!-- Attendance monitor + quick actions -->
-        <div class="g2 mb20">
-          <div class="card">
-            <div class="ch">
-              <span class="ct">&#x1F4CA; Live Attendance Today</span>
-              <span id="adminAttDate" style="font-size:12px;color:var(--muted)"></span>
-            </div>
-            <div class="cb" id="adminAttMonitor" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto"></div>
-          </div>
-          <div class="card">
-            <div class="ch"><span class="ct">&#x26A1; Quick Actions</span></div>
-            <div class="cb" style="display:flex;flex-direction:column;gap:10px">
-              <button onclick="openAddEmpModal(undefined)" class="btn btn-primary" style="justify-content:flex-start;gap:10px;padding:12px 16px">
-                <span style="font-size:18px">&#x1F9D1;&#x200D;&#x1F4BC;</span>
-                <div style="text-align:left"><div style="font-weight:700">Add New Employee</div><div style="font-size:11px;font-weight:400;opacity:0.8">Onboard a new team member</div></div>
-              </button>
-              <button onclick="goPage('settings',document.querySelector('.sb-item[onclick*=settings]'))" class="btn" style="background:var(--brand-light);color:var(--brand);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid var(--brand-mid)">
-                <span style="font-size:18px">&#x2699;&#xFE0F;</span>
-                <div style="text-align:left"><div style="font-weight:700">Manage Policies</div><div style="font-size:11px;font-weight:400;opacity:0.8">Leave rules, permissions, slabs</div></div>
-              </button>
-              <button onclick="goPage('approvals',document.querySelector('.sb-item[onclick*=approvals]'))" class="btn" style="background:var(--green-bg);color:var(--green);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid var(--green)">
-                <span style="font-size:18px">&#x2705;</span>
-                <div style="text-align:left"><div style="font-weight:700">Pending Approvals</div><div style="font-size:11px;font-weight:400;opacity:0.8">Review leave requests</div></div>
-              </button>
-              <button onclick="goPage('reports',document.querySelector('.sb-item[onclick*=reports]'))" class="btn" style="background:var(--amber-bg);color:var(--amber);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid #FDE68A">
-                <span style="font-size:18px">&#x1F4C8;</span>
-                <div style="text-align:left"><div style="font-weight:700">Generate Reports</div><div style="font-size:11px;font-weight:400;opacity:0.8">Attendance, leave, OT reports</div></div>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Leave approvals summary + recent activity -->
-        <div class="g2">
-          <div class="card">
-            <div class="ch">
-              <span class="ct">&#x1F4CB; Pending Leave Requests</span>
-              <button onclick="goPage('approvals',document.querySelector('.sb-item[onclick*=approvals]'))" class="tb-btn" style="font-size:12px">View All</button>
-            </div>
-            <div class="cb" id="adminPendingLeaves" style="display:flex;flex-direction:column;gap:8px"></div>
-          </div>
-          <div class="card">
-            <div class="ch"><span class="ct">&#x1F465; Employee Overview</span>
-              <button onclick="goPage('employees',document.querySelector('.sb-item[onclick*=employees]'))" class="tb-btn" style="font-size:12px">Manage</button>
-            </div>
-            <div class="cb" id="adminEmpOverview" style="display:flex;flex-direction:column;gap:8px"></div>
-          </div>
-        </div>
-      </div>
-
-      >
+</html>
