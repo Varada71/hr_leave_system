@@ -2679,43 +2679,67 @@ function toast(msg, type='') {
 let CURRENT_USER = null;
 
 function doLogin() {
-  var empId = (document.getElementById('loginEmpId').value || '').trim().toUpperCase();
-  var pass  = document.getElementById('loginPassword').value || '';
+  var rawId = (document.getElementById('loginEmpId').value || '').trim();
+  var empId = rawId.toUpperCase();
+  var pass  = (document.getElementById('loginPassword').value || '').trim();
   var errEl = document.getElementById('loginError');
 
-  if (!empId || !pass) {
-    if (errEl) { errEl.style.display='block'; errEl.textContent='\u2715 Please enter Employee ID and password.'; }
+  if (!rawId || !pass) {
+    if (errEl) { errEl.style.display='block'; errEl.textContent='\u2715 Please enter your Employee ID and password.'; }
     return;
   }
 
   if (_loginPortal === 'admin') {
-    // Admin portal - only check admin credentials
-    if (empId === (CFG.adminId||'EMP001').toUpperCase() && pass === (CFG.adminPass||'admin123')) {
-      CURRENT_USER = { name:CFG.adminName, empId:CFG.adminId, role:'HR Admin', dept:'Administration', color:CFG.brandColor, isAdmin:true };
+    // Check admin credentials — match by ID, email, or name (case-insensitive)
+    var adminIdMatch    = empId === (CFG.adminId||'EMP001').toUpperCase();
+    var adminEmailMatch = rawId.toLowerCase() === (CFG.adminEmail||'').toLowerCase();
+    var passMatch       = pass === (CFG.adminPass||'admin123');
+
+    if ((adminIdMatch || adminEmailMatch) && passMatch) {
+      CURRENT_USER = {
+        name:    CFG.adminName  || 'HR Admin',
+        empId:   CFG.adminId    || 'EMP001',
+        email:   CFG.adminEmail || '',
+        role:    'HR Admin',
+        dept:    'Administration',
+        desig:   CFG.adminDesig || 'HR Manager',
+        color:   CFG.brandColor,
+        isAdmin: true
+      };
       startSession();
       return;
     }
-    // Also allow HR Admin role employees to use admin portal
+
+    // Also allow any employee with HR Admin role to use admin portal
     var adminEmp = (CFG.employees||[]).find(function(e) {
-      return e.empId.toUpperCase()===empId && e.password===pass && e.role==='HR Admin' && e.loginEnabled!==false;
+      var idOk = e.empId.toUpperCase() === empId;
+      var emailOk = e.email && e.email.toLowerCase() === rawId.toLowerCase();
+      return (idOk || emailOk) && e.password === pass && e.role === 'HR Admin' && e.loginEnabled !== false;
     });
     if (adminEmp) {
-      CURRENT_USER = Object.assign({}, adminEmp, { isAdmin:true });
+      CURRENT_USER = Object.assign({}, adminEmp, { isAdmin: true });
       startSession();
       return;
     }
-    if (errEl) { errEl.style.display='block'; errEl.textContent='\u2715 Invalid Admin ID or Password. Use the Employee portal if you are not an admin.'; }
+
+    // Helpful error message showing what credentials to use
+    if (errEl) {
+      errEl.style.display = 'block';
+      errEl.innerHTML = '\u2715 Incorrect ID or password.<br><span style="font-size:11px;opacity:0.8">Use the Employee ID or email you set during setup. Default ID: <strong>' + (CFG.adminId||'EMP001') + '</strong></span>';
+    }
+
   } else {
-    // Employee portal - check all employees
+    // Employee portal
     var emp = (CFG.employees||[]).find(function(e) {
-      return e.empId.toUpperCase()===empId && e.password===pass && e.loginEnabled!==false;
+      var idOk    = e.empId.toUpperCase() === empId;
+      var emailOk = e.email && e.email.toLowerCase() === rawId.toLowerCase();
+      return (idOk || emailOk) && e.password === pass && e.loginEnabled !== false;
     });
     if (emp) {
-      CURRENT_USER = Object.assign({}, emp, { isAdmin: emp.role==='HR Admin' });
+      CURRENT_USER = Object.assign({}, emp, { isAdmin: emp.role === 'HR Admin' });
       startSession();
       return;
     }
-    // Don't allow admin to log in via employee portal
     if (empId === (CFG.adminId||'EMP001').toUpperCase()) {
       if (errEl) { errEl.style.display='block'; errEl.textContent='\u2715 Admins must use the HR Admin portal.'; }
       return;
@@ -2751,6 +2775,16 @@ function showLoginForm(portal) {
   if (empIdInput) {
     empIdInput.value = '';
     empIdInput.placeholder = isAdmin ? (CFG.adminId || 'EMP001') : 'e.g. EMP002';
+    // Show hint below the input for admin
+    var hintEl = document.getElementById('loginIdHint');
+    if (hintEl) {
+      if (isAdmin) {
+        hintEl.style.display = 'block';
+        hintEl.innerHTML = 'Your admin ID is: <strong>' + (CFG.adminId||'EMP001') + '</strong> &nbsp;&bull;&nbsp; or use your email: <strong>' + (CFG.adminEmail||'hr@company.com') + '</strong>';
+      } else {
+        hintEl.style.display = 'none';
+      }
+    }
   }
   var pwInput = document.getElementById('loginPassword');
   if (pwInput) pwInput.value = '';
