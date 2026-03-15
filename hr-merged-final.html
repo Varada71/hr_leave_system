@@ -2634,9 +2634,11 @@ function bootstrapApp() {
     document.getElementById('sbIcon').textContent = CFG.appIcon;
   }
   document.title = CFG.appName;
-  document.getElementById('appUserAv').textContent   = initials(CFG.adminName);
-  document.getElementById('appUserName').textContent = CFG.adminName;
-  document.getElementById('appUserRole').textContent = CFG.adminDesig || 'HR Admin';
+  // Use currently logged-in user's info, not always the admin
+  var _sidebarUser = CURRENT_USER || { name: CFG.adminName, role: CFG.adminDesig || 'HR Admin' };
+  document.getElementById('appUserAv').textContent   = initials(_sidebarUser.name);
+  document.getElementById('appUserName').textContent = _sidebarUser.name;
+  document.getElementById('appUserRole').textContent = _sidebarUser.desig || _sidebarUser.role || 'Employee';
 
   const fyLbl = CFG.fy === 'apr'
     ? `FY ${new Date().getFullYear()-1}–${String(new Date().getFullYear()).slice(-2)}`
