@@ -687,22 +687,35 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
         </div>
       </div>
     </div>
-    <div class="sb-nav">
-      <div class="sb-section">Overview</div>
-      <div class="sb-item active" onclick="goPage('dashboard',this)"><span class="ico">📊</span> Dashboard</div>
-      <div class="sb-item"       onclick="goPage('attendance',this)"><span class="ico">🕐</span> Attendance</div>
-      <div class="sb-section">Leave</div>
-      <div class="sb-item" onclick="goPage('myleaves',this)"><span class="ico">🌴</span> My Leaves</div>
-      <div class="sb-item" onclick="goPage('apply',this)"><span class="ico">✏️</span> Apply Leave</div>
-      <div class="sb-item" onclick="goPage('approvals',this)" id="navApprovals">
-        <span class="ico">✅</span> Approvals <span class="sb-badge" id="appBadge">3</span>
+    <div class="sb-nav" id="sidebarNav">
+      <!-- Admin nav (shown when HR Admin logs in) -->
+      <div class="admin-nav-group" id="adminNavGroup" style="display:none">
+        <div class="sb-section">HR Dashboard</div>
+        <div class="sb-item" onclick="goPage('admindash',this)"><span class="ico">📊</span> Overview</div>
+        <div class="sb-item" onclick="goPage('attendance',this)"><span class="ico">🕐</span> Attendance Monitor</div>
+        <div class="sb-item" onclick="goPage('approvals',this)" id="navApprovals">
+          <span class="ico">✅</span> Leave Approvals <span class="sb-badge" id="appBadge">3</span>
+        </div>
+        <div class="sb-section">People</div>
+        <div class="sb-item" onclick="goPage('employees',this)"><span class="ico">👥</span> Employees</div>
+        <div class="sb-item" onclick="goPage('team',this)"><span class="ico">📅</span> Team Calendar</div>
+        <div class="sb-item" onclick="goPage('holidays',this)"><span class="ico">🎉</span> Holidays</div>
+        <div class="sb-section">Admin Tools</div>
+        <div class="sb-item" onclick="goPage('reports',this)"><span class="ico">📈</span> Reports</div>
+        <div class="sb-item" onclick="goPage('settings',this)"><span class="ico">⚙️</span> Settings</div>
       </div>
-      <div class="sb-section">People</div>
-      <div class="sb-item" onclick="goPage('team',this)"><span class="ico">👥</span> Team</div>
-      <div class="sb-item" onclick="goPage('holidays',this)"><span class="ico">🎉</span> Holidays</div>
-      <div class="sb-section admin-only">Admin</div>
-      <div class="sb-item admin-only" onclick="goPage('reports',this)"><span class="ico">📈</span> Reports</div>
-      <div class="sb-item admin-only" onclick="goPage('settings',this)"><span class="ico">⚙️</span> Settings</div>
+      <!-- Employee nav (shown when employee logs in) -->
+      <div class="emp-nav-group" id="empNavGroup" style="display:none">
+        <div class="sb-section">My Workspace</div>
+        <div class="sb-item active" onclick="goPage('dashboard',this)"><span class="ico">📊</span> Dashboard</div>
+        <div class="sb-item" onclick="goPage('attendance',this)"><span class="ico">🕐</span> My Attendance</div>
+        <div class="sb-section">Leave</div>
+        <div class="sb-item" onclick="goPage('myleaves',this)"><span class="ico">🌴</span> My Leaves</div>
+        <div class="sb-item" onclick="goPage('apply',this)"><span class="ico">✏️</span> Apply Leave</div>
+        <div class="sb-section">People</div>
+        <div class="sb-item" onclick="goPage('team',this)"><span class="ico">👥</span> Team</div>
+        <div class="sb-item" onclick="goPage('holidays',this)"><span class="ico">🎉</span> Holidays</div>
+      </div>
     </div>
     <div class="sb-foot">
       <div class="ua" id="appUserAv">JS</div>
@@ -859,10 +872,11 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
 
       <!-- APPROVALS -->
       <div class="pv" id="pv-approvals">
-        <div class="tabs">
+        <div class="tabs" id="approvalTabs">
           <button class="tab active" onclick="swTab(this,'apv-pending')">Pending (3)</button>
           <button class="tab" onclick="swTab(this,'apv-history')">History</button>
-          <button class="tab" onclick="swTab(this,'apv-team')">Team Calendar</button>
+          <button class="tab mgr-only" id="mgrApvTab" onclick="swTab(this,'apv-mgr');renderMgrApprovals()">From My Team (0)</button>
+          <button class="tab" onclick="swTab(this,'apv-mine');renderMyRequests()">My Requests</button>
         </div>
         <div id="apv-pending"><div id="apvCards"></div></div>
         <div id="apv-history" style="display:none">
@@ -879,6 +893,57 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
           <div class="card"><div class="ch"><span class="ct">Team Leave Calendar — March 2026</span></div>
           <div class="cb" id="teamCalCont"></div></div>
         </div>
+      </div>
+
+      <!-- EMPLOYEES MANAGEMENT (Admin) -->
+      <div class="pv" id="pv-employees">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800">Employee Management</div>
+            <div style="font-size:13px;color:var(--muted)">Add, edit or remove employees. Toggle login access anytime.</div>
+          </div>
+          <button class="btn btn-primary" onclick="openAddEmpModal(undefined)" style="gap:8px">
+            <span>&#xFF0B;</span> Add New Employee
+          </button>
+        </div>
+
+        <!-- Summary stats -->
+        <div class="sg mb20" style="grid-template-columns:repeat(4,1fr)" id="empMgmtStats"></div>
+
+        <!-- Search + filter bar -->
+        <div class="card">
+          <div class="ch">
+            <span class="ct">All Employees</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="empSearchInput" class="fi" placeholder="&#x1F50D; Search by name or ID..." style="width:220px;padding:7px 12px;font-size:13px" oninput="filterEmpTable()">
+              <select id="empDeptFilter" class="fs" style="padding:7px 10px;font-size:13px" onchange="filterEmpTable()">
+                <option value="">All Departments</option>
+              </select>
+            </div>
+          </div>
+          <div class="cb" style="padding:0">
+            <table class="dt" id="empMgmtTable">
+              <thead><tr><th>Employee</th><th>ID</th><th>Department</th><th>Role</th><th>Reporting Manager</th><th>DOJ</th><th>Status</th><th>Login</th><th>Actions</th></tr></thead>
+              <tbody id="empMgmtTbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- MANAGER APPROVALS TAB -->
+        <div id="apv-mgr" style="display:none">
+          <div style="padding:4px 0 16px;display:flex;align-items:center;justify-content:space-between">
+            <div id="mgrApvHeader" style="font-size:13px;color:var(--muted)"></div>
+          </div>
+          <div id="mgrApprovalsList"></div>
+        </div>
+
+        <!-- MY REQUESTS TAB -->
+        <div id="apv-mine" style="display:none">
+          <table class="dt" style="margin-top:8px">
+            <thead><tr><th>Date</th><th>Type</th><th>Details</th><th>Reason</th><th>Status</th><th>Manager Note</th></tr></thead>
+            <tbody id="myRequestsList"></tbody>
+          </table>
+        </div>
+
       </div>
 
       <!-- TEAM -->
@@ -1016,6 +1081,21 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
       <div class="fg"><label class="fl">Date of Joining</label><input class="fi" type="date" id="mEmpDOJ"></div>
     </div>
     <div class="fg-row">
+      <div class="fg"><label class="fl">Date of Leaving Service</label>
+        <input class="fi" type="date" id="mEmpDOL">
+        <div class="hint" style="color:var(--muted)">Fill only when employee resigns or leaves service</div>
+      </div>
+      <div class="fg"><label class="fl">Employment Status</label>
+        <select class="fs" id="mEmpStatus" onchange="handleEmpStatusChange(this.value)">
+          <option value="active">Active</option>
+          <option value="resigned">Resigned</option>
+          <option value="terminated">Terminated</option>
+          <option value="retired">Retired</option>
+          <option value="absconded">Absconded</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg-row">
       <div class="fg"><label class="fl">Department</label>
         <select class="fs" id="mEmpDept">
           <option>Engineering</option><option>HR</option><option>Finance</option><option>Operations</option><option>Product</option><option>Sales</option><option>Administration</option><option>Management</option><option>Other</option>
@@ -1026,6 +1106,20 @@ label.fl { display: block; font-size: 11px; font-weight: 700; text-transform: up
           <option value="Employee">Employee</option><option value="Manager">Manager</option>
           <option value="Team Lead">Team Lead</option><option value="HR Admin">HR Admin</option><option value="Director">Director</option>
         </select>
+      </div>
+    </div>
+    <div class="fg-row">
+      <div class="fg">
+        <label class="fl">Reporting Manager ID</label>
+        <div style="position:relative">
+          <input class="fi" id="mEmpMgrId" placeholder="e.g. WT/2024/EMP001" oninput="this.value=this.value.toUpperCase();updateMgrPreview(this.value)" style="padding-right:140px">
+          <div id="mgrPreview" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--brand);font-weight:600;pointer-events:none"></div>
+        </div>
+        <div class="hint">Employee ID of the person this employee reports to. They will be able to approve/reject leave requests.</div>
+      </div>
+      <div class="fg">
+        <label class="fl">Designation</label>
+        <input class="fi" id="mEmpDesig" placeholder="e.g. Software Engineer">
       </div>
     </div>
 
@@ -2122,6 +2216,357 @@ function reconfigure() {
 // ================================================================
 //  SECTION 7 — APP BOOTSTRAP & RENDER FUNCTIONS
 // ================================================================
+
+
+// ================================================================
+//  MANAGER APPROVAL SYSTEM
+// ================================================================
+
+// Get all employees who report to the currently logged-in user
+function getMyReportees() {
+  if (!CURRENT_USER) return [];
+  var myId = CURRENT_USER.empId.toUpperCase();
+  return (CFG.employees||[]).filter(function(e){
+    return e.managerId && e.managerId.toUpperCase() === myId;
+  });
+}
+
+// Check if current user is a manager (has reportees)
+function isManager() {
+  if (CURRENT_USER && CURRENT_USER.isAdmin) return true;
+  return getMyReportees().length > 0;
+}
+
+// Pending requests storage (keyed by empId, stored in localStorage)
+function getPendingRequests() {
+  return JSON.parse(localStorage.getItem('hrPendingRequests') || '[]');
+}
+
+function savePendingRequests(reqs) {
+  localStorage.setItem('hrPendingRequests', JSON.stringify(reqs));
+}
+
+// Submit a new request (called when employee applies leave/permission/compoff)
+function submitRequest(type, details) {
+  var reqs = getPendingRequests();
+  var req  = Object.assign({
+    id:        'REQ' + Date.now(),
+    empId:     CURRENT_USER.empId,
+    empName:   CURRENT_USER.name,
+    managerId: CURRENT_USER.managerId || CFG.adminId || 'EMP001',
+    type:      type,  // 'leave' | 'permission' | 'compoff'
+    status:    'pending',
+    appliedOn: new Date().toISOString(),
+  }, details);
+  reqs.push(req);
+  savePendingRequests(reqs);
+  toast('Request submitted for approval', 'ok');
+  // Update approval badge
+  refreshApprovalBadge();
+}
+
+// Count pending requests for current user to approve
+function countMyPendingApprovals() {
+  if (!CURRENT_USER) return 0;
+  var myId = CURRENT_USER.empId.toUpperCase();
+  var reqs = getPendingRequests();
+  return reqs.filter(function(r){
+    return r.status === 'pending' && r.managerId && r.managerId.toUpperCase() === myId;
+  }).length;
+}
+
+function refreshApprovalBadge() {
+  var badge = document.getElementById('appBadge');
+  if (!badge) return;
+  var count = countMyPendingApprovals();
+  badge.textContent = count;
+  badge.style.display = count > 0 ? '' : 'none';
+}
+
+// Approve or reject a request
+function processRequest(reqId, action, note) {
+  var reqs = getPendingRequests();
+  var req  = reqs.find(function(r){ return r.id === reqId; });
+  if (!req) return;
+  req.status     = action; // 'approved' | 'rejected'
+  req.processedBy= CURRENT_USER.empId;
+  req.processedOn= new Date().toISOString();
+  req.note       = note || '';
+  savePendingRequests(reqs);
+  renderMgrApprovals();
+  refreshApprovalBadge();
+  toast(req.empName + "'s request " + (action==='approved'?'approved ✓':'rejected ✗'), action==='approved'?'ok':'err');
+}
+
+// Render the Manager Approvals tab
+function renderMgrApprovals() {
+  var el = document.getElementById('mgrApprovalsList');
+  if (!el) return;
+
+  var myId    = (CURRENT_USER?.empId||'').toUpperCase();
+  var allReqs = getPendingRequests();
+  var myReqs  = allReqs.filter(function(r){
+    return r.status === 'pending' && r.managerId && r.managerId.toUpperCase() === myId;
+  });
+
+  // Update tab count
+  var tabBtn = document.querySelector('.tab[onclick*="apv-mgr"]');
+  if (tabBtn) tabBtn.textContent = 'From My Team (' + myReqs.length + ')';
+
+  if (!myReqs.length) {
+    el.innerHTML =
+      '<div style="text-align:center;padding:40px;color:var(--muted)">' +
+        '<div style="font-size:36px;margin-bottom:12px">&#x2705;</div>' +
+        '<div style="font-size:15px;font-weight:600;margin-bottom:6px">All caught up!</div>' +
+        '<div style="font-size:13px">No pending approvals from your team members.</div>' +
+      '</div>';
+    return;
+  }
+
+  var typeColors = { leave:'#2563EB', permission:'#D97706', compoff:'#059669' };
+  var typeIcons  = { leave:'&#x1F334;', permission:'&#x1F6AA;', compoff:'&#x23F1;' };
+  var typeLabels = { leave:'Leave', permission:'Permission', compoff:'Comp-Off' };
+
+  el.innerHTML = myReqs.map(function(r) {
+    var col   = typeColors[r.type] || '#2563EB';
+    var icon  = typeIcons[r.type]  || '&#x1F4CB;';
+    var label = typeLabels[r.type] || r.type;
+    var applyDate = new Date(r.appliedOn).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    var details = '';
+    if (r.type === 'leave')      details = (r.leaveType||'') + ' &bull; ' + (r.days||1) + ' day(s) &bull; ' + (r.fromDate||'') + (r.toDate&&r.toDate!==r.fromDate?' to '+r.toDate:'');
+    if (r.type === 'permission') details = (r.duration||'') + ' mins &bull; ' + (r.date||'') + (r.reason?' &bull; '+r.reason:'');
+    if (r.type === 'compoff')    details = (r.workedDate||'') + ' &bull; ' + (r.hoursWorked||'') + ' hrs worked';
+
+    return '<div style="background:white;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
+      '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)">' +
+        '<div style="width:40px;height:40px;border-radius:10px;background:'+col+'20;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+icon+'</div>' +
+        '<div style="flex:1">' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+            '<span style="font-size:14px;font-weight:700">'+r.empName+'</span>' +
+            '<span style="font-size:11px;padding:2px 8px;background:'+col+'20;color:'+col+';border-radius:10px;font-weight:600">'+label+'</span>' +
+          '</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+details+'</div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--light)">Applied ' + applyDate + '</div>' +
+      '</div>' +
+      '<div style="padding:10px 16px;background:var(--bg);display:flex;align-items:center;gap:8px">' +
+        '<div style="flex:1;font-size:12px;color:var(--muted)">' + (r.reason || r.note || '&nbsp;') + '</div>' +
+        '<button onclick="showRejectModal(\''+r.id+'\')" style="padding:7px 16px;background:var(--red-bg);color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">&#x2715; Reject</button>' +
+        '<button onclick="processRequest(\''+r.id+'\',\'approved\')" style="padding:7px 16px;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">&#x2713; Approve</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function showRejectModal(reqId) {
+  var reason = prompt('Reason for rejection (optional):') ;
+  if (reason === null) return; // cancelled
+  processRequest(reqId, 'rejected', reason);
+}
+
+// Render the employee's own submitted requests
+function renderMyRequests() {
+  var el = document.getElementById('myRequestsList');
+  if (!el) return;
+  var myId  = (CURRENT_USER?.empId||'').toUpperCase();
+  var reqs  = getPendingRequests().filter(function(r){ return r.empId.toUpperCase() === myId; });
+
+  if (!reqs.length) {
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No requests submitted yet.</div>';
+    return;
+  }
+
+  var statusColors  = { pending:'#D97706', approved:'#059669', rejected:'#DC2626' };
+  var statusLabels  = { pending:'Pending', approved:'Approved', rejected:'Rejected' };
+
+  el.innerHTML = reqs.slice().reverse().map(function(r) {
+    var col  = statusColors[r.status]  || '#64748B';
+    var lbl  = statusLabels[r.status]  || r.status;
+    var date = new Date(r.appliedOn).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    return '<tr>' +
+      '<td style="font-size:12px">' + date + '</td>' +
+      '<td><span class="badge wfh">' + (r.type||'') + '</span></td>' +
+      '<td style="font-size:13px">' + (r.leaveType||r.type||'') + (r.days?' &bull; '+r.days+'d':'') + (r.duration?' &bull; '+r.duration+'m':'') + '</td>' +
+      '<td style="font-size:12px;color:var(--muted)">' + (r.reason||'&mdash;') + '</td>' +
+      '<td><span style="font-size:11px;padding:2px 8px;border-radius:10px;background:'+col+'20;color:'+col+';font-weight:600">' + lbl + '</span></td>' +
+      '<td style="font-size:11px;color:var(--muted)">' + (r.note||'&mdash;') + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ================================================================
+//  ADMIN DASHBOARD & EMPLOYEE MANAGEMENT
+// ================================================================
+
+function renderAdminDash() {
+  var statEl = document.getElementById('adminStatRow');
+  if (statEl) {
+    var total   = (CFG.employees||[]).length + 1;
+    var active  = (CFG.employees||[]).filter(function(e){ return e.loginEnabled !== false; }).length + 1;
+    statEl.innerHTML =
+      '<div class="sc g"><div class="sc-icon g">&#x1F465;</div><div class="sc-val">' + total + '</div><div class="sc-lbl">Total Employees</div></div>' +
+      '<div class="sc"><div class="sc-icon d">&#x2705;</div><div class="sc-val">' + active + '</div><div class="sc-lbl">Active Logins</div></div>' +
+      '<div class="sc a"><div class="sc-icon a">&#x1F3E2;</div><div class="sc-val">' + (CFG.leaveTypes||[]).length + '</div><div class="sc-lbl">Leave Types</div></div>' +
+      '<div class="sc r"><div class="sc-icon r">&#x23F3;</div><div class="sc-val">3</div><div class="sc-lbl">Pending Approvals</div></div>';
+  }
+
+  var dateEl = document.getElementById('adminAttDate');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+
+  var attEl = document.getElementById('adminAttMonitor');
+  if (attEl) {
+    var allEmps = [{ name:CFG.adminName, empId:CFG.adminId||'EMP001', dept:'Administration', color:CFG.brandColor }].concat(CFG.employees||[]);
+    if (allEmps.length === 1) {
+      attEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No employees added yet.</div>';
+    } else {
+      var rows = '';
+      allEmps.forEach(function(e) {
+        var ps    = JSON.parse(localStorage.getItem('punch_'+e.empId)||'{"state":"out"}');
+        var col   = e.color || CFG.brandColor;
+        var inits = (e.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+        var dot   = ps.state==='in'?'#4ade80':ps.state==='break'?'#fbbf24':'#f87171';
+        var badge = ps.state==='in'?'<span class="badge app">Present</span>':ps.state==='break'?'<span class="badge pen">On Break</span>':'<span class="badge rej">Not In</span>';
+        rows +=
+          '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">' +
+            '<div style="width:8px;height:8px;border-radius:50%;background:'+dot+';flex-shrink:0"></div>' +
+            '<div style="width:30px;height:30px;border-radius:8px;background:'+col+';display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-shrink:0">'+inits+'</div>' +
+            '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+(e.name||'')+'</div><div style="font-size:11px;color:var(--muted)">'+(e.dept||'')+'</div></div>' +
+            badge +
+          '</div>';
+      });
+      attEl.innerHTML = rows;
+    }
+  }
+
+  var leaveEl = document.getElementById('adminPendingLeaves');
+  if (leaveEl) {
+    var pool = (CFG.employees||[]).slice(0,3);
+    if (!pool.length) {
+      leaveEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No pending leave requests.</div>';
+    } else {
+      leaveEl.innerHTML = pool.map(function(e,i){
+        var lt = (CFG.leaveTypes||[])[i%(CFG.leaveTypes||[{short:'CL'}]).length]||{short:'CL'};
+        return '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;border-left:3px solid var(--amber)">' +
+          '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+(e.name||'Employee')+'</div><div style="font-size:11px;color:var(--muted)">'+lt.short+' &bull; 2 days &bull; Pending</div></div>' +
+          '<button onclick="goPage(\'approvals\',null)" style="padding:5px 12px;background:var(--brand);color:white;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Review</button>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  var empOvEl = document.getElementById('adminEmpOverview');
+  if (empOvEl) {
+    var emps = (CFG.employees||[]).slice(0,5);
+    var colours = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706'];
+    if (!emps.length) {
+      empOvEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No employees yet. <button onclick="openAddEmpModal(undefined)" style="background:none;border:none;color:var(--brand);cursor:pointer;font-weight:600;font-family:inherit">Add first employee</button></div>';
+    } else {
+      empOvEl.innerHTML = emps.map(function(e,i){
+        var col   = e.color || colours[i%colours.length];
+        var inits = (e.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+        var login = e.loginEnabled !== false;
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">' +
+          '<div style="width:32px;height:32px;border-radius:8px;background:'+col+';display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700">'+inits+'</div>' +
+          '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+(e.name||'')+'</div><div style="font-size:11px;color:var(--muted)">'+(e.empId||'')+' &bull; '+(e.dept||'')+'</div></div>' +
+          '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:'+(login?'var(--green-bg)':'var(--red-bg)')+';color:'+(login?'var(--green)':'var(--red)')+';">'+(login?'Active':'Disabled')+'</span>' +
+        '</div>';
+      }).join('');
+    }
+  }
+}
+
+function renderEmpMgmtPage() {
+  var statsEl = document.getElementById('empMgmtStats');
+  if (statsEl) {
+    var total   = (CFG.employees||[]).length;
+    var active  = (CFG.employees||[]).filter(function(e){ return e.loginEnabled !== false; }).length;
+    statsEl.innerHTML =
+      '<div class="sc g"><div class="sc-icon g">&#x1F465;</div><div class="sc-val">'+total+'</div><div class="sc-lbl">Total Employees</div></div>' +
+      '<div class="sc"><div class="sc-icon d">&#x2705;</div><div class="sc-val">'+active+'</div><div class="sc-lbl">Login Enabled</div></div>' +
+      '<div class="sc r"><div class="sc-icon r">&#x1F6AB;</div><div class="sc-val">'+(total-active)+'</div><div class="sc-lbl">Login Disabled</div></div>' +
+      '<div class="sc a"><div class="sc-icon a">&#x1F477;</div><div class="sc-val">1</div><div class="sc-lbl">Admin Account</div></div>';
+  }
+  var df = document.getElementById('empDeptFilter');
+  if (df) {
+    var depts = [];
+    (CFG.employees||[]).forEach(function(e){ if(e.dept && depts.indexOf(e.dept)<0) depts.push(e.dept); });
+    df.innerHTML = '<option value="">All Departments</option>' + depts.map(function(d){return '<option>'+d+'</option>';}).join('');
+  }
+  renderEmpMgmtTable(CFG.employees||[]);
+}
+
+function filterEmpTable() {
+  var search = (document.getElementById('empSearchInput').value||'').toLowerCase();
+  var dept   = document.getElementById('empDeptFilter').value;
+  var filtered = (CFG.employees||[]).filter(function(e){
+    return ((e.name||'').toLowerCase().includes(search)||(e.empId||'').toLowerCase().includes(search)) && (!dept||e.dept===dept);
+  });
+  renderEmpMgmtTable(filtered);
+}
+
+function renderEmpMgmtTable(emps) {
+  var el = document.getElementById('empMgmtTbody');
+  if (!el) return;
+  if (!emps.length) {
+    el.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">No employees found. <button onclick="openAddEmpModal(undefined)" style="background:none;border:none;color:var(--brand);cursor:pointer;font-weight:600;font-family:inherit">Add first employee</button></td></tr>';
+    return;
+  }
+  var colours = ['#2563EB','#7C3AED','#059669','#DC2626','#D97706','#DB2777','#0891B2'];
+  el.innerHTML = emps.map(function(e) {
+    var realIdx = (CFG.employees||[]).indexOf(e);
+    var col   = e.color || colours[realIdx%colours.length];
+    var inits = (e.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+    var login = e.loginEnabled !== false;
+    var doj   = e.doj ? new Date(e.doj).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '&mdash;';
+    var ps    = JSON.parse(localStorage.getItem('punch_'+e.empId)||'{"state":"out"}');
+    var sBadge= ps.state==='in'?'<span class="badge app">In</span>':ps.state==='break'?'<span class="badge pen">Break</span>':'<span style="font-size:11px;color:var(--light)">Out</span>';
+    // Find manager name
+    var mgrName = '&mdash;';
+    if (e.managerId) {
+      if (e.managerId.toUpperCase() === (CFG.adminId||'EMP001').toUpperCase()) {
+        mgrName = CFG.adminName + ' <span style="font-size:10px;color:var(--muted)">(Admin)</span>';
+      } else {
+        var mgr = (CFG.employees||[]).find(function(m){ return m.empId === e.managerId; });
+        if (mgr) mgrName = mgr.name;
+      }
+    }
+    // Employment status badge
+    var empStatus = e.employmentStatus || 'active';
+    var statusBadge = empStatus === 'active'
+      ? '<span class="badge app">Active</span>'
+      : '<span class="badge rej">' + empStatus.charAt(0).toUpperCase() + empStatus.slice(1) + '</span>';
+    return '<tr>' +
+      '<td><div style="display:flex;align-items:center;gap:8px">' +
+        '<div style="width:32px;height:32px;border-radius:8px;background:'+col+';display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-shrink:0">'+inits+'</div>' +
+        '<div><div style="font-weight:600">'+(e.name||'')+'</div><div style="font-size:11px;color:var(--muted)">'+(e.email||e.workEmail||'')+'</div></div>' +
+      '</div></td>' +
+      '<td><span style="font-family:monospace;font-size:12px">'+(e.empId||'')+'</span></td>' +
+      '<td>'+(e.dept||'&mdash;')+'</td>' +
+      '<td><span class="badge neu">'+(e.role||'Employee')+'</span></td>' +
+      '<td style="font-size:12px">'+mgrName+'</td>' +
+      '<td style="font-size:12px">'+doj+'</td>' +
+      '<td>'+statusBadge+'</td>' +
+      '<td><button onclick="toggleEmpLogin('+realIdx+')" style="border:none;background:none;cursor:pointer;padding:0"><span class="badge '+(login?'app':'rej')+'">'+(login?'Enabled':'Disabled')+'</span></button></td>' +
+      '<td>' +
+        '<button onclick="openAddEmpModal('+realIdx+')" style="padding:4px 10px;background:var(--brand-light);color:var(--brand);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:4px">&#x270F; Edit</button>' +
+        '<button onclick="confirmRemoveEmp('+realIdx+')" style="padding:4px 10px;background:var(--red-bg);color:var(--red);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">&#x2715; Remove</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function confirmRemoveEmp(idx) {
+  var emp = (CFG.employees||[])[idx];
+  if (!emp) return;
+  if (!confirm('Remove '+emp.name+' from the system?\n\nID: '+emp.empId+'\nDept: '+(emp.dept||'—')+'\n\nThis will permanently remove their access. This cannot be undone.')) return;
+  CFG.employees.splice(idx, 1);
+  saveConfig();
+  renderEmpMgmtPage();
+  renderAdminDash();
+  renderTeam();
+  toast(emp.name + ' removed from the system.', 'wrn');
+}
+
 function bootstrapApp() {
   document.getElementById('sbAppName').textContent   = CFG.appName;
   document.getElementById('sbCoName').textContent    = CFG.companyName;
@@ -2157,9 +2602,7 @@ function bootstrapApp() {
   renderTeamCal();
   renderApplyPolicySummary();
   renderSettEmpTable();
-  initPunchUI();
   startClock();
-  goPage('dashboard', document.querySelector('.sb-item.active'));
 }
 
 function initials(name) {
@@ -2488,11 +2931,13 @@ function renderTeamCal() {
 function goPage(id, el) {
   document.querySelectorAll('.pv').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
-  const pv=document.getElementById('pv-'+id);
+  var pv=document.getElementById('pv-'+id);
   if(pv) pv.classList.add('active');
   if(el) el.classList.add('active');
-  const titles={dashboard:'Dashboard',attendance:'Attendance',myleaves:'My Leaves',apply:'Apply Leave',approvals:'Approvals',team:'Team',holidays:'Holidays',reports:'Reports',settings:'Settings'};
+  var titles={admindash:'HR Dashboard',dashboard:'Dashboard',attendance:'Attendance',myleaves:'My Leaves',apply:'Apply Leave',approvals:'Approvals',employees:'Employees',team:'Team',holidays:'Holidays',reports:'Reports',settings:'Settings'};
   document.getElementById('pageTitle').textContent=titles[id]||id;
+  if(id==='admindash') renderAdminDash();
+  if(id==='employees') renderEmpMgmtPage();
 }
 
 function swTab(el, id) {
@@ -2815,23 +3260,46 @@ function togglePwVis() {
 function startSession() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('mainApp').style.display     = 'block';
-  // Update sidebar user info
+
   document.getElementById('appUserAv').textContent    = initials(CURRENT_USER.name);
   document.getElementById('appUserName').textContent  = CURRENT_USER.name;
   document.getElementById('appUserRole').textContent  = CURRENT_USER.role || 'Employee';
-  // Hide admin-only nav items if not admin
-  const adminItems = document.querySelectorAll('.admin-only');
-  adminItems.forEach(el => { el.style.display = CURRENT_USER.isAdmin ? '' : 'none'; });
-  initPunchUI();
+
+  var adminNav = document.getElementById('adminNavGroup');
+  var empNav   = document.getElementById('empNavGroup');
+  if (CURRENT_USER.isAdmin) {
+    if (adminNav) adminNav.style.display = 'block';
+    if (empNav)   empNav.style.display   = 'none';
+  } else {
+    if (adminNav) adminNav.style.display = 'none';
+    if (empNav)   empNav.style.display   = 'block';
+    initPunchUI();
+  }
+
   bootstrapApp();
-  toast('Welcome back, ' + CURRENT_USER.name.split(' ')[0] + '! 👋','ok');
-  // Check for special occasions after a short delay (let the dashboard render first)
+  toast('Welcome back, ' + CURRENT_USER.name.split(' ')[0] + '! 👋', 'ok');
   setTimeout(checkGreetings, 800);
-  // Update today log title
-  const tl = document.getElementById('todayLogTitle');
-  const td = document.getElementById('todayLogDate');
-  if(tl) tl.textContent = "Today's Log — " + CURRENT_USER.name;
-  if(td) td.textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+
+  // Show manager tab in approvals if user has reportees
+  var mgrTab = document.getElementById('mgrApvTab');
+  if (mgrTab) mgrTab.style.display = isManager() ? '' : 'none';
+  // Set manager header
+  var mgrHdr = document.getElementById('mgrApvHeader');
+  if (mgrHdr) {
+    var reportees = getMyReportees();
+    mgrHdr.innerHTML = 'Showing approval requests from your <strong>' + reportees.length + ' direct report(s)</strong>';
+  }
+  refreshApprovalBadge();
+
+  if (CURRENT_USER.isAdmin) {
+    goPage('admindash', document.querySelector('#adminNavGroup .sb-item'));
+  } else {
+    goPage('dashboard', document.querySelector('#empNavGroup .sb-item'));
+    var tl = document.getElementById('todayLogTitle');
+    var td = document.getElementById('todayLogDate');
+    if(tl) tl.textContent = "Today's Log — " + CURRENT_USER.name;
+    if(td) td.textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  }
 }
 
 function doLogout() {
@@ -2877,6 +3345,38 @@ function showLoginScreen() {
 // ── Employee modal ──
 // Temp children array while editing in modal
 let _modalChildren = [];
+
+function updateMgrPreview(val) {
+  var el = document.getElementById('mgrPreview');
+  if (!el) return;
+  if (!val) { el.textContent = ''; return; }
+  // Check admin
+  if (val === (CFG.adminId||'EMP001').toUpperCase()) {
+    el.textContent = CFG.adminName + ' (Admin)';
+    el.style.color = 'var(--brand)';
+    return;
+  }
+  var mgr = (CFG.employees||[]).find(function(e){ return e.empId === val; });
+  if (mgr) {
+    el.textContent = mgr.name + (mgr.desig ? ' • ' + mgr.desig : '');
+    el.style.color = 'var(--green)';
+  } else {
+    el.textContent = 'ID not found';
+    el.style.color = 'var(--red)';
+  }
+}
+
+function handleEmpStatusChange(val) {
+  var dolWrap = document.getElementById('mEmpDOL');
+  if (!dolWrap) return;
+  if (val === 'active') {
+    dolWrap.value = '';
+    dolWrap.style.borderColor = '';
+  } else {
+    dolWrap.style.borderColor = 'var(--amber)';
+    if (!dolWrap.value) dolWrap.valueAsDate = new Date();
+  }
+}
 
 function toggleSpouseFields(val) {
   const sw = document.getElementById('mEmpSpouseWrap');
@@ -2941,8 +3441,15 @@ function openAddEmpModal(idx) {
   document.getElementById('mEmpContact2').value   = e.contact2    || '';
   document.getElementById('mEmpQual').value       = e.qualification|| '';
   document.getElementById('mEmpExp').value        = e.experience  || '';
-  document.getElementById('mEmpPass').value       = '';
-  document.getElementById('mEmpPass2').value      = '';
+  document.getElementById('mEmpDOL').value         = e.dol          || '';
+  document.getElementById('mEmpMgrId').value       = e.managerId    || '';
+  document.getElementById('mEmpDesig').value       = e.desig        || '';
+  document.getElementById('mEmpPass').value        = '';
+  document.getElementById('mEmpPass2').value       = '';
+
+  var statusSel = document.getElementById('mEmpStatus');
+  if (statusSel) statusSel.value = e.employmentStatus || 'active';
+  updateMgrPreview(e.managerId || '');
 
   const deptSel   = document.getElementById('mEmpDept');
   const roleSel   = document.getElementById('mEmpRole');
@@ -2997,14 +3504,18 @@ function saveEmpModal() {
     spouseName:    marital==='Married' ? document.getElementById('mEmpSpouse').value : '',
     spouseDob:     marital==='Married' ? document.getElementById('mEmpSpouseDob').value : '',
     children:      children,
-    course:        document.getElementById('mEmpCourse').value,
-    yearOfPassing: document.getElementById('mEmpYearPass').value,
-    college:       document.getElementById('mEmpCollege').value,
-    experience:    document.getElementById('mEmpExp').value,
-    contact1:      document.getElementById('mEmpMobile').value,
-    contact2:      document.getElementById('mEmpContact2').value,
-    email:         document.getElementById('mEmpEmail').value,
-    loginEnabled:  document.getElementById('mEmpLoginTog').classList.contains('on'),
+    course:          document.getElementById('mEmpCourse').value,
+    yearOfPassing:   document.getElementById('mEmpYearPass').value,
+    college:         document.getElementById('mEmpCollege').value,
+    experience:      document.getElementById('mEmpExp').value,
+    contact1:        document.getElementById('mEmpMobile').value,
+    contact2:        document.getElementById('mEmpContact2').value,
+    email:           document.getElementById('mEmpEmail').value,
+    dol:             document.getElementById('mEmpDOL').value,
+    employmentStatus:document.getElementById('mEmpStatus').value,
+    managerId:       document.getElementById('mEmpMgrId').value.trim().toUpperCase(),
+    desig:           document.getElementById('mEmpDesig').value,
+    loginEnabled:    document.getElementById('mEmpLoginTog').classList.contains('on'),
     color:         idx >= 0 ? (CFG.employees[idx].color || randColor()) : randColor(),
     password:      pass || (idx>=0 ? CFG.employees[idx].password : ''),
   };
@@ -3332,4 +3843,60 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
-</html>
+</html<!-- ADMIN DASHBOARD -->
+      <div class="pv" id="pv-admindash">
+
+        <!-- Org stats row -->
+        <div class="sg mb20" id="adminStatRow"></div>
+
+        <!-- Attendance monitor + quick actions -->
+        <div class="g2 mb20">
+          <div class="card">
+            <div class="ch">
+              <span class="ct">&#x1F4CA; Live Attendance Today</span>
+              <span id="adminAttDate" style="font-size:12px;color:var(--muted)"></span>
+            </div>
+            <div class="cb" id="adminAttMonitor" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">&#x26A1; Quick Actions</span></div>
+            <div class="cb" style="display:flex;flex-direction:column;gap:10px">
+              <button onclick="openAddEmpModal(undefined)" class="btn btn-primary" style="justify-content:flex-start;gap:10px;padding:12px 16px">
+                <span style="font-size:18px">&#x1F9D1;&#x200D;&#x1F4BC;</span>
+                <div style="text-align:left"><div style="font-weight:700">Add New Employee</div><div style="font-size:11px;font-weight:400;opacity:0.8">Onboard a new team member</div></div>
+              </button>
+              <button onclick="goPage('settings',document.querySelector('.sb-item[onclick*=settings]'))" class="btn" style="background:var(--brand-light);color:var(--brand);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid var(--brand-mid)">
+                <span style="font-size:18px">&#x2699;&#xFE0F;</span>
+                <div style="text-align:left"><div style="font-weight:700">Manage Policies</div><div style="font-size:11px;font-weight:400;opacity:0.8">Leave rules, permissions, slabs</div></div>
+              </button>
+              <button onclick="goPage('approvals',document.querySelector('.sb-item[onclick*=approvals]'))" class="btn" style="background:var(--green-bg);color:var(--green);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid var(--green)">
+                <span style="font-size:18px">&#x2705;</span>
+                <div style="text-align:left"><div style="font-weight:700">Pending Approvals</div><div style="font-size:11px;font-weight:400;opacity:0.8">Review leave requests</div></div>
+              </button>
+              <button onclick="goPage('reports',document.querySelector('.sb-item[onclick*=reports]'))" class="btn" style="background:var(--amber-bg);color:var(--amber);justify-content:flex-start;gap:10px;padding:12px 16px;border:1.5px solid #FDE68A">
+                <span style="font-size:18px">&#x1F4C8;</span>
+                <div style="text-align:left"><div style="font-weight:700">Generate Reports</div><div style="font-size:11px;font-weight:400;opacity:0.8">Attendance, leave, OT reports</div></div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leave approvals summary + recent activity -->
+        <div class="g2">
+          <div class="card">
+            <div class="ch">
+              <span class="ct">&#x1F4CB; Pending Leave Requests</span>
+              <button onclick="goPage('approvals',document.querySelector('.sb-item[onclick*=approvals]'))" class="tb-btn" style="font-size:12px">View All</button>
+            </div>
+            <div class="cb" id="adminPendingLeaves" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">&#x1F465; Employee Overview</span>
+              <button onclick="goPage('employees',document.querySelector('.sb-item[onclick*=employees]'))" class="tb-btn" style="font-size:12px">Manage</button>
+            </div>
+            <div class="cb" id="adminEmpOverview" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      >
