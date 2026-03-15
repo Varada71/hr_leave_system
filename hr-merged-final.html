@@ -1195,7 +1195,14 @@ const DEFAULT_CONFIG = {
   //   loginEnabled, password, color }
 };
 
-let CFG = JSON.parse(localStorage.getItem('hrMergedConfig') || 'null') || { ...DEFAULT_CONFIG };
+// Safely merge saved config with defaults so new keys always have values
+var _savedCfg = JSON.parse(localStorage.getItem('hrMergedConfig') || 'null');
+let CFG = _savedCfg ? Object.assign({}, DEFAULT_CONFIG, _savedCfg) : { ...DEFAULT_CONFIG };
+// Ensure array fields are always arrays
+if (!Array.isArray(CFG.leaveTypes))  CFG.leaveTypes  = DEFAULT_CONFIG.leaveTypes;
+if (!Array.isArray(CFG.holidays))    CFG.holidays     = DEFAULT_CONFIG.holidays;
+if (!Array.isArray(CFG.slabs))       CFG.slabs        = DEFAULT_CONFIG.slabs;
+if (!Array.isArray(CFG.employees))   CFG.employees    = [];
 function saveConfig() { localStorage.setItem('hrMergedConfig', JSON.stringify(CFG)); }
 
 // ================================================================
@@ -1573,13 +1580,18 @@ function renderWizardStep() {
     title = 'Add your employees';
     desc  = 'Add employees who will use this system. Click + Add Employee to enter details. You can add more anytime from Settings.';
     body  =
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+      '<div style="background:var(--brand-light);border:2px dashed var(--brand-mid);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px">' +
+        '<div style="font-size:32px;margin-bottom:8px">&#x1F465;</div>' +
+        '<div style="font-size:15px;font-weight:700;color:var(--brand);margin-bottom:4px">Step 11 of 13 — Add Employees</div>' +
+        '<div style="font-size:13px;color:var(--muted)">You are now on the <strong>Add Employees</strong> step.</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
         '<div style="font-size:13px;color:var(--muted)"><strong id="empCountLbl">' + CFG.employees.length + '</strong> employee(s) added</div>' +
         '<button class="add-lt-btn" onclick="addEmpRow()">&#xFF0B; Add Employee</button>' +
       '</div>' +
-      '<div id="wEmpList" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;margin-bottom:12px"></div>' +
+      '<div id="wEmpList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:12px"></div>' +
       '<div class="info-box blue"><div class="ib-icon">&#x1F511;</div>' +
-        '<div>Each employee logs in with their <strong>Employee ID + Password</strong>. Birthdays and anniversaries trigger personalised greeting messages on login.</div>' +
+        '<div>Employees are optional at this stage — you can add them now or any time later from <strong>Settings &rarr; Employees</strong>. Click <strong>Continue</strong> to proceed to Admin Setup.</div>' +
       '</div>';
   }
 
@@ -1613,10 +1625,10 @@ function renderWizardStep() {
     title = 'Ready to launch!';
     desc  = 'Review your configuration and hit Launch to start using your HR system.';
     var fyLabel   = CFG.fy==='apr' ? 'April - March' : CFG.fy==='jan' ? 'Jan - Dec' : 'July - June';
-    var slabLabel = CFG.slabsEnabled ? (CFG.slabs.length + ' tiers') : 'Disabled';
-    var permLabel = CFG.permissionEnabled ? (CFG.permMonthlyHours + 'h/month') : 'Disabled';
-    var coLabel   = CFG.enableCompOff ? ('>=' + CFG.compoffMinHours + 'h min') : 'Disabled';
-    var featList  = [CFG.enableWFH&&'WFH', CFG.enableOD&&'OD', CFG.enableCompOff&&'Comp-Off'].filter(Boolean).join(' / ');
+    var slabLabel = CFG.slabsEnabled ? (((CFG.slabs||[]).length) + ' tiers') : 'Disabled';
+    var permLabel = CFG.permissionEnabled ? ((CFG.permMonthlyHours||2) + 'h/month') : 'Disabled';
+    var coLabel   = CFG.enableCompOff ? ('>=' + (CFG.compoffMinHours||4) + 'h min') : 'Disabled';
+    var featList  = [CFG.enableWFH&&'WFH', CFG.enableOD&&'OD', CFG.enableCompOff&&'Comp-Off'].filter(Boolean).join(' / ') || 'Standard';
     body =
       '<div class="success-icon">&#x2728;</div>' +
       '<div class="config-summary">' +
@@ -2009,7 +2021,7 @@ function wizNext() {
     CFG.adminDesig = document.getElementById('wAdminDesig') ? (document.getElementById('wAdminDesig').value || '')             : CFG.adminDesig;
     var p1 = document.getElementById('wAdminPass')  ? document.getElementById('wAdminPass').value  : '';
     var p2 = document.getElementById('wAdminPass2') ? document.getElementById('wAdminPass2').value : '';
-    if (!CFG.adminName.trim()) { toast('Please enter admin name','err'); return; }
+    if (!CFG.adminName || !CFG.adminName.trim()) CFG.adminName = 'HR Admin';
     if (p1 && p1 !== p2)       { toast('Passwords do not match','err'); return; }
     if (p1) CFG.adminPass = p1;
   }
